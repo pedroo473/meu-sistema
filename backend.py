@@ -11,22 +11,68 @@ COLUNAS = [
     "Cidade", "Bairro", "CEP", "Endereço", "Número"
 ]
 
-# 🔧 FUNÇÕES FORA (CORRETO)
+def normalizar_colunas(df):
+    # tira espaços extras
+    df.columns = df.columns.str.strip()
+
+    # corrige nomes errados
+    df = df.rename(columns={
+        "CPF / CNPJ": "CPF/CNPJ",
+        "CPF CNPJ": "CPF/CNPJ",
+        "cpf/cnpj": "CPF/CNPJ",
+        "cpf / cnpj": "CPF/CNPJ",
+        "CPF/CNPJ ": "CPF/CNPJ",
+        " Endereço": "Endereço",
+        "Endereco": "Endereço",
+        "Enderço": "Endereço",
+        "endereco": "Endereço",
+        "Endereço ": "Endereço",
+        "numero": "Número",
+        "Numero": "Número",
+        " nome": "Nome",
+        "nome": "Nome",
+        "celular ": "Celular",
+        "uf": "UF",
+        "cidade": "Cidade",
+        "bairro": "Bairro",
+        "cep": "CEP",
+        "id": "ID"
+    })
+
+    # remove colunas duplicadas pelo nome
+    df = df.loc[:, ~df.columns.duplicated()]
+
+    # cria colunas faltantes
+    for coluna in COLUNAS:
+        if coluna not in df.columns:
+            df[coluna] = ""
+
+    # mantém somente as colunas corretas e na ordem certa
+    df = df[COLUNAS]
+
+    return df
+
 def salvar(df):
+    df = normalizar_colunas(df)
     df.to_excel(ARQUIVO, index=False)
 
 def gerar_id(df):
     if df.empty:
         return 1
-    return int(df["ID"].max()) + 1
+
+    ids_validos = pd.to_numeric(df["ID"], errors="coerce").dropna()
+
+    if ids_validos.empty:
+        return 1
+
+    return int(ids_validos.max()) + 1
 
 def carregar():
     if os.path.exists(ARQUIVO):
-        df = pd.read_excel(ARQUIVO)
+        df = pd.read_excel(ARQUIVO, engine="openpyxl")
+        df = normalizar_colunas(df)
 
-        df.columns = df.columns.str.strip()
-
-        if "ID" not in df.columns:
+        if df["ID"].isnull().all() or pd.to_numeric(df["ID"], errors="coerce").isnull().all():
             df["ID"] = range(1, len(df) + 1)
             salvar(df)
 
@@ -34,7 +80,6 @@ def carregar():
 
     return pd.DataFrame(columns=COLUNAS)
 
-# 🔎 LISTAR + BUSCAR
 @app.route("/")
 def index():
     busca = request.args.get("busca", "").lower()
@@ -46,7 +91,6 @@ def index():
     dados = df.to_dict(orient="records")
     return render_template("index.html", dados=dados, busca=busca)
 
-# ➕ ADICIONAR
 @app.route("/add", methods=["POST"])
 def add():
     df = carregar()
@@ -68,7 +112,6 @@ def add():
     salvar(df)
     return redirect("/")
 
-# ❌ EXCLUIR
 @app.route("/delete/<int:id>")
 def delete(id):
     df = carregar()
@@ -76,7 +119,6 @@ def delete(id):
     salvar(df)
     return redirect("/")
 
-# ✏️ EDITAR
 @app.route("/edit/<int:id>")
 def edit(id):
     df = carregar()
@@ -88,7 +130,6 @@ def edit(id):
     empresa = empresa_df.iloc[0].to_dict()
     return render_template("editar.html", e=empresa)
 
-# 💾 UPDATE
 @app.route("/update/<int:id>", methods=["POST"])
 def update(id):
     df = carregar()
@@ -104,28 +145,43 @@ def update(id):
             df.at[i, "CEP"] = request.form["cep"]
             df.at[i, "Endereço"] = request.form["endereco"]
             df.at[i, "Número"] = request.form["numero"]
+            break
 
     salvar(df)
     return redirect("/")
 
-# 📥 EXPORTAR
 @app.route("/export")
 def export():
-    return send_file(ARQUIVO, as_attachment=True)
+    df = carregar()
+    arquivo_exportado = "empresas_exportadas.xlsx"
+    df.to_excel(arquivo_exportado, index=False)
+    return send_file(arquivo_exportado, as_attachment=True)
 
-# 📤 IMPORTAR
 @app.route("/import", methods=["POST"])
 def importar():
+    if "file" not in request.files:
+        return "Nenhum arquivo foi enviado."
+
     file = request.files["file"]
-    df = pd.read_excel(file)
 
-    df.columns = df.columns.str.strip()
+    if file.filename == "":
+        return "Nenhum arquivo foi selecionado."
 
-    if "ID" not in df.columns:
-        df["ID"] = range(1, len(df) + 1)
+    if not file.filename.lower().endswith(".xlsx"):
+        return "Envie apenas arquivos .xlsx"
 
-    salvar(df)
-    return redirect("/")
+    try:
+        df = pd.read_excel(file, engine="openpyxl")
+        df = normalizar_colunas(df)
+
+        if "ID" not in df.columns or df["ID"].isnull().all():
+            df["ID"] = range(1, len(df) + 1)
+
+        salvar(df)
+        return redirect("/")
+
+    except Exception as e:
+        return f"Erro ao importar arquivo: {str(e)}"
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

@@ -42,7 +42,7 @@
         <a href="/export" class="btn btn-secondary">⬇ Exportar Excel</a>
 
         <form action="/import" method="POST" enctype="multipart/form-data" class="d-flex">
-            <input type="file" name="file" class="form-control me-2">
+            <input type="file" name="file" class="form-control me-2" accept=".xlsx" required>
             <button class="btn btn-warning">Importar</button>
         </form>
     </div>

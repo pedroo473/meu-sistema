@@ -1,6 +1,28 @@
 from flask import Flask, render_template, request, redirect, send_file
 import pandas as pd
 import os
+import re
+
+def apenas_numeros(valor):
+    return re.sub(r"\D", "", str(valor))
+
+def formatar_cpf_cnpj(valor):
+    v = apenas_numeros(valor)
+
+    if len(v) <= 11:
+        # CPF
+        return f"{v[:3]}.{v[3:6]}.{v[6:9]}-{v[9:11]}"
+    else:
+        # CNPJ
+        return f"{v[:2]}.{v[2:5]}.{v[5:8]}/{v[8:12]}-{v[12:14]}"
+
+def formatar_celular(valor):
+    v = apenas_numeros(valor)[:11]
+    return f"({v[:2]}){v[2:7]}-{v[7:11]}"
+
+def formatar_cep(valor):
+    v = apenas_numeros(valor)[:8]
+    return f"{v[:2]}.{v[2:5]}-{v[5:8]}"
 
 app = Flask(__name__)
 
@@ -98,12 +120,12 @@ def add():
     novo = {
         "ID": gerar_id(df),
         "Nome": request.form["nome"],
-        "CPF/CNPJ": request.form["cpf"],
-        "Celular": request.form["celular"],
+        "CPF/CNPJ": formatar_cpf_cnpj(request.form["cpf"]),
+        "Celular": formatar_celular(request.form["celular"]),
         "UF": request.form["uf"],
         "Cidade": request.form["cidade"],
         "Bairro": request.form["bairro"],
-        "CEP": request.form["cep"],
+        "CEP": formatar_cep(request.form["cep"]),
         "Endereço": request.form["endereco"],
         "Número": request.form["numero"]
     }
@@ -137,12 +159,12 @@ def update(id):
     for i, row in df.iterrows():
         if row["ID"] == id:
             df.at[i, "Nome"] = request.form["nome"]
-            df.at[i, "CPF/CNPJ"] = request.form["cpf"]
-            df.at[i, "Celular"] = request.form["celular"]
+            df.at[i, "CPF/CNPJ"] = formatar_cpf_cnpj(request.form["cpf"])
+            df.at[i, "Celular"] = formatar_celular(request.form["celular"])
             df.at[i, "Cidade"] = request.form["cidade"]
             df.at[i, "UF"] = request.form["uf"]
             df.at[i, "Bairro"] = request.form["bairro"]
-            df.at[i, "CEP"] = request.form["cep"]
+            df.at[i, "CEP"] = formatar_cep(request.form["cep"])
             df.at[i, "Endereço"] = request.form["endereco"]
             df.at[i, "Número"] = request.form["numero"]
             break

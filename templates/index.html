@@ -22,14 +22,14 @@
         <form method="POST" action="/add">
             <div class="row">
                 <div class="col"><input name="nome" class="form-control" placeholder="Nome"></div>
-                <div class="col"><input name="cpf" class="form-control" placeholder="CPF/CNPJ"></div>
-                <div class="col"><input name="celular" class="form-control" placeholder="Celular"></div>
+                <div class="col"><input name="cpf" class="form-control" placeholder="CPF/CNPJ" oninput="formatarCpfCnpj(this)"></div>
+                <div class="col"><input name="celular" class="form-control" placeholder="Celular"oninput="formatarCelular(this)"></div>
                 <div class="col"><input name="uf" class="form-control" placeholder="UF"></div>
             </div>
             <div class="row mt-2">
                 <div class="col"><input name="cidade" class="form-control" placeholder="Cidade"></div>
                 <div class="col"><input name="bairro" class="form-control" placeholder="Bairro"></div>
-                <div class="col"><input name="cep" class="form-control" placeholder="CEP"></div>
+                <div class="col"><input name="cep" class="form-control" placeholder="CEP"oninput="formatarCEP(this)"></div>
                 <div class="col"><input name="endereco" class="form-control" placeholder="Endereço"></div>
                 <div class="col"><input name="numero" class="form-control" placeholder="Número"></div>
             </div>
@@ -77,6 +77,56 @@
     </table>
 
 </div>
+
+<script>
+function apenasNumeros(valor) {
+    return valor.replace(/\D/g, "");
+}
+
+// CPF/CNPJ automático
+function formatarCpfCnpj(campo) {
+    let v = apenasNumeros(campo.value);
+
+    if (v.length <= 11) {
+        // CPF
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    } else {
+        // CNPJ
+        v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+        v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+        v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
+        v = v.replace(/(\d{4})(\d)/, "$1-$2");
+    }
+
+    campo.value = v;
+}
+
+// CELULAR
+function formatarCelular(campo) {
+    let v = apenasNumeros(campo.value).slice(0, 11);
+
+    if (v.length > 10) {
+        v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1)$2-$3");
+    } else if (v.length > 6) {
+        v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1)$2-$3");
+    } else if (v.length > 2) {
+        v = v.replace(/^(\d{2})(\d{0,5})/, "($1)$2");
+    }
+
+    campo.value = v;
+}
+
+// CEP
+function formatarCEP(campo) {
+    let v = apenasNumeros(campo.value).slice(0, 8);
+    v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+    v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2-$3");
+
+    campo.value = v;
+}
+</script>
 
 </body>
 </html>

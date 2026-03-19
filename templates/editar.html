@@ -10,6 +10,10 @@
 
     <h2>✏️ Editar Empresa</h2>
 
+    {% if erro %}
+    <div class=" alert alert-danger">{{ erro }} </div>
+    {% endif %}
+
     <form method="POST" action="/update/{{ e['ID'] }}">
 
         <div class="mb-2">
@@ -17,11 +21,11 @@
         </div>
 
         <div class="mb-2">
-            <input name="cpf" class="form-control" value="{{ e['CPF/CNPJ'] }}" placeholder="CPF/CNPJ">
+            <input name="cpf" class="form-control" value="{{ e['CPF/CNPJ'] }}" placeholder="CPF/CNPJ" maxlength="18" oninput="formatarCpfCnpj(this)" required>
         </div>
 
         <div class="mb-2">
-            <input name="celular" class="form-control" value="{{ e['Celular'] }}" placeholder="Celular">
+            <input name="celular" class="form-control" value="{{ e['Celular'] }}" placeholder="Celular" maxlength="14" oninput="formatarCelular(this)">
         </div>
 
         <div class="mb-2">
@@ -37,7 +41,7 @@
         </div>
 
         <div class="mb-2">
-            <input name="cep" class="form-control" value="{{ e['CEP'] }}" placeholder="CEP">
+            <input name="cep" class="form-control" value="{{ e['CEP'] }}" placeholder="CEP" maxlength="10" oninput="formatarCEP(this)">
         </div>
 
         <div class="mb-2">
@@ -54,6 +58,99 @@
     </form>
 
 </div>
+
+<script>
+function apenasNumeros(valor) {
+    return valor.replace(/\D/g, "");
+}
+
+// CPF/CNPJ
+function formatarCpfCnpj(campo) {
+    let v = apenasNumeros(campo.value).slice(0, 14);
+
+    if (v.length <= 11) {
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    } else {
+        v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+        v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+        v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
+        v = v.replace(/(\d{4})(\d)/, "$1-$2");
+    }
+
+    campo.value = v;
+}
+
+// CELULAR
+function formatarCelular(campo) {
+    let v = apenasNumeros(campo.value).slice(0, 11);
+
+    if (v.length > 10) {
+        v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1)$2-$3");
+    } else if (v.length > 6) {
+        v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1)$2-$3");
+    } else if (v.length > 2) {
+        v = v.replace(/^(\d{2})(\d{0,5})/, "($1)$2");
+    }
+
+    campo.value = v;
+}
+
+// CEP
+function formatarCEP(campo) {
+    let v = apenasNumeros(campo.value).slice(0, 8);
+    v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+    v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2-$3");
+
+    campo.value = v;
+}
+</script>
+
+<script>
+function apenasNumeros(valor) {
+    return valor.replace(/\D/g, "");
+}
+
+function formatarCpfCnpj(campo) {
+    let v = apenasNumeros(campo.value).slice(0, 14);
+
+    if (v.length <= 11) {
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    } else {
+        v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+        v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+        v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
+        v = v.replace(/(\d{4})(\d)/, "$1-$2");
+    }
+
+    campo.value = v;
+}
+
+function formatarCelular(campo) {
+    let v = apenasNumeros(campo.value).slice(0, 11);
+
+    if (v.length > 10) {
+        v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1)$2-$3");
+    } else if (v.length > 6) {
+        v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1)$2-$3");
+    } else if (v.length > 2) {
+        v = v.replace(/^(\d{2})(\d{0,5})/, "($1)$2");
+    }
+
+    campo.value = v;
+}
+
+function formatarCEP(campo) {
+    let v = apenasNumeros(campo.value).slice(0, 8);
+    v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+    v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2-$3");
+
+    campo.value = v;
+}
+</script>
 
 </body>
 </html>

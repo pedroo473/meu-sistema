@@ -1,7 +1,22 @@
-from flask import Flask, render_template, request, redirect, send_file, flash
+from flask import Flask, render_template, request, redirect, send_file, flash, url_for
 import pandas as pd
 import os
 import re
+
+app = Flask(__name__)
+app.secret_key = "fd1e6978886a5dd23d"
+
+ARQUIVO = "empresas.xlsx"
+
+COLUNAS = [
+    "ID", "Nome", "CPF/CNPJ", "Celular", "UF",
+    "Cidade", "Bairro", "CEP", "Endereço", "Número"
+]
+
+
+def apenas_numeros(valor):
+    return re.sub(r"\D", "", str(valor))
+
 
 def validar_cpf(cpf):
     cpf = apenas_numeros(cpf)
@@ -68,40 +83,50 @@ def validar_documento(valor):
 
     return False
 
-def apenas_numeros(valor):
-    return re.sub(r"\D", "", str(valor))
 
 def formatar_cpf_cnpj(valor):
     v = apenas_numeros(valor)[:14]
 
     if len(v) <= 11:
-        return f"{v[:3]}.{v[3:6]}.{v[6:9]}-{v[9:11]}"
+        if len(v) == 11:
+            return f"{v[:3]}.{v[3:6]}.{v[6:9]}-{v[9:11]}"
+        return v
     else:
-        return f"{v[:2]}.{v[2:5]}.{v[5:8]}/{v[8:12]}-{v[12:14]}"
+        if len(v) == 14:
+            return f"{v[:2]}.{v[2:5]}.{v[5:8]}/{v[8:12]}-{v[12:14]}"
+        return v
+
 
 def formatar_celular(valor):
     v = apenas_numeros(valor)[:11]
-    return f"({v[:2]}){v[2:7]}-{v[7:11]}"
+
+    if not v:
+        return ""
+
+    if len(v) == 11:
+        return f"({v[:2]}){v[2:7]}-{v[7:11]}"
+
+    if len(v) == 10:
+        return f"({v[:2]}){v[2:6]}-{v[6:10]}"
+
+    return v
+
 
 def formatar_cep(valor):
     v = apenas_numeros(valor)[:8]
-    return f"{v[:2]}.{v[2:5]}-{v[5:8]}"
 
-app = Flask(__name__)
-app.secret_key = "fd1e6978886a5dd23d"
+    if not v:
+        return ""
 
-ARQUIVO = "empresas.xlsx"
+    if len(v) == 8:
+        return f"{v[:2]}.{v[2:5]}-{v[5:8]}"
 
-COLUNAS = [
-    "ID", "Nome", "CPF/CNPJ", "Celular", "UF",
-    "Cidade", "Bairro", "CEP", "Endereço", "Número"
-]
+    return v
+
 
 def normalizar_colunas(df):
-    # tira espaços extras
     df.columns = df.columns.str.strip()
 
-    # corrige nomes errados
     df = df.rename(columns={
         "CPF / CNPJ": "CPF/CNPJ",
         "CPF CNPJ": "CPF/CNPJ",
@@ -125,22 +150,20 @@ def normalizar_colunas(df):
         "id": "ID"
     })
 
-    # remove colunas duplicadas pelo nome
     df = df.loc[:, ~df.columns.duplicated()]
 
-    # cria colunas faltantes
     for coluna in COLUNAS:
         if coluna not in df.columns:
             df[coluna] = ""
 
-    # mantém somente as colunas corretas e na ordem certa
     df = df[COLUNAS]
-
     return df
+
 
 def salvar(df):
     df = normalizar_colunas(df)
     df.to_excel(ARQUIVO, index=False)
+
 
 def gerar_id(df):
     if df.empty:
@@ -152,6 +175,7 @@ def gerar_id(df):
         return 1
 
     return int(ids_validos.max()) + 1
+
 
 def carregar():
     if os.path.exists(ARQUIVO):
@@ -166,69 +190,137 @@ def carregar():
 
     return pd.DataFrame(columns=COLUNAS)
 
+
 @app.route("/")
 def index():
-    busca = request.args.get("busca", "").lower()
+    busca = request.args.get("busca", "").strip().lower()
+    filtro_tipo = request.args.get("tipo", "").strip().lower()
+
     df = carregar()
 
     if busca:
-        df = df[df.apply(lambda x: busca in str(x).lower(), axis=1)]
+        df = df[df.apply(lambda x: busca in " ".join(x.astype(str)).lower(), axis=1)]
+
+    if filtro_tipo == "pessoa":
+        df = df[df["CPF/CNPJ"].astype(str).apply(lambda x: len(apenas_numeros(x)) == 11)]
+
+    elif filtro_tipo == "empresa":
+        df = df[df["CPF/CNPJ"].astype(str).apply(lambda x: len(apenas_numeros(x)) == 14)]
 
     dados = df.to_dict(orient="records")
-    return render_template("index.html", dados=dados, busca=busca)
+    return render_template(
+        "index.html",
+        dados=dados,
+        busca=request.args.get("busca", ""),
+        tipo=filtro_tipo
+    )
+
 
 @app.route("/add", methods=["POST"])
 def add():
-    df = carregar()
+    try:
+        df = carregar()
 
-    cpf_bruto = request.form["cpf"]
-    cpf_limpo = apenas_numeros(cpf_bruto)[:14]
+        nome = request.form.get("nome", "").strip()
+        cpf_bruto = request.form.get("cpf_cnpj", "").strip()
+        celular = request.form.get("celular", "").strip()
+        uf = request.form.get("uf", "").strip()
+        cidade = request.form.get("cidade", "").strip()
+        bairro = request.form.get("bairro", "").strip()
+        cep = request.form.get("cep", "").strip()
+        endereco = request.form.get("endereco", "").strip()
+        numero = request.form.get("numero", "").strip()
 
-    if not validar_documento(cpf_limpo):
-        dados = df.to_dict(orient="records")
+        cpf_limpo = apenas_numeros(cpf_bruto)[:14]
+
+        if not nome:
+            flash("O campo Nome é obrigatório.", "danger")
+            return redirect(url_for("index"))
+
+        if not validar_documento(cpf_limpo):
+            flash("CPF/CNPJ inválido.", "danger")
+            return redirect(url_for("index"))
+
+        if "CPF/CNPJ" in df.columns:
+            docs_existentes = df["CPF/CNPJ"].astype(str).apply(apenas_numeros)
+            if cpf_limpo in docs_existentes.values:
+                flash("Este CPF/CNPJ já está cadastrado.", "warning")
+                return redirect(url_for("index"))
+
+        novo = {
+            "ID": gerar_id(df),
+            "Nome": nome,
+            "CPF/CNPJ": formatar_cpf_cnpj(cpf_limpo),
+            "Celular": formatar_celular(celular),
+            "UF": uf,
+            "Cidade": cidade,
+            "Bairro": bairro,
+            "CEP": formatar_cep(cep),
+            "Endereço": endereco,
+            "Número": numero
+        }
+
+        df = pd.concat([df, pd.DataFrame([novo])], ignore_index=True)
+        salvar(df)
+
         flash("Cadastro realizado com sucesso!", "success")
-        return redirect("/")
+        return redirect(url_for("index"))
 
-    cpf_formatado = formatar_cpf_cnpj(cpf_limpo)
+    except Exception as e:
+        flash(f"Erro ao cadastrar: {str(e)}", "danger")
+        return redirect(url_for("index"))
 
-    if "CPF/CNPJ" in df.columns:
-        docs_existentes = df["CPF/CNPJ"].astype(str).apply(apenas_numeros)
-        if cpf_limpo in docs_existentes.values:
-            dados = df.to_dict(orient="records")
-            return render_template(
-                "index.html",
-                dados=dados,
-                busca="",
-                erro="Este CPF/CNPJ já está cadastrado."
-            )
-
-    novo = {
-        "ID": gerar_id(df),
-        "Nome": request.form["nome"],
-        "CPF/CNPJ": cpf_formatado,
-        "Celular": formatar_celular(request.form["celular"]),
-        "UF": request.form["uf"],
-        "Cidade": request.form["cidade"],
-        "Bairro": request.form["bairro"],
-        "CEP": formatar_cep(request.form["cep"]),
-        "Endereço": request.form["endereco"],
-        "Número": request.form["numero"]
-    }
-
-    df = pd.concat([df, pd.DataFrame([novo])], ignore_index=True)
-    salvar(df)
-
-    flash('Cadastro realizado com sucesso!','Sucess')
-    return redirect("/")
 
 @app.route("/delete/<int:id>")
 def delete(id):
-    df = carregar()
-    df = df[df["ID"] != id]
-    salvar(df)
+    try:
+        df = carregar()
+        qtd_antes = len(df)
 
-    flash('Cadastro excluído com sucesso!','Sucess')
-    return redirect("/")
+        df = df[df["ID"] != id]
+
+        if len(df) == qtd_antes:
+            flash("Cadastro não encontrado.", "warning")
+            return redirect(url_for("index"))
+
+        salvar(df)
+        flash("Cadastro excluído com sucesso!", "danger")
+        return redirect(url_for("index"))
+
+    except Exception as e:
+        flash(f"Erro ao excluir: {str(e)}", "danger")
+        return redirect(url_for("index"))
+
+
+@app.route("/delete_selected", methods=["POST"])
+def delete_selected():
+    try:
+        ids_selecionados = request.form.getlist("ids")
+
+        if not ids_selecionados:
+            flash("Nenhum cadastro foi selecionado.", "warning")
+            return redirect(url_for("index"))
+
+        ids_selecionados = [int(i) for i in ids_selecionados]
+
+        df = carregar()
+        qtd_antes = len(df)
+
+        df = df[~df["ID"].isin(ids_selecionados)]
+        qtd_excluidos = qtd_antes - len(df)
+
+        if qtd_excluidos == 0:
+            flash("Nenhum cadastro selecionado foi encontrado.", "warning")
+            return redirect(url_for("index"))
+
+        salvar(df)
+        flash(f"{qtd_excluidos} cadastro(s) excluído(s) com sucesso!", "danger")
+        return redirect(url_for("index"))
+
+    except Exception as e:
+        flash(f"Erro ao excluir selecionados: {str(e)}", "danger")
+        return redirect(url_for("index"))
+
 
 @app.route("/edit/<int:id>")
 def edit(id):
@@ -236,108 +328,156 @@ def edit(id):
     empresa_df = df[df["ID"] == id]
 
     if empresa_df.empty:
-        return "Empresa não encontrada"
+        flash("Empresa não encontrada.", "danger")
+        return redirect(url_for("index"))
 
     empresa = empresa_df.iloc[0].to_dict()
     return render_template("editar.html", e=empresa)
 
+
 @app.route("/update/<int:id>", methods=["POST"])
 def update(id):
-    df = carregar()
-
-    cpf_bruto = request.form["cpf"]
-    cpf_limpo = apenas_numeros(cpf_bruto)[:14]
-
-    if not validar_documento(cpf_limpo):
+    try:
+        df = carregar()
         empresa_df = df[df["ID"] == id]
 
         if empresa_df.empty:
-            return "Empresa não encontrada"
+            flash("Empresa não encontrada.", "danger")
+            return redirect(url_for("index"))
 
-        empresa = empresa_df.iloc[0].to_dict()
-        empresa["Nome"] = request.form["nome"]
-        empresa["CPF/CNPJ"] = request.form["cpf"]
-        empresa["Celular"] = request.form["celular"]
-        empresa["UF"] = request.form["uf"]
-        empresa["Cidade"] = request.form["cidade"]
-        empresa["Bairro"] = request.form["bairro"]
-        empresa["CEP"] = request.form["cep"]
-        empresa["Endereço"] = request.form["endereco"]
-        empresa["Número"] = request.form["numero"]
+        nome = request.form.get("nome", "").strip()
+        cpf_bruto = request.form.get("cpf_cnpj", "").strip()
+        celular = request.form.get("celular", "").strip()
+        uf = request.form.get("uf", "").strip()
+        cidade = request.form.get("cidade", "").strip()
+        bairro = request.form.get("bairro", "").strip()
+        cep = request.form.get("cep", "").strip()
+        endereco = request.form.get("endereco", "").strip()
+        numero = request.form.get("numero", "").strip()
 
-        return render_template("editar.html", e=empresa, erro="CPF/CNPJ inválido.")
+        cpf_limpo = apenas_numeros(cpf_bruto)[:14]
 
-    docs_existentes = df[df["ID"] != id]["CPF/CNPJ"].astype(str).apply(apenas_numeros)
-    if cpf_limpo in docs_existentes.values:
-        empresa_df = df[df["ID"] == id]
+        if not nome:
+            empresa = empresa_df.iloc[0].to_dict()
+            empresa["Nome"] = nome
+            empresa["CPF/CNPJ"] = cpf_bruto
+            empresa["Celular"] = celular
+            empresa["UF"] = uf
+            empresa["Cidade"] = cidade
+            empresa["Bairro"] = bairro
+            empresa["CEP"] = cep
+            empresa["Endereço"] = endereco
+            empresa["Número"] = numero
+            return render_template("editar.html", e=empresa, erro="O campo Nome é obrigatório.")
 
-        if empresa_df.empty:
-            return "Empresa não encontrada"
+        if not validar_documento(cpf_limpo):
+            empresa = empresa_df.iloc[0].to_dict()
+            empresa["Nome"] = nome
+            empresa["CPF/CNPJ"] = cpf_bruto
+            empresa["Celular"] = celular
+            empresa["UF"] = uf
+            empresa["Cidade"] = cidade
+            empresa["Bairro"] = bairro
+            empresa["CEP"] = cep
+            empresa["Endereço"] = endereco
+            empresa["Número"] = numero
+            return render_template("editar.html", e=empresa, erro="CPF/CNPJ inválido.")
 
-        empresa = empresa_df.iloc[0].to_dict()
-        empresa["Nome"] = request.form["nome"]
-        empresa["CPF/CNPJ"] = request.form["cpf"]
-        empresa["Celular"] = request.form["celular"]
-        empresa["UF"] = request.form["uf"]
-        empresa["Cidade"] = request.form["cidade"]
-        empresa["Bairro"] = request.form["bairro"]
-        empresa["CEP"] = request.form["cep"]
-        empresa["Endereço"] = request.form["endereco"]
-        empresa["Número"] = request.form["numero"]
+        docs_existentes = df[df["ID"] != id]["CPF/CNPJ"].astype(str).apply(apenas_numeros)
+        if cpf_limpo in docs_existentes.values:
+            empresa = empresa_df.iloc[0].to_dict()
+            empresa["Nome"] = nome
+            empresa["CPF/CNPJ"] = cpf_bruto
+            empresa["Celular"] = celular
+            empresa["UF"] = uf
+            empresa["Cidade"] = cidade
+            empresa["Bairro"] = bairro
+            empresa["CEP"] = cep
+            empresa["Endereço"] = endereco
+            empresa["Número"] = numero
+            return render_template("editar.html", e=empresa, erro="Este CPF/CNPJ já está cadastrado.")
 
-        return render_template("editar.html", e=empresa, erro="Este CPF/CNPJ já está cadastrado.")
+        for i, row in df.iterrows():
+            if row["ID"] == id:
+                df.at[i, "Nome"] = nome
+                df.at[i, "CPF/CNPJ"] = formatar_cpf_cnpj(cpf_limpo)
+                df.at[i, "Celular"] = formatar_celular(celular)
+                df.at[i, "UF"] = uf
+                df.at[i, "Cidade"] = cidade
+                df.at[i, "Bairro"] = bairro
+                df.at[i, "CEP"] = formatar_cep(cep)
+                df.at[i, "Endereço"] = endereco
+                df.at[i, "Número"] = numero
+                break
 
-    for i, row in df.iterrows():
-        if row["ID"] == id:
-            df.at[i, "Nome"] = request.form["nome"]
-            df.at[i, "CPF/CNPJ"] = formatar_cpf_cnpj(cpf_limpo)
-            df.at[i, "Celular"] = formatar_celular(request.form["celular"])
-            df.at[i, "Cidade"] = request.form["cidade"]
-            df.at[i, "UF"] = request.form["uf"]
-            df.at[i, "Bairro"] = request.form["bairro"]
-            df.at[i, "CEP"] = formatar_cep(request.form["cep"])
-            df.at[i, "Endereço"] = request.form["endereco"]
-            df.at[i, "Número"] = request.form["numero"]
-            break
+        salvar(df)
+        flash("Dados atualizados com sucesso!", "primary")
+        return redirect(url_for("index"))
 
-    salvar(df)
+    except Exception as e:
+        flash(f"Erro ao atualizar: {str(e)}", "danger")
+        return redirect(url_for("index"))
 
-    flash('Dados Atualizados com sucesso!','Sucess')
-    return redirect("/")
 
 @app.route("/export")
 def export():
-    df = carregar()
-    arquivo_exportado = "empresas_exportadas.xlsx"
-    df.to_excel(arquivo_exportado, index=False)
-    return send_file(arquivo_exportado, as_attachment=True)
+    try:
+        df = carregar()
+        arquivo_exportado = "empresas_exportadas.xlsx"
+        df.to_excel(arquivo_exportado, index=False)
+        return send_file(arquivo_exportado, as_attachment=True)
+
+    except Exception as e:
+        flash(f"Erro ao exportar: {str(e)}", "danger")
+        return redirect(url_for("index"))
+
 
 @app.route("/import", methods=["POST"])
 def importar():
     if "file" not in request.files:
-        return "Nenhum arquivo foi enviado."
+        flash("Nenhum arquivo foi enviado.", "danger")
+        return redirect(url_for("index"))
 
     file = request.files["file"]
 
     if file.filename == "":
-        return "Nenhum arquivo foi selecionado."
+        flash("Nenhum arquivo foi selecionado.", "danger")
+        return redirect(url_for("index"))
 
     if not file.filename.lower().endswith(".xlsx"):
-        return "Envie apenas arquivos .xlsx"
+        flash("Envie apenas arquivos .xlsx", "warning")
+        return redirect(url_for("index"))
 
     try:
-        df = pd.read_excel(file, engine="openpyxl")
-        df = normalizar_colunas(df)
-        df = normalizar_colunas(df)
+        df_importado = pd.read_excel(file, engine="openpyxl")
+        df_importado = normalizar_colunas(df_importado)
 
-        if "ID" not in df.columns or df["ID"].isnull().all():
-            df["ID"] = range(1, len(df) + 1)
+        if "ID" not in df_importado.columns or df_importado["ID"].isnull().all():
+            df_importado["ID"] = range(1, len(df_importado) + 1)
 
-        salvar(df)
-        return redirect("/")
+        docs_importados = df_importado["CPF/CNPJ"].astype(str).apply(apenas_numeros)
+        docs_importados_validos = docs_importados[docs_importados != ""]
+
+        if docs_importados_validos.duplicated().any():
+            flash("A planilha importada contém CPF/CNPJ duplicado.", "warning")
+            return redirect(url_for("index"))
+
+        df_atual = carregar()
+        docs_atuais = df_atual["CPF/CNPJ"].astype(str).apply(apenas_numeros)
+
+        repetidos = set(docs_importados_validos).intersection(set(docs_atuais))
+        if repetidos:
+            flash("A planilha possui CPF/CNPJ que já existem no sistema.", "warning")
+            return redirect(url_for("index"))
+
+        salvar(df_importado)
+        flash("Arquivo importado com sucesso!", "success")
+        return redirect(url_for("index"))
 
     except Exception as e:
-        return f"Erro ao importar arquivo: {str(e)}"
+        flash(f"Erro ao importar arquivo: {str(e)}", "danger")
+        return redirect(url_for("index"))
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

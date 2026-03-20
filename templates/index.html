@@ -1,133 +1,603 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Empresas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f4f6f9;
+        }
+
+        #endereco, #bairro, #cidade, #uf {
+            background-color: #f8f9fa;
+        }
+
+        .titulo-sistema {
+            padding-left: 14px;
+            border-left: 5px solid #0d6efd;
+        }
+
+        .titulo-sistema h2 {
+            font-size: 1.65rem;
+            letter-spacing: -0.3px;
+        }
+
+        .titulo-sistema p {
+            font-size: 0.96rem;
+            color: #6c757d;
+        }
+
+        .card {
+            overflow: hidden;
+        }
+
+        .btn-acao {
+            min-width: 96px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .barra-acoes-lote {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 16px;
+            padding: 12px 16px;
+        }
+
+        .tabela-registros {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .tabela-registros thead th {
+            background: #212529;
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            padding: 14px 12px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .tabela-registros thead th:first-child {
+            border-top-left-radius: 14px;
+        }
+
+        .tabela-registros thead th:last-child {
+            border-top-right-radius: 14px;
+        }
+
+        .tabela-registros tbody td {
+            padding: 14px 12px;
+            vertical-align: middle;
+            border-color: #e9ecef;
+            background: #fff;
+        }
+
+        .tabela-registros tbody tr {
+            transition: 0.2s ease;
+        }
+
+        .tabela-registros tbody tr:hover td {
+            background: #f8f9fa;
+        }
+
+        .tabela-registros tbodytr.linha-selecionada td {
+            background: #fff5f5;
+        }
+
+        .col-check {
+            width: 52px;
+        }
+
+        .col-acoes {
+            width: 220px;
+        }
+
+        .form-check-input,
+        .checkbox-item {
+            cursor: pointer;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+        }
+
+        .toast-container-custom {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: min(390px, calc(100vw - 24px));
+        }
+
+        .toast-custom {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px 18px;
+            border-radius: 16px;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+            background: #fff;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+            animation: slideInToast 0.35s ease;
+        }
+
+        .toast-icon {
+            flex-shrink: 0;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: #f8f9fa;
+        }
+
+        .toast-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .toast-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 3px;
+            color: #212529;
+        }
+
+        .toast-message {
+            font-size: 0.92rem;
+            color: #495057;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        .toast-close {
+            border: none;
+            background: transparent;
+            color: #6c757d;
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 4px;
+            transition: 0.2s ease;
+        }
+
+        .toast-close:hover {
+            color: #212529;
+            transform: scale(1.08);
+        }
+
+        .toast-progress {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 4px;
+            width: 100%;
+            transform-origin: left;
+            animation: toastProgress 5s linear forwards;
+        }
+
+        .toast-success {
+            border-left: 5px solid #198754;
+        }
+
+        .toast-success .toast-icon {
+            background: rgba(25, 135, 84, 0.12);
+        }
+
+        .toast-success .toast-progress {
+            background: #198754;
+        }
+
+        .toast-danger {
+            border-left: 5px solid #dc3545;
+        }
+
+        .toast-danger .toast-icon {
+            background: rgba(220, 53, 69, 0.12);
+        }
+
+        .toast-danger .toast-progress {
+            background: #dc3545;
+        }
+
+        .toast-warning {
+            border-left: 5px solid #ffc107;
+        }
+
+        .toast-warning .toast-icon {
+            background: rgba(255, 193, 7, 0.18);
+        }
+
+        .toast-warning .toast-progress {
+            background: #ffc107;
+        }
+
+        .toast-primary {
+            border-left: 5px solid #0d6efd;
+        }
+
+        .toast-primary .toast-icon {
+            background: rgba(13, 110, 253, 0.12);
+        }
+
+        .toast-primary .toast-progress {
+            background: #0d6efd;
+        }
+
+        .toast-hide {
+            animation: slideOutToast 0.28s ease forwards;
+        }
+
+        @keyframes slideInToast {
+            from {
+                opacity: 0;
+                transform: translateX(40px) translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) translateY(0);
+            }
+        }
+
+        @keyframes slideOutToast {
+            from {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(30px) scale(0.96);
+            }
+        }
+
+        @keyframes toastProgress {
+            from {
+                transform: scaleX(1);
+            }
+            to {
+                transform: scaleX(0);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .toast-container-custom {
+                top: 12px;
+                right: 12px;
+                left: 12px;
+                width: auto;
+            }
+
+            .toast-custom {
+                padding: 14px 16px;
+                border-radius: 14px;
+            }
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
-<div class="container mt-4">
-
-    <h2 class="mb-4">📊 Sistema de Empresas</h2>
-
-    <!-- 🔥 MENSAGENS (FLASH) -->
+<div class="toast-container-custom">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for categoria, mensagem in messages %}
-                <div class="alert alert-{{ categoria }} alert-dismissible fade show" role="alert">
-                    {{ mensagem }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="toast-custom toast-{{ categoria }}">
+                    <div class="toast-icon">
+                        {% if categoria == "success" %}✅{% endif %}
+                        {% if categoria == "danger" %}🗑️{% endif %}
+                        {% if categoria == "warning" %}⚠️{% endif %}
+                        {% if categoria == "primary" %}✏️{% endif %}
+                        {% if categoria not in ["success", "danger", "warning", "primary"] %}ℹ️{% endif %}
+                    </div>
+
+                    <div class="toast-content">
+                        <div class="toast-title">
+                            {% if categoria == "success" %}Operação realizada{% endif %}
+                            {% if categoria == "danger" %}Algo deu errado{% endif %}
+                            {% if categoria == "warning" %}Atenção{% endif %}
+                            {% if categoria == "primary" %}Atualização{% endif %}
+                            {% if categoria not in ["success", "danger", "warning", "primary"] %}Aviso{% endif %}
+                        </div>
+                        <div class="toast-message">{{ mensagem }}</div>
+                    </div>
+
+                    <button type="button" class="toast-close" onclick="fecharToast(this)">×</button>
+                    <div class="toast-progress"></div>
                 </div>
             {% endfor %}
         {% endif %}
     {% endwith %}
+</div>
 
-    <!-- 🔎 BUSCA -->
-    <form method="GET" class="mb-3 d-flex">
-        <input type="text" name="busca" class="form-control me-2" placeholder="Buscar..." value="{{ busca }}">
-        <button class="btn btn-primary">Buscar</button>
-    </form>
+<div class="container py-4">
 
-    <!-- ➕ CADASTRO -->
-    <div class="card p-3 mb-4">
-        <h5>Adicionar Empresa/Pessoa</h5>
+    <div class="mb-4 titulo-sistema">
+        <h2 class="fw-bold mb-1">📊 Sistema de Empresas</h2>
+        <p class="mb-0">Gerencie pessoas e empresas com mais organização.</p>
+    </div>
 
-        <form method="POST" action="/add">
-            <div class="row">
-                <div class="col">
-                    <input name="nome" class="form-control" placeholder="Nome" required>
-                </div>
+    <div class="card shadow-sm border-0 rounded-4 p-4 mb-4">
+        <h5 class="mb-3">🔎 Filtros</h5>
 
-                <div class="col">
-                    <input name="cpf" class="form-control" placeholder="CPF/CNPJ" maxlength="18" oninput="formatarCpfCnpj(this)" required>
-                </div>
-
-                <div class="col">
-                    <input name="celular" class="form-control" placeholder="Celular" maxlength="14" oninput="formatarCelular(this)">
-                </div>
-
-                <div class="col">
-                    <input name="uf" class="form-control" placeholder="UF">
-                </div>
+        <form method="GET" class="row g-3">
+            <div class="col-md-6">
+                <input type="text" name="busca" class="form-control" placeholder="Buscar..." value="{{ busca }}">
             </div>
 
-            <div class="row mt-2">
-                <div class="col">
-                    <input name="cidade" class="form-control" placeholder="Cidade">
-                </div>
-
-                <div class="col">
-                    <input name="bairro" class="form-control" placeholder="Bairro">
-                </div>
-
-                <div class="col">
-                    <input name="cep" class="form-control" placeholder="CEP" maxlength="10" oninput="formatarCEP(this)">
-                </div>
-
-                <div class="col">
-                    <input name="endereco" class="form-control" placeholder="Endereço">
-                </div>
-
-                <div class="col">
-                    <input name="numero" class="form-control" placeholder="Número">
-                </div>
+            <div class="col-md-3">
+                <select name="tipo" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="pessoa" {% if tipo =="pessoa" %}selected{% endif %}>Pessoa</option>
+                    <option value="empresa" {% if tipo =="empresa" %}selected{% endif %}>Empresa</option>
+                </select>
             </div>
 
-            <button class="btn btn-success mt-3">Salvar</button>
+            <div class="col-md-3 d-flex gap-2">
+                <button class="btn btn-primary w-100">🔎 Buscar</button>
+                <a href="/" class="btn btn-outline-secondary w-100">🧹 Limpar</a>
+            </div>
         </form>
     </div>
 
-    <!-- 📤 IMPORTAR / EXPORTAR -->
-    <div class="mb-3 d-flex gap-2">
-        <a href="/export" class="btn btn-secondary">⬇ Exportar Excel</a>
+    <div class="card shadow-sm border-0 rounded-4 p-4 mb-4">
+        <h5 class="mb-3">👤 Adicionar Empresa/Pessoa</h5>
 
-        <form action="/import" method="POST" enctype="multipart/form-data" class="d-flex">
-            <input type="file" name="file" class="form-control me-2" accept=".xlsx" required>
-            <button class="btn btn-warning">Importar</button>
+        <form method="POST" action="/add" id="formCadastro">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="nome" id="nome" class="form-control" placeholder="Nome" required>
+                </div>
+
+                <div class="col-md-3">
+                    <input type="text" name="cpf_cnpj" id="cpf_cnpj" class="form-control" placeholder="CPF/CNPJ" oninput="formatarCpfCnpj(this)" required>
+                </div>
+
+                <div class="col-md-3">
+                    <input type="text" name="celular" id="celular" class="form-control" placeholder="Celular" oninput="formatarCelular(this)">
+                </div>
+
+
+            </div>
+
+            <div class="row g-3 mt-1">
+                <div class="col-md-2">
+                    <input type="text" name="cep" id="cep" class="form-control" placeholder="CEP" maxlength="9">
+                </div>
+
+                <div class="col-md-4">
+                    <input type="text" name="endereco" id="endereco" class="form-control" placeholder="Endereço">
+                </div>
+
+                <div class="col-md-2">
+                    <input type="text" name="numero" id="numero" class="form-control" placeholder="Número">
+                </div>
+
+                <div class="col-md-1">
+                    <input type="text" name="uf" id="uf" class="form-control" placeholder="UF" maxlength="2">
+                </div>
+
+                <div class="col-md-3">
+                    <input type="text" name="cidade" id="cidade" class="form-control" placeholder="Cidade">
+                </div>
+
+                <div class="col-md-4">
+                    <input type="text" name="bairro" id="bairro" class="form-control" placeholder="Bairro">
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-success mt-4 px-4" onclick="abrirModalCadastro()">
+                ➕ Salvar cadastro
+            </button>
         </form>
     </div>
 
-    <!-- 📋 TABELA -->
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>CPF/CNPJ</th>
-                <th>Celular</th>
-                <th>Cidade</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for d in dados %}
-            <tr>
-                <td>{{ d["ID"] }}</td>
-                <td>{{ d["Nome"] }}</td>
-                <td>{{ d["CPF/CNPJ"] }}</td>
-                <td>{{ d["Celular"] }}</td>
-                <td>{{ d["Cidade"] }}</td>
-                <td>
-                    <a href="/edit/{{ d['ID'] }}" class="btn btn-sm btn-primary">Editar</a>
-                    <a href="/delete/{{ d['ID'] }}" class="btn btn-sm btn-danger"
-                       onclick="return confirm('Tem certeza que deseja excluir?')">
-                        Excluir
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card shadow-sm border-0 rounded-4 p-4 mb-4">
+        <h5 class="mb-3">📂 Importação e Exportação</h5>
+
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+            <a href="/export" class="btn btn-outline-secondary px-3">📥 Exportar Excel</a>
+
+            <form action="/import" method="POST" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-center m-0">
+                <input type="file" name="file" class="form-control" accept=".xlsx" required style="min-width: 300px;">
+                <button class="btn btn-warning px-3">📤 Importar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+            <div>
+                <h5 class="mb-1 fw-semibold">📋 Registros cadastrados</h5>
+                <p class="text-muted mb-0 small">Selecione um ou mais registros para gerenciar em lote.</p>
+            </div>
+
+            <button type="button" class="btn btn-danger px-3 fw-semibold" onclick="abrirModalExcluirSelecionados()">
+                🗑 Excluir selecionados
+            </button>
+        </div>
+
+        <div class="barra-acoes-lote mb-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div class="form-check m-0">
+                    <input class="form-check-input" type="checkbox" id="selecionarTodos">
+                    <label class="form-check-label fw-medium" for="selecionarTodos">
+                        Selecionar todos
+                    </label>
+                </div>
+
+                <div class="text-muted small">
+                    <span id="contadorSelecionados">0</span> registro(s) selecionado(s)
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" action="/delete_selected" id="formExcluirSelecionados">
+            <div class="table-responsive">
+                <table class="table tabela-registros align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="col-check text-center">
+                                <input type="checkbox" id="selecionarTodosTopo">
+                            </th>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>CPF/CNPJ</th>
+                            <th>Celular</th>
+                            <th>Cidade</th>
+                            <th class="text-center col-acoes">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if dados %}
+                            {% for d in dados %}
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" name="ids" value="{{ d['ID'] }}" class="checkbox-item">
+                                </td>
+                                <td class="fw-semibold text-secondary">{{ d["ID"] }}</td>
+                                <td class="fw-medium">{{ d["Nome"] }}</td>
+                                <td>{{ d["CPF/CNPJ"] }}</td>
+                                <td>{{ d["Celular"] }}</td>
+                                <td>{{ d["Cidade"] }}</td>
+                                <td class="text-center">
+                                    <div class="d-inline-flex gap-2 flex-wrap justify-content-center">
+                                        <a href="/edit/{{ d['ID'] }}" class="btn btn-sm btn-outline-primary btn-acao" title="Editar registro">
+                                            ✏️ Editar
+                                        </a>
+
+                                        <a href="#" class="btn btn-sm btn-outline-danger btn-acao" title="Excluir registro"
+                                           onclick='abrirModalExcluir("/delete/{{ d["ID"] }}", {{ d["Nome"]|tojson }})'>
+                                            🗑 Excluir
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">Nenhum registro encontrado.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
 
 </div>
 
-<!-- 🔥 SCRIPT BOOTSTRAP (necessário pro botão fechar funcionar) -->
+<div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-danger text-white rounded-top-4">
+                <h5 class="modal-title" id="modalExcluirLabel">Confirmar exclusão</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-1"><strong>Tem certeza que deseja excluir este cadastro?</strong></p>
+                <p class="mb-1">Registro: <span id="nomeRegistroExcluir" class="fw-semibold"></span></p>
+                <p class="text-muted mb-0">Essa ação não poderá ser desfeita.</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancelar</button>
+                <a href="#" id="btnConfirmarExclusao" class="btn btn-danger">Sim, excluir</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalExcluirSelecionados" tabindex="-1" aria-labelledby="modalExcluirSelecionadosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-danger text-white rounded-top-4">
+                <h5 class="modal-title" id="modalExcluirSelecionadosLabel">Excluir selecionados</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-1"><strong>Tem certeza que deseja excluir os cadastros selecionados?</strong></p>
+                <p class="mb-1">Quantidade selecionada: <span id="qtdSelecionados" class="fw-semibold">0</span></p>
+                <p class="text-muted mb-0">Essa ação não poderá ser desfeita.</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="confirmarExclusaoSelecionados()">Sim, excluir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCadastro" tabindex="-1" aria-labelledby="modalCadastroLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-success text-white rounded-top-4">
+                <h5 class="modal-title" id="modalCadastroLabel">Confirmar cadastro</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-1"><strong>Deseja realmente salvar este cadastro?</strong></p>
+                <p class="text-muted mb-0">Confira os dados antes de continuar.</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="confirmarCadastro()">Sim, salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- 🔧 FORMATAÇÕES -->
 <script>
+function abrirModalExcluir(url, nome = "") {
+    document.getElementById("btnConfirmarExclusao").href = url;
+    document.getElementById("nomeRegistroExcluir").textContent = nome;
+
+    const modal = new bootstrap.Modal(document.getElementById("modalExcluir"));
+    modal.show();
+}
+
+function abrirModalCadastro() {
+    const modal = new bootstrap.Modal(document.getElementById("modalCadastro"));
+    modal.show();
+}
+
+function confirmarCadastro() {
+    document.getElementById("formCadastro").submit();
+}
+
+function fecharToast(botao) {
+    const toast = botao.closest(".toast-custom");
+    esconderToast(toast);
+}
+
+function esconderToast(toast) {
+    if (!toast || toast.classList.contains("toast-hide")) return;
+
+    toast.classList.add("toast-hide");
+
+    setTimeout(() => {
+        toast.remove();
+    }, 280);
+}
+
 function apenasNumeros(valor) {
     return valor.replace(/\D/g, "");
 }
@@ -153,23 +623,198 @@ function formatarCelular(campo) {
     let v = apenasNumeros(campo.value).slice(0, 11);
 
     if (v.length > 10) {
-        v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1)$2-$3");
+        v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
     } else if (v.length > 6) {
-        v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1)$2-$3");
+        v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
     } else if (v.length > 2) {
-        v = v.replace(/^(\d{2})(\d{0,5})/, "($1)$2");
+        v = v.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
     }
 
     campo.value = v;
 }
 
-function formatarCEP(campo) {
-    let v = apenasNumeros(campo.value).slice(0, 8);
-    v = v.replace(/^(\d{2})(\d)/, "$1.$2");
-    v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2-$3");
-
-    campo.value = v;
+function getCheckboxes() {
+    return document.querySelectorAll(".checkbox-item");
 }
+
+function getMarcados() {
+    return document.querySelectorAll(".checkbox-item:checked");
+}
+
+function atualizarLinhasSelecionadas() {
+    getCheckboxes().forEach(checkbox => {
+        const linha = checkbox.closest("tr");
+        if (!linha) return;
+
+        if (checkbox.checked) {
+            linha.classList.add("linha-selecionada");
+        } else {
+            linha.classList.remove("linha-selecionada");
+        }
+    });
+}
+
+function atualizarContadorSelecionados() {
+    const contador = document.getElementById("contadorSelecionados");
+    if (contador) {
+        contador.textContent = getMarcados().length;
+    }
+}
+
+function atualizarEstadoSelecionarTodos() {
+    const checkboxes = getCheckboxes();
+    const total = checkboxes.length;
+    const marcados = getMarcados().length;
+
+    const selecionarTodos = document.getElementById("selecionarTodos");
+    const selecionarTodosTopo = document.getElementById("selecionarTodosTopo");
+
+    if (!selecionarTodos || !selecionarTodosTopo) return;
+
+    if (total === 0) {
+        selecionarTodos.checked = false;
+        selecionarTodos.indeterminate = false;
+        selecionarTodosTopo.checked = false;
+        selecionarTodosTopo.indeterminate = false;
+        atualizarContadorSelecionados();
+        return;
+    }
+
+    if (marcados === 0) {
+        selecionarTodos.checked = false;
+        selecionarTodos.indeterminate = false;
+        selecionarTodosTopo.checked = false;
+        selecionarTodosTopo.indeterminate = false;
+    } else if (marcados === total) {
+        selecionarTodos.checked = true;
+        selecionarTodos.indeterminate = false;
+        selecionarTodosTopo.checked = true;
+        selecionarTodosTopo.indeterminate = false;
+    } else {
+        selecionarTodos.checked = false;
+        selecionarTodos.indeterminate = true;
+        selecionarTodosTopo.checked = false;
+        selecionarTodosTopo.indeterminate = true;
+    }
+
+    atualizarContadorSelecionados();
+    atualizarLinhasSelecionadas();
+}
+
+function marcarTodos(valor) {
+    getCheckboxes().forEach(checkbox => {
+        checkbox.checked = valor;
+    });
+
+    atualizarEstadoSelecionarTodos();
+}
+
+function abrirModalExcluirSelecionados() {
+    const qtd = getMarcados().length;
+
+    if (qtd === 0) {
+        alert("Selecione pelo menos um cadastro para excluir.");
+        return;
+    }
+
+    document.getElementById("qtdSelecionados").textContent = qtd;
+    const modal = new bootstrap.Modal(document.getElementById("modalExcluirSelecionados"));
+    modal.show();
+}
+
+function confirmarExclusaoSelecionados() {
+    document.getElementById("formExcluirSelecionados").submit();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const selecionarTodos = document.getElementById("selecionarTodos");
+    const selecionarTodosTopo = document.getElementById("selecionarTodosTopo");
+
+    if (selecionarTodos) {
+        selecionarTodos.addEventListener("change", function () {
+            marcarTodos(this.checked);
+        });
+    }
+
+    if (selecionarTodosTopo) {
+        selecionarTodosTopo.addEventListener("change", function () {
+            marcarTodos(this.checked);
+        });
+    }
+
+    document.addEventListener("change", function (e) {
+        if (e.target.classList.contains("checkbox-item")) {
+            atualizarEstadoSelecionarTodos();
+        }
+    });
+
+    const toasts = document.querySelectorAll(".toast-custom");
+    toasts.forEach((toast, index) => {
+        const tempo = 5000 + (index * 200);
+        setTimeout(() => {
+            esconderToast(toast);
+        }, tempo);
+    });
+
+    atualizarEstadoSelecionarTodos();
+
+    const cepInput = document.getElementById("cep");
+    const enderecoInput = document.getElementById("endereco");
+    const bairroInput = document.getElementById("bairro");
+    const cidadeInput = document.getElementById("cidade");
+    const ufInput = document.getElementById("uf");
+
+    if (cepInput) {
+        cepInput.addEventListener("input", function () {
+            let valor = apenasNumeros(this.value).slice(0, 8);
+
+            if (valor.length > 5) {
+                valor = valor.slice(0, 5) + "-" + valor.slice(5);
+            }
+
+            this.value = valor;
+        });
+
+        cepInput.addEventListener("blur", async function () {
+            const cep = apenasNumeros(this.value);
+
+            if (cep.length !== 8) {
+                return;
+            }
+
+            try {
+                enderecoInput.value = "Buscando...";
+                bairroInput.value = "Buscando...";
+                cidadeInput.value = "Buscando...";
+                ufInput.value = "Buscando...";
+
+                const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const dados = await resposta.json();
+
+                if (dados.erro) {
+                    enderecoInput.value = "";
+                    bairroInput.value = "";
+                    cidadeInput.value = "";
+                    ufInput.value = "";
+                    alert("CEP não encontrado.");
+                    return;
+                }
+
+                enderecoInput.value = dados.logradouro || "";
+                bairroInput.value = dados.bairro || "";
+                cidadeInput.value = dados.localidade || "";
+                ufInput.value = dados.uf || "";
+            } catch (erro) {
+                enderecoInput.value = "";
+                bairroInput.value = "";
+                cidadeInput.value = "";
+                ufInput.value = "";
+                console.error("Erro ao consultar CEP:", erro);
+                alert("Erro ao buscar o CEP. Verifique sua conexão.");
+            }
+        });
+    }
+});
 </script>
 
 </body>

@@ -1,0 +1,14 @@
+[23/03/2026 11:53:13] BACKUP | Arquivo gerado: backups\backup_empresas_2026-03-23_11-53-13.xlsx
+[23/03/2026 11:53:14] CADASTRO | ID=60 | Nome=aa | Documento=144.354.456-62
+[23/03/2026 11:53:30] BACKUP | Arquivo gerado: backups\backup_empresas_2026-03-23_11-53-30.xlsx
+[23/03/2026 11:53:30] EXCLUSAO | ID=60 | Nome=aa
+[23/03/2026 11:59:25] BACKUP | Arquivo gerado: backups\backup_empresas_2026-03-23_11-59-25.xlsx
+[23/03/2026 11:59:26] ATUALIZACAO | ID=59 | Nome=Beleaf Industria e Comercio de Alimentos S.a. | Documento=24.296.895/0001-11
+[23/03/2026 13:42:59] BACKUP | Arquivo gerado: backups\backup_empresas_2026-03-23_13-42-59.xlsx
+[23/03/2026 13:42:59] CADASTRO | ID=60 | Nome=aa | Documento=144.354.456-62
+[23/03/2026 13:43:07] BACKUP | Arquivo gerado: backups\backup_empresas_2026-03-23_13-43-07.xlsx
+[23/03/2026 13:43:07] EXCLUSAO | ID=60 | Nome=aa
+[23/03/2026 14:47:35] BACKUP | Arquivo gerado: backups\backup_empresas_2026-03-23_14-47-35.xlsx
+[23/03/2026 14:47:38] CADASTRO | ID=60 | Nome=aa | Documento=144.354.456-62
+[23/03/2026 14:48:04] BACKUP | Arquivo gerado: backups\backup_empresas_2026-03-23_14-48-04.xlsx
+[23/03/2026 14:48:04] EXCLUSAO | ID=60 | Nome=aa

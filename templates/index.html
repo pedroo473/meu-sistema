@@ -5,116 +5,570 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Empresas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
+        :root {
+            --bg: #f4f7fb;
+            --bg-soft: #f8fafc;
+            --card: rgba(255, 255, 255, 0.88);
+            --card-solid: #ffffff;
+            --text: #17212b;
+            --muted: #6b7280;
+            --line: #e7edf4;
+            --primary: #2563eb;
+            --primary-2: #1d4ed8;
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --dark: #0f172a;
+            --shadow-xl: 0 20px 50px rgba(15, 23, 42, 0.10);
+            --shadow-lg: 0 14px 32px rgba(15, 23, 42, 0.08);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.06);
+            --radius-xl: 26px;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+        }
+
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #f4f6f9;
+            background:
+                radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 30%),
+                radial-gradient(circle at top right, rgba(34, 197, 94, 0.06), transparent 25%),
+                linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+            color: var(--text);
         }
 
-        #endereco, #bairro, #cidade, #uf {
-            background-color: #f8f9fa;
+        .page-shell {
+            max-width: 1460px;
         }
 
-        .titulo-sistema {
-            padding-left: 14px;
-            border-left: 5px solid #0d6efd;
+        .hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 30px;
+            background:
+                linear-gradient(135deg, rgba(37, 99, 235, 0.98), rgba(29, 78, 216, 0.92)),
+                linear-gradient(180deg, #2563eb, #1d4ed8);
+            color: #fff;
+            box-shadow: var(--shadow-xl);
         }
 
-        .titulo-sistema h2 {
-            font-size: 1.65rem;
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: auto -100px -100px auto;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.18), transparent 65%);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: -80px auto auto -60px;
+            width: 240px;
+            height: 240px;
+            background: radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.18);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            backdrop-filter: blur(8px);
+            line-height: 1;
+        }
+
+        .hero-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -1px;
+            margin: 0;
+        }
+
+        .hero-subtitle {
+            color: rgba(255,255,255,0.86);
+            font-size: 1rem;
+            max-width: 720px;
+            margin: 0;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn,
+        .btn-hero-light,
+        .btn-hero-ghost,
+        .btn-soft,
+        .btn-acao {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            line-height: 1;
+            vertical-align: middle;
+        }
+
+        .btn-hero-light {
+            background: #fff;
+            color: var(--primary-2);
+            border: none;
+            font-weight: 800;
+            border-radius: 14px;
+            min-height: 50px;
+            padding: 0 18px;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+            text-decoration: none;
+        }
+
+        .btn-hero-ghost {
+            background: rgba(255,255,255,0.10);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.18);
+            font-weight: 800;
+            border-radius: 14px;
+            min-height: 50px;
+            padding: 0 18px;
+            backdrop-filter: blur(8px);
+            text-decoration: none;
+        }
+
+        .glass-card,
+        .solid-card {
+            border: 1px solid rgba(231, 237, 244, 0.9);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .glass-card {
+            background: var(--card);
+            backdrop-filter: blur(14px);
+        }
+
+        .solid-card {
+            background: var(--card-solid);
+        }
+
+        .hero-summary-card {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 26px;
+            padding: 24px;
+            box-shadow: 0 18px 30px rgba(15, 23, 42, 0.10);
+            color: #17212b;
+            backdrop-filter: blur(12px);
+        }
+
+        .hero-summary-title {
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .hero-summary-subtitle {
+            color: #64748b;
+            font-size: 0.92rem;
+            margin-bottom: 18px;
+        }
+
+        .hero-summary-live {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 0 14px;
+            border-radius: 999px;
+            background: #eef5ff;
+            color: #1d4ed8;
+            border: 1px solid #dbeafe;
+            font-size: 0.84rem;
+            font-weight: 900;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .hero-mini-card {
+            background: #ffffff;
+            border: 1px solid #edf2f7;
+            border-radius: 18px;
+            padding: 16px;
+            height: 100%;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+        }
+
+        .hero-mini-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .hero-mini-value {
+            font-size: 2rem;
+            line-height: 1;
+            font-weight: 900;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .hero-mini-value.sm {
+            font-size: 1.45rem;
+        }
+
+        .metric-card {
+            position: relative;
+            overflow: hidden;
+            padding: 22px;
+            height: 100%;
+        }
+
+        .metric-card::after {
+            content: "";
+            position: absolute;
+            top: -32px;
+            right: -32px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.10), transparent 70%);
+        }
+
+        .metric-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 14px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+
+        .metric-icon.total {
+            background: linear-gradient(135deg, rgba(37,99,235,0.16), rgba(37,99,235,0.08));
+        }
+
+        .metric-icon.pessoas {
+            background: linear-gradient(135deg, rgba(22,163,74,0.16), rgba(22,163,74,0.08));
+        }
+
+        .metric-icon.empresas {
+            background: linear-gradient(135deg, rgba(245,158,11,0.20), rgba(245,158,11,0.08));
+        }
+
+        .metric-icon.resultados {
+            background: linear-gradient(135deg, rgba(15,23,42,0.12), rgba(15,23,42,0.05));
+        }
+
+        .metric-label {
+            font-size: 0.92rem;
+            color: var(--muted);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -1px;
+            margin: 0 0 6px 0;
+        }
+
+        .metric-foot {
+            color: var(--muted);
+            font-size: 0.84rem;
+            margin: 0;
+        }
+
+        .section-title {
+            font-size: 1.08rem;
+            font-weight: 900;
+            margin: 0;
             letter-spacing: -0.3px;
         }
 
-        .titulo-sistema p {
-            font-size: 0.96rem;
-            color: #6c757d;
+        .section-subtitle {
+            font-size: 0.92rem;
+            color: var(--muted);
+            margin: 4px 0 0 0;
         }
 
-        .card {
+        .section-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 8px 12px;
+            background: #eef5ff;
+            color: var(--primary-2);
+            border: 1px solid #dbeafe;
+            font-size: 0.88rem;
+            font-weight: 800;
+        }
+
+        .form-control,
+        .form-select {
+            min-height: 50px;
+            border-radius: 16px;
+            border: 1px solid #dfe7ef;
+            background: #fff;
+            box-shadow: none !important;
+            padding-left: 14px;
+            padding-right: 14px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #93c5fd;
+            box-shadow: 0 0 0 0.22rem rgba(37, 99, 235, 0.12) !important;
+        }
+
+        .btn {
+            border-radius: 16px;
+            min-height: 50px;
+            font-weight: 800;
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+
+        .btn-soft {
+            background: #f8fafc;
+            border: 1px solid #e5ebf2;
+            color: #334155;
+        }
+
+        .register-card {
             overflow: hidden;
         }
 
-        .btn-acao {
-            min-width: 96px;
-            border-radius: 10px;
-            font-weight: 500;
+        .register-header {
+            padding: 22px 24px 0 24px;
         }
 
-        .barra-acoes-lote {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 16px;
-            padding: 12px 16px;
+        .register-body {
+            padding: 18px 24px 24px 24px;
+        }
+
+        .table-shell {
+            overflow: hidden;
+        }
+
+        .table-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 0 0 18px 0;
+        }
+
+        .bulk-bar {
+            background: linear-gradient(180deg, #fafcff, #f7faff);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px 16px;
         }
 
         .tabela-registros {
+            margin: 0;
             border-collapse: separate;
             border-spacing: 0;
         }
 
         .tabela-registros thead th {
-            background: #212529;
+            background: linear-gradient(180deg, #17212b, #111827);
             color: #fff;
-            font-weight: 600;
             border: none;
-            padding: 14px 12px;
-            vertical-align: middle;
+            padding: 16px 14px;
+            font-size: 0.90rem;
+            font-weight: 800;
             white-space: nowrap;
+            vertical-align: middle;
         }
 
         .tabela-registros thead th:first-child {
-            border-top-left-radius: 14px;
+            border-top-left-radius: 16px;
         }
 
         .tabela-registros thead th:last-child {
-            border-top-right-radius: 14px;
+            border-top-right-radius: 16px;
         }
 
         .tabela-registros tbody td {
-            padding: 14px 12px;
-            vertical-align: middle;
-            border-color: #e9ecef;
             background: #fff;
+            border-color: #edf2f7;
+            padding: 15px 14px;
+            vertical-align: middle;
         }
 
         .tabela-registros tbody tr {
-            transition: 0.2s ease;
+            transition: 0.18s ease;
         }
 
         .tabela-registros tbody tr:hover td {
-            background: #f8f9fa;
+            background: #fbfdff;
         }
 
-        .tabela-registros tbodytr.linha-selecionada td {
-            background: #fff5f5;
+        .tabela-registros tbody tr.linha-selecionada td {
+            background: #f8fbff;
         }
 
-        .col-check {
-            width: 52px;
+        .id-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 54px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: var(--primary-2);
+            font-weight: 900;
+            font-size: 0.84rem;
+            border: 1px solid #dbeafe;
         }
 
-        .col-acoes {
-            width: 220px;
+        .name-block {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
         }
 
-        .form-check-input,
-        .checkbox-item {
-            cursor: pointer;
+        .name-main {
+            font-weight: 800;
+            color: #111827;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 260px;
         }
 
-        .form-check-label {
-            cursor: pointer;
+        .name-sub {
+            color: var(--muted);
+            font-size: 0.84rem;
+        }
+
+        .doc-pill,
+        .city-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border: 1px solid #e8eef5;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #334155;
+            line-height: 1;
+        }
+
+        .acoes-wrap {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-acao {
+            min-height: 40px;
+            border-radius: 12px;
+            font-size: 0.84rem;
+            font-weight: 800;
+            padding: 0 12px;
+        }
+
+        .empty-state {
+            padding: 56px 24px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 74px;
+            height: 74px;
+            margin: 0 auto 14px auto;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #eff6ff, #f8fafc);
+            font-size: 34px;
+        }
+
+        .empty-title {
+            font-size: 1.18rem;
+            font-weight: 900;
+            margin: 0 0 8px 0;
+        }
+
+        .empty-text {
+            color: var(--muted);
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .pagination-shell {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-top: 18px;
+        }
+
+        .page-meta {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .page-link {
+            border-radius: 12px !important;
+            margin: 0 3px;
+            border: 1px solid #e5ebf2;
+            color: #334155;
+            font-weight: 700;
+            min-height: unset;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .page-item.active .page-link {
+            background: var(--primary);
+            border-color: var(--primary);
         }
 
         .toast-container-custom {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 18px;
+            right: 18px;
             z-index: 9999;
             display: flex;
             flex-direction: column;
             gap: 12px;
-            width: min(390px, calc(100vw - 24px));
+            width: min(420px, calc(100vw - 24px));
         }
 
         .toast-custom {
@@ -123,24 +577,25 @@
             align-items: flex-start;
             gap: 14px;
             padding: 16px 18px;
-            border-radius: 16px;
-            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
-            background: #fff;
-            border: 1px solid #e9ecef;
+            border-radius: 18px;
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14);
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(10px);
+            border: 1px solid #e8eef5;
             overflow: hidden;
             animation: slideInToast 0.35s ease;
         }
 
         .toast-icon {
             flex-shrink: 0;
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
-            background: #f8f9fa;
+            font-size: 19px;
+            background: #f8fafc;
         }
 
         .toast-content {
@@ -149,15 +604,15 @@
         }
 
         .toast-title {
-            font-size: 0.95rem;
-            font-weight: 700;
-            margin-bottom: 3px;
-            color: #212529;
+            font-size: 0.96rem;
+            font-weight: 900;
+            margin-bottom: 4px;
+            color: #111827;
         }
 
         .toast-message {
             font-size: 0.92rem;
-            color: #495057;
+            color: #475569;
             line-height: 1.45;
             word-break: break-word;
         }
@@ -165,18 +620,12 @@
         .toast-close {
             border: none;
             background: transparent;
-            color: #6c757d;
+            color: #94a3b8;
             font-size: 24px;
             line-height: 1;
             cursor: pointer;
             padding: 0;
             margin-left: 4px;
-            transition: 0.2s ease;
-        }
-
-        .toast-close:hover {
-            color: #212529;
-            transform: scale(1.08);
         }
 
         .toast-progress {
@@ -189,56 +638,59 @@
             animation: toastProgress 5s linear forwards;
         }
 
-        .toast-success {
-            border-left: 5px solid #198754;
-        }
+        .toast-success { border-left: 5px solid var(--success); }
+        .toast-success .toast-icon { background: rgba(22,163,74,0.12); }
+        .toast-success .toast-progress { background: var(--success); }
 
-        .toast-success .toast-icon {
-            background: rgba(25, 135, 84, 0.12);
-        }
+        .toast-danger { border-left: 5px solid var(--danger); }
+        .toast-danger .toast-icon { background: rgba(220,38,38,0.12); }
+        .toast-danger .toast-progress { background: var(--danger); }
 
-        .toast-success .toast-progress {
-            background: #198754;
-        }
+        .toast-warning { border-left: 5px solid var(--warning); }
+        .toast-warning .toast-icon { background: rgba(245,158,11,0.16); }
+        .toast-warning .toast-progress { background: var(--warning); }
 
-        .toast-danger {
-            border-left: 5px solid #dc3545;
-        }
-
-        .toast-danger .toast-icon {
-            background: rgba(220, 53, 69, 0.12);
-        }
-
-        .toast-danger .toast-progress {
-            background: #dc3545;
-        }
-
-        .toast-warning {
-            border-left: 5px solid #ffc107;
-        }
-
-        .toast-warning .toast-icon {
-            background: rgba(255, 193, 7, 0.18);
-        }
-
-        .toast-warning .toast-progress {
-            background: #ffc107;
-        }
-
-        .toast-primary {
-            border-left: 5px solid #0d6efd;
-        }
-
-        .toast-primary .toast-icon {
-            background: rgba(13, 110, 253, 0.12);
-        }
-
-        .toast-primary .toast-progress {
-            background: #0d6efd;
-        }
+        .toast-primary { border-left: 5px solid var(--primary); }
+        .toast-primary .toast-icon { background: rgba(37,99,235,0.12); }
+        .toast-primary .toast-progress { background: var(--primary); }
 
         .toast-hide {
             animation: slideOutToast 0.28s ease forwards;
+        }
+
+        .modal-content {
+            border: 0;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+        }
+
+        .modal-info-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .modal-info-item {
+            border: 1px solid #edf2f7;
+            background: #fbfdff;
+            border-radius: 16px;
+            padding: 14px 16px;
+        }
+
+        .modal-info-label {
+            color: var(--muted);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .modal-info-value {
+            color: #111827;
+            font-size: 0.97rem;
+            font-weight: 800;
+            word-break: break-word;
         }
 
         @keyframes slideInToast {
@@ -259,20 +711,26 @@
             }
             to {
                 opacity: 0;
-                transform: translateX(30px) scale(0.96);
+                transform: translateX(28px) scale(0.97);
             }
         }
 
         @keyframes toastProgress {
-            from {
-                transform: scaleX(1);
-            }
-            to {
-                transform: scaleX(0);
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+
+        @media (max-width: 991px) {
+            .name-main {
+                max-width: 180px;
             }
         }
 
         @media (max-width: 576px) {
+            .hero {
+                border-radius: 24px;
+            }
+
             .toast-container-custom {
                 top: 12px;
                 right: 12px;
@@ -280,9 +738,23 @@
                 width: auto;
             }
 
-            .toast-custom {
-                padding: 14px 16px;
-                border-radius: 14px;
+            .metric-value {
+                font-size: 1.7rem;
+            }
+
+            .table-toolbar,
+            .pagination-shell {
+                align-items: stretch;
+            }
+
+            .hero-actions .btn,
+            .hero-actions .btn-hero-light,
+            .hero-actions .btn-hero-ghost {
+                width: 100%;
+            }
+
+            .hero-summary-card {
+                padding: 18px;
             }
         }
     </style>
@@ -296,9 +768,9 @@
                 <div class="toast-custom toast-{{ categoria }}">
                     <div class="toast-icon">
                         {% if categoria == "success" %}✅{% endif %}
-                        {% if categoria == "danger" %}🗑️{% endif %}
+                        {% if categoria == "danger" %}❌{% endif %}
                         {% if categoria == "warning" %}⚠️{% endif %}
-                        {% if categoria == "primary" %}✏️{% endif %}
+                        {% if categoria == "primary" %}🔎{% endif %}
                         {% if categoria not in ["success", "danger", "warning", "primary"] %}ℹ️{% endif %}
                     </div>
 
@@ -307,7 +779,7 @@
                             {% if categoria == "success" %}Operação realizada{% endif %}
                             {% if categoria == "danger" %}Algo deu errado{% endif %}
                             {% if categoria == "warning" %}Atenção{% endif %}
-                            {% if categoria == "primary" %}Atualização{% endif %}
+                            {% if categoria == "primary" %}Resultado do filtro{% endif %}
                             {% if categoria not in ["success", "danger", "warning", "primary"] %}Aviso{% endif %}
                         </div>
                         <div class="toast-message">{{ mensagem }}</div>
@@ -321,123 +793,263 @@
     {% endwith %}
 </div>
 
-<div class="container py-4">
+<div class="container-fluid page-shell py-4 py-lg-5">
 
-    <div class="mb-4 titulo-sistema">
-        <h2 class="fw-bold mb-1">📊 Sistema de Empresas</h2>
-        <p class="mb-0">Gerencie pessoas e empresas com mais organização.</p>
-    </div>
+    <div class="hero p-4 p-lg-5 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-8">
+                <div class="hero-badge mb-3">📊 Painel de gestão • versão premium</div>
+                <h1 class="hero-title mb-3">Sistema de Empresas</h1>
+                <p class="hero-subtitle mb-4">
+                    Gerencie cadastros com visual profissional, filtros inteligentes, ações rápidas, importação de planilhas e organização de alto nível.
+                </p>
 
-    <div class="card shadow-sm border-0 rounded-4 p-4 mb-4">
-        <h5 class="mb-3">🔎 Filtros</h5>
-
-        <form method="GET" class="row g-3">
-            <div class="col-md-6">
-                <input type="text" name="busca" class="form-control" placeholder="Buscar..." value="{{ busca }}">
+                <div class="hero-actions">
+                    <button type="button" class="btn-hero-light" onclick="rolarParaCadastro()">➕ Novo cadastro</button>
+                    <a href="/export" class="btn-hero-ghost">📥 Exportar Excel</a>
+                    <button type="button" class="btn-hero-ghost" onclick="rolarParaTabela()">📋 Ver registros</button>
+                </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-lg-4">
+                <div class="hero-summary-card h-100">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3 flex-wrap">
+                        <div>
+                            <div class="hero-summary-title">Resumo rápido</div>
+                            <div class="hero-summary-subtitle">Visão geral do ambiente atual.</div>
+                        </div>
+                        <div class="hero-summary-live">Ao vivo</div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="hero-mini-card">
+                                <div class="hero-mini-label">Total</div>
+                                <p class="hero-mini-value">{{ resumo.total_registros }}</p>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="hero-mini-card">
+                                <div class="hero-mini-label">Filtrados</div>
+                                <p class="hero-mini-value">{{ resumo.total_filtrado }}</p>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="hero-mini-card">
+                                <div class="hero-mini-label">Pessoas</div>
+                                <p class="hero-mini-value sm">{{ resumo.total_pessoas }}</p>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="hero-mini-card">
+                                <div class="hero-mini-label">Empresas</div>
+                                <p class="hero-mini-value sm">{{ resumo.total_empresas }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="solid-card metric-card">
+                <div class="metric-icon total">📁</div>
+                <div class="metric-label">Total de registros</div>
+                <p class="metric-value">{{ resumo.total_registros }}</p>
+                <p class="metric-foot">Base completa do sistema.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="solid-card metric-card">
+                <div class="metric-icon pessoas">👤</div>
+                <div class="metric-label">Pessoas</div>
+                <p class="metric-value">{{ resumo.total_pessoas }}</p>
+                <p class="metric-foot">Cadastros com CPF.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="solid-card metric-card">
+                <div class="metric-icon empresas">🏢</div>
+                <div class="metric-label">Empresas</div>
+                <p class="metric-value">{{ resumo.total_empresas }}</p>
+                <p class="metric-foot">Cadastros com CNPJ.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="solid-card metric-card">
+                <div class="metric-icon resultados">🔎</div>
+                <div class="metric-label">Resultados atuais</div>
+                <p class="metric-value">{{ resumo.total_filtrado }}</p>
+                <p class="metric-foot">Após filtros e ordenação.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="solid-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+            <div>
+                <h2 class="section-title">🔎 Filtros e ordenação</h2>
+                <p class="section-subtitle">Localize registros por texto, tipo e ordem de exibição.</p>
+            </div>
+
+            {% if busca or tipo %}
+                <div class="section-chip">🎯 Filtro ativo</div>
+            {% endif %}
+        </div>
+
+        <form method="GET" class="row g-3">
+            <div class="col-lg-4">
+                <input type="text" name="busca" class="form-control" placeholder="Buscar por nome, documento, cidade..." value="{{ busca }}">
+            </div>
+
+            <div class="col-lg-2">
                 <select name="tipo" class="form-select">
                     <option value="">Todos</option>
-                    <option value="pessoa" {% if tipo =="pessoa" %}selected{% endif %}>Pessoa</option>
-                    <option value="empresa" {% if tipo =="empresa" %}selected{% endif %}>Empresa</option>
+                    <option value="pessoa" {% if tipo == "pessoa" %}selected{% endif %}>Pessoa</option>
+                    <option value="empresa" {% if tipo == "empresa" %}selected{% endif %}>Empresa</option>
                 </select>
             </div>
 
-            <div class="col-md-3 d-flex gap-2">
+            <div class="col-lg-3">
+                <select name="ordem" class="form-select">
+                    <option value="id_desc" {% if ordem == "id_desc" %}selected{% endif %}>Mais recentes primeiro</option>
+                    <option value="id_asc" {% if ordem == "id_asc" %}selected{% endif %}>ID crescente</option>
+                    <option value="nome_asc" {% if ordem == "nome_asc" %}selected{% endif %}>Nome A-Z</option>
+                    <option value="nome_desc" {% if ordem == "nome_desc" %}selected{% endif %}>Nome Z-A</option>
+                    <option value="cidade_asc" {% if ordem == "cidade_asc" %}selected{% endif %}>Cidade A-Z</option>
+                    <option value="cidade_desc" {% if ordem == "cidade_desc" %}selected{% endif %}>Cidade Z-A</option>
+                </select>
+            </div>
+
+            <div class="col-lg-3 d-flex gap-2">
                 <button class="btn btn-primary w-100">🔎 Buscar</button>
-                <a href="/" class="btn btn-outline-secondary w-100">🧹 Limpar</a>
+                <a href="/" class="btn btn-soft w-100">🧹 Limpar</a>
             </div>
         </form>
+
+        {% if busca or tipo %}
+            <div class="mt-3 small text-secondary">
+                <strong>Filtro atual:</strong>
+                {% if busca %} Busca = "{{ busca }}" {% endif %}
+                {% if busca and tipo %} | {% endif %}
+                {% if tipo %} Tipo = "{{ tipo|capitalize }}" {% endif %}
+            </div>
+        {% endif %}
     </div>
 
-    <div class="card shadow-sm border-0 rounded-4 p-4 mb-4">
-        <h5 class="mb-3">👤 Adicionar Empresa/Pessoa</h5>
-
-        <form method="POST" action="/add" id="formCadastro">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <input type="text" name="nome" id="nome" class="form-control" placeholder="Nome" required>
+    <div class="register-card solid-card mb-4" id="blocoCadastro">
+        <div class="register-header">
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                <div>
+                    <h2 class="section-title">👤 Adicionar empresa ou pessoa</h2>
+                    <p class="section-subtitle">Cadastro rápido com preenchimento elegante e consulta automática de CEP.</p>
                 </div>
-
-                <div class="col-md-3">
-                    <input type="text" name="cpf_cnpj" id="cpf_cnpj" class="form-control" placeholder="CPF/CNPJ" oninput="formatarCpfCnpj(this)" required>
-                </div>
-
-                <div class="col-md-3">
-                    <input type="text" name="celular" id="celular" class="form-control" placeholder="Celular" oninput="formatarCelular(this)">
-                </div>
-
-
+                <div class="section-chip">Preenchimento inteligente</div>
             </div>
+        </div>
 
-            <div class="row g-3 mt-1">
-                <div class="col-md-2">
-                    <input type="text" name="cep" id="cep" class="form-control" placeholder="CEP" maxlength="9">
+        <div class="register-body">
+            <form method="POST" action="/add" id="formCadastro" class="quick-form">
+                <div class="row g-3">
+                    <div class="col-xl-4">
+                        <input type="text" name="nome" id="nome" class="form-control" placeholder="Nome" required>
+                    </div>
+
+                    <div class="col-xl-3">
+                        <input type="text" name="cpf_cnpj" id="cpf_cnpj" class="form-control" placeholder="CPF/CNPJ" oninput="formatarCpfCnpj(this)" required>
+                    </div>
+
+                    <div class="col-xl-3">
+                        <input type="text" name="celular" id="celular" class="form-control" placeholder="Celular" oninput="formatarCelular(this)">
+                    </div>
+
+                    <div class="col-xl-2">
+                        <input type="text" name="cep" id="cep" class="form-control" placeholder="CEP" maxlength="9">
+                    </div>
+
+                    <div class="col-xl-4">
+                        <input type="text" name="endereco" id="endereco" class="form-control" placeholder="Endereço">
+                    </div>
+
+                    <div class="col-xl-2">
+                        <input type="text" name="numero" id="numero" class="form-control" placeholder="Número">
+                    </div>
+
+                    <div class="col-xl-1">
+                        <input type="text" name="uf" id="uf" class="form-control text-uppercase" placeholder="UF" maxlength="2">
+                    </div>
+
+                    <div class="col-xl-3">
+                        <input type="text" name="cidade" id="cidade" class="form-control" placeholder="Cidade">
+                    </div>
+
+                    <div class="col-xl-2">
+                        <input type="text" name="bairro" id="bairro" class="form-control" placeholder="Bairro">
+                    </div>
                 </div>
 
-                <div class="col-md-4">
-                    <input type="text" name="endereco" id="endereco" class="form-control" placeholder="Endereço">
+                <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mt-4">
+                    <div class="small text-secondary">
+                        Revise os dados antes de confirmar o envio.
+                    </div>
+
+                    <button type="button" class="btn btn-success px-4" onclick="abrirModalCadastro()">
+                        ➕ Salvar cadastro
+                    </button>
                 </div>
-
-                <div class="col-md-2">
-                    <input type="text" name="numero" id="numero" class="form-control" placeholder="Número">
-                </div>
-
-                <div class="col-md-1">
-                    <input type="text" name="uf" id="uf" class="form-control" placeholder="UF" maxlength="2">
-                </div>
-
-                <div class="col-md-3">
-                    <input type="text" name="cidade" id="cidade" class="form-control" placeholder="Cidade">
-                </div>
-
-                <div class="col-md-4">
-                    <input type="text" name="bairro" id="bairro" class="form-control" placeholder="Bairro">
-                </div>
-            </div>
-
-            <button type="button" class="btn btn-success mt-4 px-4" onclick="abrirModalCadastro()">
-                ➕ Salvar cadastro
-            </button>
-        </form>
-    </div>
-
-    <div class="card shadow-sm border-0 rounded-4 p-4 mb-4">
-        <h5 class="mb-3">📂 Importação e Exportação</h5>
-
-        <div class="d-flex flex-wrap gap-3 align-items-center">
-            <a href="/export" class="btn btn-outline-secondary px-3">📥 Exportar Excel</a>
-
-            <form action="/import" method="POST" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-center m-0">
-                <input type="file" name="file" class="form-control" accept=".xlsx" required style="min-width: 300px;">
-                <button class="btn btn-warning px-3">📤 Importar</button>
             </form>
         </div>
     </div>
 
-    <div class="card shadow-sm border-0 rounded-4 p-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div class="solid-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
             <div>
-                <h5 class="mb-1 fw-semibold">📋 Registros cadastrados</h5>
-                <p class="text-muted mb-0 small">Selecione um ou mais registros para gerenciar em lote.</p>
+                <h2 class="section-title">📂 Importação e exportação</h2>
+                <p class="section-subtitle">Importe uma ou várias planilhas .xlsx e exporte a base atual com um clique.</p>
+            </div>
+            <div class="section-chip">Planilhas múltiplas</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+            <a href="/export" class="btn btn-outline-secondary">📥 Exportar Excel</a>
+
+            <form action="/import" method="POST" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-center m-0">
+                <input type="file" name="file" class="form-control" accept=".xlsx" multiple required style="min-width: 320px;">
+                <button class="btn btn-warning">📤 Importar planilhas</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="solid-card p-4 table-shell" id="blocoTabela">
+        <div class="table-toolbar">
+            <div>
+                <h2 class="section-title">📋 Registros cadastrados</h2>
+                <p class="section-subtitle">Visualize, selecione, edite e exclua registros com controle refinado.</p>
             </div>
 
-            <button type="button" class="btn btn-danger px-3 fw-semibold" onclick="abrirModalExcluirSelecionados()">
+            <button type="button" class="btn btn-danger" onclick="abrirModalExcluirSelecionados()">
                 🗑 Excluir selecionados
             </button>
         </div>
 
-        <div class="barra-acoes-lote mb-3">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div class="bulk-bar mb-3">
+            <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
                 <div class="form-check m-0">
                     <input class="form-check-input" type="checkbox" id="selecionarTodos">
-                    <label class="form-check-label fw-medium" for="selecionarTodos">
-                        Selecionar todos
+                    <label class="form-check-label fw-semibold" for="selecionarTodos">
+                        Selecionar todos da página
                     </label>
                 </div>
 
-                <div class="text-muted small">
+                <div class="small text-secondary">
                     <span id="contadorSelecionados">0</span> registro(s) selecionado(s)
                 </div>
             </div>
@@ -445,18 +1057,18 @@
 
         <form method="POST" action="/delete_selected" id="formExcluirSelecionados">
             <div class="table-responsive">
-                <table class="table tabela-registros align-middle mb-0">
+                <table class="table tabela-registros align-middle">
                     <thead>
                         <tr>
-                            <th class="col-check text-center">
+                            <th class="text-center" style="width: 56px;">
                                 <input type="checkbox" id="selecionarTodosTopo">
                             </th>
-                            <th>ID</th>
+                            <th style="width: 90px;">ID</th>
                             <th>Nome</th>
                             <th>CPF/CNPJ</th>
                             <th>Celular</th>
                             <th>Cidade</th>
-                            <th class="text-center col-acoes">Ações</th>
+                            <th class="text-center" style="width: 280px;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -466,18 +1078,41 @@
                                 <td class="text-center">
                                     <input type="checkbox" name="ids" value="{{ d['ID'] }}" class="checkbox-item">
                                 </td>
-                                <td class="fw-semibold text-secondary">{{ d["ID"] }}</td>
-                                <td class="fw-medium">{{ d["Nome"] }}</td>
-                                <td>{{ d["CPF/CNPJ"] }}</td>
-                                <td>{{ d["Celular"] }}</td>
-                                <td>{{ d["Cidade"] }}</td>
+
+                                <td>
+                                    <span class="id-pill">#{{ d["ID"] }}</span>
+                                </td>
+
+                                <td>
+                                    <div class="name-block">
+                                        <span class="name-main" title="{{ d['Nome'] }}">{{ d["Nome"] }}</span>
+                                        <span class="name-sub">Cadastro ativo no sistema</span>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="doc-pill">🧾 {{ d["CPF/CNPJ"] }}</span>
+                                </td>
+
+                                <td>{{ d["Celular"] or "-" }}</td>
+
+                                <td>
+                                    <span class="city-pill">📍 {{ d["Cidade"] or "-" }}</span>
+                                </td>
+
                                 <td class="text-center">
-                                    <div class="d-inline-flex gap-2 flex-wrap justify-content-center">
-                                        <a href="/edit/{{ d['ID'] }}" class="btn btn-sm btn-outline-primary btn-acao" title="Editar registro">
+                                    <div class="acoes-wrap">
+                                        <button type="button" class="btn btn-outline-dark btn-acao"
+                                                onclick='abrirModalVisualizar({{ d|tojson }})'>
+                                            👁 Visualizar
+                                        </button>
+
+                                        <a href="/edit/{{ d['ID'] }}" class="btn btn-outline-primary btn-acao">
                                             ✏️ Editar
                                         </a>
 
-                                        <a href="#" class="btn btn-sm btn-outline-danger btn-acao" title="Excluir registro"
+                                        <a href="#"
+                                           class="btn btn-outline-danger btn-acao"
                                            onclick='abrirModalExcluir("/delete/{{ d["ID"] }}", {{ d["Nome"]|tojson }})'>
                                             🗑 Excluir
                                         </a>
@@ -487,100 +1122,238 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-5">Nenhum registro encontrado.</td>
+                                <td colspan="7">
+                                    <div class="empty-state">
+                                        <div class="empty-icon">🔍</div>
+                                        <h3 class="empty-title">Nenhum registro encontrado</h3>
+                                        <p class="empty-text">Tente ajustar os filtros aplicados ou adicione um novo cadastro para começar a preencher a base.</p>
+                                    </div>
+                                </td>
                             </tr>
                         {% endif %}
                     </tbody>
                 </table>
             </div>
         </form>
-    </div>
 
-</div>
-
-<div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header bg-danger text-white rounded-top-4">
-                <h5 class="modal-title" id="modalExcluirLabel">Confirmar exclusão</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        <div class="pagination-shell">
+            <div class="page-meta">
+                Exibindo página <strong>{{ pagina }}</strong> de <strong>{{ total_paginas }}</strong> —
+                <strong>{{ total_resultados }}</strong> resultado(s) no total
             </div>
 
-            <div class="modal-body">
+            <nav>
+                <ul class="pagination mb-0">
+                    <li class="page-item {% if pagina <= 1 %}disabled{% endif %}">
+                        <a class="page-link" href="/?busca={{ busca }}&tipo={{ tipo }}&ordem={{ ordem }}&pagina={{ pagina - 1 }}">Anterior</a>
+                    </li>
+
+                    {% for p in range(1, total_paginas + 1) %}
+                        {% if p >= pagina - 2 and p <= pagina + 2 %}
+                            <li class="page-item {% if p == pagina %}active{% endif %}">
+                                <a class="page-link" href="/?busca={{ busca }}&tipo={{ tipo }}&ordem={{ ordem }}&pagina={{ p }}">{{ p }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    <li class="page-item {% if pagina >= total_paginas %}disabled{% endif %}">
+                        <a class="page-link" href="/?busca={{ busca }}&tipo={{ tipo }}&ordem={{ ordem }}&pagina={{ pagina + 1 }}">Próxima</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalExcluir" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold">Confirmar exclusão</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body py-4">
                 <p class="mb-1"><strong>Tem certeza que deseja excluir este cadastro?</strong></p>
-                <p class="mb-1">Registro: <span id="nomeRegistroExcluir" class="fw-semibold"></span></p>
-                <p class="text-muted mb-0">Essa ação não poderá ser desfeita.</p>
+                <p class="mb-0 text-secondary">Registro: <span id="nomeRegistroExcluir" class="fw-bold"></span></p>
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Cancelar</button>
                 <a href="#" id="btnConfirmarExclusao" class="btn btn-danger">Sim, excluir</a>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalExcluirSelecionados" tabindex="-1" aria-labelledby="modalExcluirSelecionadosLabel" aria-hidden="true">
+<div class="modal fade" id="modalExcluirSelecionados" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header bg-danger text-white rounded-top-4">
-                <h5 class="modal-title" id="modalExcluirSelecionadosLabel">Excluir selecionados</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold">Excluir selecionados</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body">
-                <p class="mb-1"><strong>Tem certeza que deseja excluir os cadastros selecionados?</strong></p>
-                <p class="mb-1">Quantidade selecionada: <span id="qtdSelecionados" class="fw-semibold">0</span></p>
-                <p class="text-muted mb-0">Essa ação não poderá ser desfeita.</p>
+            <div class="modal-body py-4">
+                <p class="mb-1"><strong>Deseja excluir os registros selecionados?</strong></p>
+                <p class="mb-0 text-secondary">Quantidade: <span id="qtdSelecionados" class="fw-bold">0</span></p>
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-danger" onclick="confirmarExclusaoSelecionados()">Sim, excluir</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalCadastro" tabindex="-1" aria-labelledby="modalCadastroLabel" aria-hidden="true">
+<div class="modal fade" id="modalCadastro" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header bg-success text-white rounded-top-4">
-                <h5 class="modal-title" id="modalCadastroLabel">Confirmar cadastro</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold">Confirmar cadastro</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body">
+            <div class="modal-body py-4">
                 <p class="mb-1"><strong>Deseja realmente salvar este cadastro?</strong></p>
-                <p class="text-muted mb-0">Confira os dados antes de continuar.</p>
+                <p class="mb-0 text-secondary">Confira os dados antes de continuar.</p>
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-success" onclick="confirmarCadastro()">Sim, salvar</button>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<div class="modal fade" id="modalVisualizar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold">Detalhes do cadastro</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
 
+            <div class="modal-body p-4">
+                <div class="modal-info-grid">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="modal-info-item">
+                                <div class="modal-info-label">ID</div>
+                                <div class="modal-info-value" id="viewId">-</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="modal-info-item">
+                                <div class="modal-info-label">Nome</div>
+                                <div class="modal-info-value" id="viewNome">-</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="modal-info-item">
+                                <div class="modal-info-label">CPF/CNPJ</div>
+                                <div class="modal-info-value" id="viewDocumento">-</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="modal-info-item">
+                                <div class="modal-info-label">Celular</div>
+                                <div class="modal-info-value" id="viewCelular">-</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="modal-info-item">
+                                <div class="modal-info-label">CEP</div>
+                                <div class="modal-info-value" id="viewCep">-</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="modal-info-item">
+                                <div class="modal-info-label">Endereço</div>
+                                <div class="modal-info-value" id="viewEndereco">-</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="modal-info-item">
+                                <div class="modal-info-label">Número</div>
+                                <div class="modal-info-value" id="viewNumero">-</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="modal-info-item">
+                                <div class="modal-info-label">Bairro</div>
+                                <div class="modal-info-value" id="viewBairro">-</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="modal-info-item">
+                                <div class="modal-info-label">Cidade</div>
+                                <div class="modal-info-value" id="viewCidade">-</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-1">
+                            <div class="modal-info-item">
+                                <div class="modal-info-label">UF</div>
+                                <div class="modal-info-value" id="viewUf">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+function rolarParaCadastro() {
+    document.getElementById("blocoCadastro")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function rolarParaTabela() {
+    document.getElementById("blocoTabela")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function abrirModalExcluir(url, nome = "") {
     document.getElementById("btnConfirmarExclusao").href = url;
     document.getElementById("nomeRegistroExcluir").textContent = nome;
-
-    const modal = new bootstrap.Modal(document.getElementById("modalExcluir"));
-    modal.show();
+    new bootstrap.Modal(document.getElementById("modalExcluir")).show();
 }
 
 function abrirModalCadastro() {
-    const modal = new bootstrap.Modal(document.getElementById("modalCadastro"));
-    modal.show();
+    new bootstrap.Modal(document.getElementById("modalCadastro")).show();
 }
 
 function confirmarCadastro() {
     document.getElementById("formCadastro").submit();
+}
+
+function abrirModalVisualizar(dado) {
+    document.getElementById("viewId").textContent = dado["ID"] || "-";
+    document.getElementById("viewNome").textContent = dado["Nome"] || "-";
+    document.getElementById("viewDocumento").textContent = dado["CPF/CNPJ"] || "-";
+    document.getElementById("viewCelular").textContent = dado["Celular"] || "-";
+    document.getElementById("viewCep").textContent = dado["CEP"] || "-";
+    document.getElementById("viewEndereco").textContent = dado["Endereço"] || "-";
+    document.getElementById("viewNumero").textContent = dado["Número"] || "-";
+    document.getElementById("viewBairro").textContent = dado["Bairro"] || "-";
+    document.getElementById("viewCidade").textContent = dado["Cidade"] || "-";
+    document.getElementById("viewUf").textContent = dado["UF"] || "-";
+    new bootstrap.Modal(document.getElementById("modalVisualizar")).show();
 }
 
 function fecharToast(botao) {
@@ -590,12 +1363,8 @@ function fecharToast(botao) {
 
 function esconderToast(toast) {
     if (!toast || toast.classList.contains("toast-hide")) return;
-
     toast.classList.add("toast-hide");
-
-    setTimeout(() => {
-        toast.remove();
-    }, 280);
+    setTimeout(() => toast.remove(), 280);
 }
 
 function apenasNumeros(valor) {
@@ -645,27 +1414,19 @@ function atualizarLinhasSelecionadas() {
     getCheckboxes().forEach(checkbox => {
         const linha = checkbox.closest("tr");
         if (!linha) return;
-
-        if (checkbox.checked) {
-            linha.classList.add("linha-selecionada");
-        } else {
-            linha.classList.remove("linha-selecionada");
-        }
+        linha.classList.toggle("linha-selecionada", checkbox.checked);
     });
 }
 
 function atualizarContadorSelecionados() {
     const contador = document.getElementById("contadorSelecionados");
-    if (contador) {
-        contador.textContent = getMarcados().length;
-    }
+    if (contador) contador.textContent = getMarcados().length;
 }
 
 function atualizarEstadoSelecionarTodos() {
     const checkboxes = getCheckboxes();
     const total = checkboxes.length;
     const marcados = getMarcados().length;
-
     const selecionarTodos = document.getElementById("selecionarTodos");
     const selecionarTodosTopo = document.getElementById("selecionarTodosTopo");
 
@@ -705,21 +1466,52 @@ function marcarTodos(valor) {
     getCheckboxes().forEach(checkbox => {
         checkbox.checked = valor;
     });
-
     atualizarEstadoSelecionarTodos();
+}
+
+function mostrarToastLocal(mensagem, categoria = "warning") {
+    const container = document.querySelector(".toast-container-custom");
+    if (!container) return;
+
+    const titulos = {
+        success: "Operação realizada",
+        danger: "Algo deu errado",
+        warning: "Atenção",
+        primary: "Aviso"
+    };
+
+    const icones = {
+        success: "✅",
+        danger: "❌",
+        warning: "⚠️",
+        primary: "ℹ️"
+    };
+
+    const toast = document.createElement("div");
+    toast.className = `toast-custom toast-${categoria}`;
+    toast.innerHTML = `
+        <div class="toast-icon">${icones[categoria] || "ℹ️"}</div>
+        <div class="toast-content">
+            <div class="toast-title">${titulos[categoria] || "Aviso"}</div>
+            <div class="toast-message">${mensagem}</div>
+        </div>
+        <button type="button" class="toast-close" onclick="fecharToast(this)">×</button>
+        <div class="toast-progress"></div>
+    `;
+    container.appendChild(toast);
+
+    setTimeout(() => esconderToast(toast), 5000);
 }
 
 function abrirModalExcluirSelecionados() {
     const qtd = getMarcados().length;
-
     if (qtd === 0) {
-        alert("Selecione pelo menos um cadastro para excluir.");
+        mostrarToastLocal("Selecione pelo menos um cadastro para excluir.", "warning");
         return;
     }
 
     document.getElementById("qtdSelecionados").textContent = qtd;
-    const modal = new bootstrap.Modal(document.getElementById("modalExcluirSelecionados"));
-    modal.show();
+    new bootstrap.Modal(document.getElementById("modalExcluirSelecionados")).show();
 }
 
 function confirmarExclusaoSelecionados() {
@@ -730,17 +1522,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const selecionarTodos = document.getElementById("selecionarTodos");
     const selecionarTodosTopo = document.getElementById("selecionarTodosTopo");
 
-    if (selecionarTodos) {
-        selecionarTodos.addEventListener("change", function () {
-            marcarTodos(this.checked);
-        });
-    }
+    selecionarTodos?.addEventListener("change", function () {
+        marcarTodos(this.checked);
+    });
 
-    if (selecionarTodosTopo) {
-        selecionarTodosTopo.addEventListener("change", function () {
-            marcarTodos(this.checked);
-        });
-    }
+    selecionarTodosTopo?.addEventListener("change", function () {
+        marcarTodos(this.checked);
+    });
 
     document.addEventListener("change", function (e) {
         if (e.target.classList.contains("checkbox-item")) {
@@ -748,12 +1536,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    const toasts = document.querySelectorAll(".toast-custom");
-    toasts.forEach((toast, index) => {
-        const tempo = 5000 + (index * 200);
-        setTimeout(() => {
-            esconderToast(toast);
-        }, tempo);
+    document.querySelectorAll(".toast-custom").forEach((toast, index) => {
+        setTimeout(() => esconderToast(toast), 5000 + (index * 220));
     });
 
     atualizarEstadoSelecionarTodos();
@@ -764,23 +1548,20 @@ document.addEventListener("DOMContentLoaded", function () {
     const cidadeInput = document.getElementById("cidade");
     const ufInput = document.getElementById("uf");
 
+    ufInput?.addEventListener("input", function () {
+        this.value = this.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2);
+    });
+
     if (cepInput) {
         cepInput.addEventListener("input", function () {
             let valor = apenasNumeros(this.value).slice(0, 8);
-
-            if (valor.length > 5) {
-                valor = valor.slice(0, 5) + "-" + valor.slice(5);
-            }
-
+            if (valor.length > 5) valor = valor.slice(0, 5) + "-" + valor.slice(5);
             this.value = valor;
         });
 
         cepInput.addEventListener("blur", async function () {
             const cep = apenasNumeros(this.value);
-
-            if (cep.length !== 8) {
-                return;
-            }
+            if (cep.length !== 8) return;
 
             try {
                 enderecoInput.value = "Buscando...";
@@ -796,26 +1577,24 @@ document.addEventListener("DOMContentLoaded", function () {
                     bairroInput.value = "";
                     cidadeInput.value = "";
                     ufInput.value = "";
-                    alert("CEP não encontrado.");
+                    mostrarToastLocal("CEP não encontrado.", "warning");
                     return;
                 }
 
                 enderecoInput.value = dados.logradouro || "";
                 bairroInput.value = dados.bairro || "";
                 cidadeInput.value = dados.localidade || "";
-                ufInput.value = dados.uf || "";
+                ufInput.value = (dados.uf || "").toUpperCase();
             } catch (erro) {
                 enderecoInput.value = "";
                 bairroInput.value = "";
                 cidadeInput.value = "";
                 ufInput.value = "";
-                console.error("Erro ao consultar CEP:", erro);
-                alert("Erro ao buscar o CEP. Verifique sua conexão.");
+                mostrarToastLocal("Erro ao buscar o CEP. Verifique sua conexão.", "danger");
             }
         });
     }
 });
 </script>
-
 </body>
 </html>

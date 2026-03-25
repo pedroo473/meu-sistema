@@ -1,3 +1,8 @@
+from sqlalchemy import text
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask import Flask, render_template, request, redirect, send_file, flash, url_for
 import pandas as pd
 import os
@@ -9,6 +14,79 @@ from io import BytesIO
 
 app = Flask(__name__)
 app.secret_key = "fd1e6978886a5dd23d"
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:9876@localhost:5432/sistema_empresas"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+login_manager.login_message = "Faça login para acessar o sistema."
+login_manager.login_message_category = "warning"
+
+
+class Empresa(db.Model):
+    __tablename__ = "empresas"
+
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(200), nullable=False)
+    cpf_cnpj = db.Column(db.String(18), unique=True, nullable=False)
+    celular = db.Column(db.String(30))
+    uf = db.Column(db.String(2))
+    cidade = db.Column(db.String(120))
+    bairro = db.Column(db.String(120))
+    cep = db.Column(db.String(10))
+    endereco = db.Column(db.String(200))
+    numero = db.Column(db.String(50))
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Usuario(UserMixin, db.Model):
+    __tablename__ = "usuarios"
+
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    senha_hash = db.Column(db.String(255), nullable=False)
+    ativo = db.Column(db.Boolean, default=True, nullable=False)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def set_senha(self, senha):
+        self.senha_hash = generate_password_hash(senha)
+
+    def check_senha(self, senha):
+        return check_password_hash(self.senha_hash, senha)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(Usuario, int(user_id))
+
+
+def criar_admin_padrao():
+    email_admin = "admin@admin.com"
+    senha_admin = "123456"
+
+    usuario = Usuario.query.filter_by(email=email_admin).first()
+
+    if not usuario:
+        usuario = Usuario(
+            nome="Administrador",
+            email=email_admin,
+            ativo=True
+        )
+        usuario.set_senha(senha_admin)
+
+        db.session.add(usuario)
+        db.session.commit()
+
+        print("✅ Admin criado com sucesso")
+        print("Login:", email_admin)
+        print("Senha:", senha_admin)
 
 ARQUIVO = "empresas.xlsx"
 PASTA_BACKUP = "backups"
@@ -134,6 +212,50 @@ def criar_backup(motivo="alteracao"):
     except Exception:
         return None
 
+    def resetar_sequence_empresas_se_vazio():
+        total = db.session.query(Empresa).count()
+
+        if total == 0:
+            db.session.execute(
+                text("SELECT setval(pg_get_serial_sequence('empresas', 'id'), 1, false)")
+            )
+            db.session.commit()
+
+# FUNÇÕES BANCO DE DADOS
+
+def empresa_para_dict(empresa):
+    return {
+        "ID": str(empresa.id),
+        "Nome": empresa.nome or "",
+        "CPF/CNPJ": formatar_documento(empresa.cpf_cnpj),
+        "Celular": formatar_celular(empresa.celular),
+        "UF": empresa.uf or "",
+        "Cidade": empresa.cidade or "",
+        "Bairro": empresa.bairro or "",
+        "CEP": formatar_cep(empresa.cep),
+        "Endereço": empresa.endereco or "",
+        "Número": empresa.numero or "",
+    }
+
+
+def listar_empresas_db():
+    empresas = Empresa.query.order_by(Empresa.id.desc()).all()
+    dados = [empresa_para_dict(emp) for emp in empresas]
+    return pd.DataFrame(dados, columns=COLUNAS)
+
+
+def buscar_empresa_db(id_registro):
+    return db.session.get(Empresa, id_registro)
+
+
+def documento_ja_existe_db(documento, ignorar_id=None):
+    doc = formatar_documento(documento)
+
+    query = Empresa.query.filter_by(cpf_cnpj=doc)
+    if ignorar_id is not None:
+        query = query.filter(Empresa.id != ignorar_id)
+
+    return db.session.query(query.exists()).scalar()
 
 # =========================================================
 # FORMATAÇÃO
@@ -550,7 +672,7 @@ def valor_coluna(linha, coluna):
     return linha.get(coluna, "")
 
 
-def importar_dataframe(df_origem, df_atual, proximo_codigo):
+def importar_dataframe(df_origem, df_atual, proximo_codigo=None):
     df_origem = normalizar_dataframe(df_origem)
 
     importados = []
@@ -584,21 +706,19 @@ def importar_dataframe(df_origem, df_atual, proximo_codigo):
             continue
 
         registro = {
-            "ID": str(proximo_codigo),
-            "Nome": nome,
-            "CPF/CNPJ": documento,
-            "Celular": celular,
-            "UF": uf,
-            "Cidade": cidade,
-            "Bairro": bairro,
-            "CEP": cep,
-            "Endereço": endereco,
-            "Número": numero,
+            "Nome": nome[:200],
+            "CPF/CNPJ": documento[:18],
+            "Celular": celular[:30],
+            "UF": uf[:2],
+            "Cidade": cidade[:120],
+            "Bairro": bairro[:120],
+            "CEP": cep[:10],
+            "Endereço": endereco[:200],
+            "Número": numero[:50],
         }
 
         importados.append(registro)
         docs_existentes.add(doc_limpo)
-        proximo_codigo += 1
 
     return importados, ignorados, proximo_codigo
 
@@ -607,9 +727,44 @@ def importar_dataframe(df_origem, df_atual, proximo_codigo):
 # ROTAS
 # =========================================================
 
+# =========================================================
+# ROTAS
+# =========================================================
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+        email = limpar_texto(request.form.get("email")).lower()
+        senha = request.form.get("senha", "")
+
+        usuario = Usuario.query.filter_by(email=email, ativo=True).first()
+
+        if not usuario or not usuario.check_senha(senha):
+            flash("E-mail ou senha inválidos.", "danger")
+            return render_template("login.html")
+
+        login_user(usuario)
+        flash(f"Bem-vindo, {usuario.nome}!", "success")
+        return redirect(url_for("index"))
+
+    return render_template("login.html")
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("Você saiu do sistema com sucesso.", "success")
+    return redirect(url_for("login"))
+
+
 @app.route("/")
+@login_required
 def index():
-    df = ler_dados()
+    df = listar_empresas_db()
 
     busca = limpar_texto(request.args.get("busca", ""))
     tipo = limpar_texto(request.args.get("tipo", "")).lower()
@@ -621,6 +776,16 @@ def index():
     df_ordenado = aplicar_ordenacao(df_filtrado, ordem=ordem)
     paginacao = paginar_dataframe(df_ordenado, pagina=pagina, por_pagina=10)
 
+    mensagem_filtro = ""
+    categoria_filtro = "primary"
+
+    if tipo == "pessoa":
+        mensagem_filtro = f"Filtro aplicado: exibindo somente pessoas ({len(df_filtrado)} resultado(s))."
+    elif tipo == "empresa":
+        mensagem_filtro = f"Filtro aplicado: exibindo somente empresas ({len(df_filtrado)} resultado(s))."
+    elif busca:
+        mensagem_filtro = f"Busca aplicada: {len(df_filtrado)} resultado(s) encontrado(s) para '{busca}'."
+
     return render_template(
         "index.html",
         dados=paginacao["dados"],
@@ -631,47 +796,69 @@ def index():
         pagina=paginacao["pagina"],
         total_paginas=paginacao["total_paginas"],
         total_resultados=paginacao["total_resultados"],
+        mensagem_filtro=mensagem_filtro,
+        categoria_filtro=categoria_filtro,
     )
 
 
 @app.route("/add", methods=["POST"])
+@login_required
 def add():
-    df = ler_dados()
     novo = montar_registro_form(request.form)
-    novo["ID"] = str(proximo_id(df))
 
-    erros = lista_erros_registro(df, novo)
+    erros = validar_campos_obrigatorios(novo["Nome"], novo["CPF/CNPJ"])
+
+    if documento_ja_existe_db(novo["CPF/CNPJ"]):
+        erros.append("Já existe outro cadastro com este CPF/CNPJ.")
 
     if erros:
         for erro in erros:
             flash(erro, "danger")
         return redirect(url_for("index"))
 
-    df = pd.concat([df, pd.DataFrame([novo])], ignore_index=True)
-    salvar_dados(df, motivo_backup="add")
+    try:
+        empresa = Empresa(
+            nome=novo["Nome"],
+            cpf_cnpj=novo["CPF/CNPJ"],
+            celular=novo["Celular"],
+            uf=novo["UF"],
+            cidade=novo["Cidade"],
+            bairro=novo["Bairro"],
+            cep=novo["CEP"],
+            endereco=novo["Endereço"],
+            numero=novo["Número"],
+        )
 
-    registrar_auditoria(
-        "cadastro_adicionado",
-        {
-            "id": novo["ID"],
-            "nome": novo["Nome"],
-            "documento": novo["CPF/CNPJ"],
-        },
-    )
+        db.session.add(empresa)
+        db.session.commit()
 
-    flash("Cadastro salvo com sucesso.", "success")
+        registrar_auditoria(
+            "cadastro_adicionado",
+            {
+                "id": empresa.id,
+                "nome": empresa.nome,
+                "documento": empresa.cpf_cnpj,
+            },
+        )
+
+        flash("Cadastro salvo com sucesso.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao salvar cadastro: {str(e)}", "danger")
+
     return redirect(url_for("index"))
 
 
 @app.route("/edit/<int:id>")
+@login_required
 def edit(id):
-    df = ler_dados()
-    idx, registro = buscar_por_id(df, id)
+    empresa = buscar_empresa_db(id)
 
-    if registro is None:
+    if not empresa:
         flash("Cadastro não encontrado.", "danger")
         return redirect(url_for("index"))
 
+    registro = empresa_para_dict(empresa)
     registro["tipo"] = tipo_documento(registro["CPF/CNPJ"])
     registro["documento_numerico"] = apenas_numeros(registro["CPF/CNPJ"])
     registro["celular_numerico"] = apenas_numeros(registro["Celular"])
@@ -682,102 +869,114 @@ def edit(id):
 
 
 @app.route("/update/<int:id>", methods=["POST"])
+@login_required
 def update(id):
-    df = ler_dados()
-    idx, atual = buscar_por_id(df, id)
+    empresa = buscar_empresa_db(id)
 
-    if atual is None:
+    if not empresa:
         flash("Cadastro não encontrado.", "danger")
         return redirect(url_for("index"))
 
     atualizado = montar_registro_form(request.form, id_existente=id)
-    erros = lista_erros_registro(df, atualizado, ignorar_id=id)
+    erros = validar_campos_obrigatorios(atualizado["Nome"], atualizado["CPF/CNPJ"])
+
+    if documento_ja_existe_db(atualizado["CPF/CNPJ"], ignorar_id=id):
+        erros.append("Já existe outro cadastro com este CPF/CNPJ.")
 
     if erros:
         for erro in erros:
             flash(erro, "danger")
         return redirect(url_for("edit", id=id))
 
-    for coluna in COLUNAS:
-        df.at[idx, coluna] = atualizado[coluna]
+    antes = empresa_para_dict(empresa)
 
-    salvar_dados(df, motivo_backup="update")
+    try:
+        empresa.nome = atualizado["Nome"]
+        empresa.cpf_cnpj = atualizado["CPF/CNPJ"]
+        empresa.celular = atualizado["Celular"]
+        empresa.uf = atualizado["UF"]
+        empresa.cidade = atualizado["Cidade"]
+        empresa.bairro = atualizado["Bairro"]
+        empresa.cep = atualizado["CEP"]
+        empresa.endereco = atualizado["Endereço"]
+        empresa.numero = atualizado["Número"]
 
-    registrar_auditoria(
-        "cadastro_editado",
-        {
-            "id": str(id),
-            "antes": atual,
-            "depois": atualizado,
-        },
-    )
+        db.session.commit()
 
-    flash("Cadastro atualizado com sucesso.", "success")
+        registrar_auditoria(
+            "cadastro_editado",
+            {
+                "id": str(id),
+                "antes": antes,
+                "depois": atualizado,
+            },
+        )
+
+        flash("Cadastro atualizado com sucesso.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao atualizar cadastro: {str(e)}", "danger")
+
     return redirect(url_for("index"))
 
 
 @app.route("/delete/<int:id>")
+@login_required
 def delete(id):
-    df = ler_dados()
-    idx, registro = buscar_por_id(df, id)
+    empresa = buscar_empresa_db(id)
 
-    if registro is None:
+    if not empresa:
         flash("Cadastro não encontrado.", "danger")
         return redirect(url_for("index"))
 
-    df = df[df["ID"].astype(str) != str(id)]
-    salvar_dados(df, motivo_backup="delete")
+    registro = empresa_para_dict(empresa)
 
-    registrar_auditoria(
-        "cadastro_excluido",
-        {
-            "id": str(id),
-            "nome": registro["Nome"],
-            "documento": registro["CPF/CNPJ"],
-        },
-    )
+    try:
+        db.session.delete(empresa)
+        db.session.commit()
 
-    flash("Cadastro excluído com sucesso.", "success")
+        resetar_sequence_empresas_se_vazio()
+
+        registrar_auditoria(
+            "cadastro_excluido",
+            {
+                "id": str(id),
+                "nome": registro["Nome"],
+                "documento": registro["CPF/CNPJ"],
+            },
+        )
+
+        flash("Cadastro excluído com sucesso.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao excluir cadastro: {str(e)}", "danger")
+
     return redirect(url_for("index"))
 
 
-@app.route("/delete_selected", methods=["POST"])
-def delete_selected():
-    ids = request.form.getlist("ids")
+@app.route("/delete_all", methods=["POST"])
+@login_required
+def delete_all():
+    try:
+        db.session.execute(text("TRUNCATE TABLE empresas RESTART IDENTITY CASCADE"))
+        db.session.commit()
 
-    if not ids:
-        flash("Selecione ao menos um cadastro para excluir.", "warning")
-        return redirect(url_for("index"))
+        registrar_auditoria(
+            "base_resetada",
+            {"acao": "todos os cadastros excluidos e ids reiniciados"}
+        )
 
-    df = ler_dados()
-    ids_set = {str(i) for i in ids}
+        flash("Todos os cadastros foram excluídos e os IDs foram reiniciados.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao limpar base: {str(e)}", "danger")
 
-    registros_excluidos = df[df["ID"].astype(str).isin(ids_set)].to_dict(orient="records")
-    qtd_excluir = len(registros_excluidos)
-
-    if qtd_excluir == 0:
-        flash("Nenhum cadastro válido foi encontrado para exclusão.", "warning")
-        return redirect(url_for("index"))
-
-    df = df[~df["ID"].astype(str).isin(ids_set)]
-    salvar_dados(df, motivo_backup="delete_selected")
-
-    registrar_auditoria(
-        "cadastros_excluidos_em_lote",
-        {
-            "quantidade": qtd_excluir,
-            "ids": list(ids_set),
-            "registros": registros_excluidos,
-        },
-    )
-
-    flash(f"{qtd_excluir} cadastro(s) excluído(s) com sucesso.", "success")
     return redirect(url_for("index"))
-
 
 @app.route("/export")
+@login_required
 def export():
-    df = ler_dados()
+    df = listar_empresas_db()
     output = BytesIO()
 
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
@@ -802,6 +1001,7 @@ def export():
 
 
 @app.route("/import", methods=["POST"])
+@login_required
 def importar():
     arquivos = request.files.getlist("file")
 
@@ -809,8 +1009,8 @@ def importar():
         flash("Selecione ao menos uma planilha .xlsx para importar.", "warning")
         return redirect(url_for("index"))
 
-    df_atual = ler_dados()
-    proximo_codigo = proximo_id(df_atual)
+    df_atual = listar_empresas_db()
+    proximo_codigo = None
 
     total_importados = 0
     total_ignorados = 0
@@ -832,10 +1032,14 @@ def importar():
             total_erros_arquivo += 1
             continue
 
+        base_temp = pd.concat(
+            [df_atual, pd.DataFrame(novos_registros)],
+            ignore_index=True
+        ) if novos_registros else df_atual
+
         importados, ignorados, proximo_codigo = importar_dataframe(
             df_importado,
-            pd.concat([df_atual, pd.DataFrame(novos_registros)], ignore_index=True)
-            if novos_registros else df_atual,
+            base_temp,
             proximo_codigo
         )
 
@@ -843,9 +1047,29 @@ def importar():
         total_importados += len(importados)
         total_ignorados += ignorados
 
-    if novos_registros:
-        df_final = pd.concat([df_atual, pd.DataFrame(novos_registros)], ignore_index=True)
-        salvar_dados(df_final, motivo_backup="import")
+    if not novos_registros:
+        flash(
+            f"Nenhum registro novo foi importado. Ignorados: {total_ignorados}. Arquivos com erro: {total_erros_arquivo}.",
+            "warning",
+        )
+        return redirect(url_for("index"))
+
+    try:
+        for registro in novos_registros:
+            empresa = Empresa(
+                nome=registro["Nome"],
+                cpf_cnpj=registro["CPF/CNPJ"],
+                celular=registro["Celular"],
+                uf=registro["UF"],
+                cidade=registro["Cidade"],
+                bairro=registro["Bairro"],
+                cep=registro["CEP"],
+                endereco=registro["Endereço"],
+                numero=registro["Número"],
+            )
+            db.session.add(empresa)
+
+        db.session.commit()
 
         registrar_auditoria(
             "importacao_realizada",
@@ -861,12 +1085,9 @@ def importar():
             f"{total_ignorados} ignorado(s) e {total_erros_arquivo} arquivo(s) com erro.",
             "success",
         )
-    else:
-        flash(
-            f"Nenhum registro novo foi importado. "
-            f"Ignorados: {total_ignorados}. Arquivos com erro: {total_erros_arquivo}.",
-            "warning",
-        )
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao importar planilha: {str(e)}", "danger")
 
     return redirect(url_for("index"))
 
@@ -901,6 +1122,29 @@ def calcular_completude(registro):
 # START
 # =========================================================
 
+def criar_admin_padrao():
+    email_admin = "admin@admin.com"
+    senha_admin = "123456"
+
+    usuario = Usuario.query.filter_by(email=email_admin).first()
+
+    if not usuario:
+        usuario = Usuario(
+            nome="Administrador",
+            email=email_admin,
+            ativo=True
+        )
+        usuario.set_senha(senha_admin)
+
+        db.session.add(usuario)
+        db.session.commit()
+
+        print("✅ Admin criado com sucesso")
+
+
 if __name__ == "__main__":
+    with app.app_context():
+        criar_admin_padrao()
+
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)

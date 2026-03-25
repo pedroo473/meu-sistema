@@ -761,6 +761,11 @@
 </head>
 <body>
 
+<div class="d-flex justify-content-end align-items-center gap-2 p-3">
+    <span class="badge bg-dark">Usuário: {{ current_user.nome }}</span>
+    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Sair</a>
+</div>
+
 <div class="toast-container-custom">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -1001,9 +1006,9 @@
                         Revise os dados antes de confirmar o envio.
                     </div>
 
-                    <button type="button" class="btn btn-success px-4" onclick="abrirModalCadastro()">
-                        ➕ Salvar cadastro
-                    </button>
+                    <button type="submit" class="btn btn-success px-4 text-white fw-bold shadow">
+    ➕ Salvar cadastro
+</button>
                 </div>
             </form>
         </div>
@@ -1474,11 +1479,11 @@ function mostrarToastLocal(mensagem, categoria = "warning") {
     if (!container) return;
 
     const titulos = {
-        success: "Operação realizada",
-        danger: "Algo deu errado",
-        warning: "Atenção",
-        primary: "Aviso"
-    };
+    success: "Operação realizada",
+    danger: "Algo deu errado",
+    warning: "Atenção",
+    primary: "Resultado do filtro"
+};
 
     const icones = {
         success: "✅",
@@ -1596,5 +1601,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 </script>
+
+{% if mensagem_filtro %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    mostrarToastLocal({{ mensagem_filtro|tojson }}, {{ categoria_filtro|tojson }});
+});
+</script>
+{% endif %}
+
 </body>
+
 </html>

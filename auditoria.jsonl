@@ -29,3 +29,12 @@
 {"data_hora": "2026-03-25 16:55:50", "acao": "cadastro_adicionado", "detalhes": {"id": 132, "nome": "ronaldo", "documento": "144.354.456-62"}}
 {"data_hora": "2026-03-26 10:58:55", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "nome": "aa", "documento": "24.296.895/0001-11"}}
 {"data_hora": "2026-03-26 10:59:16", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "nome": "aa", "documento": "24.296.895/0001-11"}}
+{"data_hora": "2026-03-26 14:17:28", "acao": "cadastro_adicionado", "detalhes": {"id": 2, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-26 14:17:32", "acao": "cadastro_excluido", "detalhes": {"id": "1", "nome": "aa", "documento": "24.296.895/0001-11"}}
+{"data_hora": "2026-03-26 14:17:35", "acao": "cadastro_excluido", "detalhes": {"id": "2", "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-26 14:17:59", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "nome": "pedro", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-26 14:18:06", "acao": "cadastro_adicionado", "detalhes": {"id": 2, "nome": "empresa fudida", "documento": "24.296.895/0001-11"}}
+{"data_hora": "2026-03-26 14:18:49", "acao": "base_exportada", "detalhes": {"quantidade_registros": 2}}
+{"data_hora": "2026-03-26 14:19:31", "acao": "cadastro_editado", "detalhes": {"id": "1", "antes": {"ID": "1", "Nome": "pedro", "CPF/CNPJ": "144.354.456-62", "Celular": "", "UF": "", "Cidade": "", "Bairro": "", "CEP": "", "Endereço": "", "Número": ""}, "depois": {"ID": "1", "Nome": "pedro", "CPF/CNPJ": "144.354.456-62", "Celular": "", "UF": "MG", "Cidade": "Contagem", "Bairro": "Riacho das Pedras", "CEP": "32280-430", "Endereço": "Rua Rio Congo", "Número": "222"}}}
+{"data_hora": "2026-03-26 14:19:50", "acao": "cadastro_editado", "detalhes": {"id": "1", "antes": {"ID": "1", "Nome": "pedro", "CPF/CNPJ": "144.354.456-62", "Celular": "", "UF": "MG", "Cidade": "Contagem", "Bairro": "Riacho das Pedras", "CEP": "32280-430", "Endereço": "Rua Rio Congo", "Número": "222"}, "depois": {"ID": "1", "Nome": "pedro", "CPF/CNPJ": "144.354.456-62", "Celular": "", "UF": "MG", "Cidade": "Contagem", "Bairro": "Riacho das Pedras", "CEP": "32280-430", "Endereço": "Rua Rio Congo", "Número": "222"}}}
+{"data_hora": "2026-03-26 14:24:28", "acao": "cadastros_excluidos_em_massa", "detalhes": {"quantidade": 2, "registros": [{"id": "1", "nome": "pedro", "documento": "144.354.456-62"}, {"id": "2", "nome": "empresa fudida", "documento": "24.296.895/0001-11"}]}}

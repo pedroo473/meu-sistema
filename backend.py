@@ -972,6 +972,60 @@ def delete(id):
 
     return redirect(url_for("index"))
 
+@app.route("/delete_selected", methods=["POST"])
+@login_required
+def delete_selected():
+    ids = request.form.getlist("ids")
+
+    if not ids:
+        flash("Nenhum cadastro foi selecionado para exclusão.", "warning")
+        return redirect(url_for("index"))
+
+    try:
+        ids_int = []
+        for item in ids:
+            try:
+                ids_int.append(int(item))
+            except (TypeError, ValueError):
+                continue
+
+        if not ids_int:
+            flash("Nenhum ID válido foi enviado para exclusão.", "warning")
+            return redirect(url_for("index"))
+
+        empresas = Empresa.query.filter(Empresa.id.in_(ids_int)).all()
+
+        if not empresas:
+            flash("Nenhum cadastro encontrado para os itens selecionados.", "warning")
+            return redirect(url_for("index"))
+
+        excluidos = []
+        for empresa in empresas:
+            excluidos.append({
+                "id": str(empresa.id),
+                "nome": empresa.nome,
+                "documento": empresa.cpf_cnpj
+            })
+            db.session.delete(empresa)
+
+        db.session.commit()
+        resetar_sequence_empresas_se_vazio()
+
+        registrar_auditoria(
+            "cadastros_excluidos_em_massa",
+            {
+                "quantidade": len(excluidos),
+                "registros": excluidos
+            },
+        )
+
+        flash(f"{len(excluidos)} cadastro(s) excluído(s) com sucesso.", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao excluir cadastros selecionados: {str(e)}", "danger")
+
+    return redirect(url_for("index"))
 
 @app.route("/delete_all", methods=["POST"])
 @login_required

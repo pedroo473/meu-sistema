@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Sistema de Empresas</title>
+    <title>Criar Conta | Sistema de Empresas</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -17,6 +17,8 @@
             --texto: #1f2937;
             --texto-suave: #6b7280;
             --branco: #ffffff;
+            --sucesso: #198754;
+            --erro: #dc3545;
             --sombra-forte: 0 24px 60px rgba(15, 23, 42, 0.18);
             --sombra-media: 0 12px 30px rgba(31, 111, 235, 0.14);
         }
@@ -200,6 +202,48 @@
             font-size: 1.1rem;
         }
 
+        .password-rules {
+            margin-top: 10px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: #f8fbff;
+            border: 1px solid #e4edfb;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .password-rules strong {
+            color: #334155;
+        }
+
+        .password-strength {
+            margin-top: 12px;
+        }
+
+        .strength-bar {
+            width: 100%;
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 999px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            transition: all 0.3s ease;
+            background: #dc3545;
+        }
+
+        .strength-text {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--texto-suave);
+        }
+
         .btn-premium {
             height: 58px;
             border: none;
@@ -334,17 +378,17 @@
             <div class="auth-header-content">
                 <div class="auth-badge">
                     <i class="bi bi-shield-lock-fill"></i>
-                    Acesso seguro
+                    Cadastro seguro
                 </div>
-                <h1 class="auth-title">Sistema de Empresas</h1>
-                <p class="auth-subtitle">Entre com seu e-mail e senha para acessar o sistema</p>
+                <h1 class="auth-title">Criar Conta</h1>
+                <p class="auth-subtitle">Cadastre seu acesso no Sistema de Empresas</p>
             </div>
         </div>
 
         <div class="auth-body">
-            <div class="section-title">Bem-vindo de volta</div>
+            <div class="section-title">Preencha seus dados</div>
             <div class="section-subtitle">
-                Faça login para continuar gerenciando seus cadastros com segurança.
+                Informe nome, e-mail e uma senha segura para criar sua conta.
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -358,7 +402,21 @@
                 {% endif %}
             {% endwith %}
 
-            <form method="POST" action="{{ url_for('login') }}" autocomplete="on">
+            <form method="POST" action="{{ url_for('register') }}" autocomplete="on">
+                <div class="mb-3">
+                    <label for="nome" class="form-label">Nome completo</label>
+                    <input
+                        type="text"
+                        name="nome"
+                        id="nome"
+                        class="form-control input-premium"
+                        placeholder="Digite seu nome completo"
+                        required
+                        autocomplete="name"
+                    >
+                    <div class="form-text-custom">Use o nome que será exibido no sistema.</div>
+                </div>
+
                 <div class="mb-3">
                     <label for="email" class="form-label">E-mail</label>
                     <input
@@ -370,47 +428,82 @@
                         required
                         autocomplete="email"
                     >
-                    <div class="form-text-custom">Use o e-mail cadastrado para acessar sua conta.</div>
+                    <div class="form-text-custom">Este e-mail será usado para acessar sua conta.</div>
                 </div>
 
-                <div class="mb-4">
-                    <label for="senha_login" class="form-label">Senha</label>
+                <div class="mb-3">
+                    <label for="senha" class="form-label">Senha</label>
                     <div class="campo-senha">
                         <input
                             type="password"
                             name="senha"
-                            id="senha_login"
+                            id="senha"
                             class="form-control input-senha-premium"
                             placeholder="Digite sua senha"
                             required
-                            autocomplete="current-password"
+                            autocomplete="new-password"
+                            oninput="avaliarSenha()"
                         >
                         <button
                             type="button"
                             class="btn-toggle-senha"
-                            onclick="toggleSenha('senha_login', this)"
+                            onclick="toggleSenha('senha', this)"
                             aria-label="Mostrar ou ocultar senha"
                         >
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
-                    <div class="form-text-custom">Clique no ícone para mostrar ou ocultar a senha.</div>
+
+                    <div class="password-strength">
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <div class="strength-text" id="strengthText">Força da senha: não informada</div>
+                    </div>
+
+                    <div class="password-rules">
+                        <strong>Dica:</strong> use letras maiúsculas, minúsculas, números e caracteres especiais para uma senha mais forte.
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="confirmar_senha" class="form-label">Confirmar senha</label>
+                    <div class="campo-senha">
+                        <input
+                            type="password"
+                            name="confirmar_senha"
+                            id="confirmar_senha"
+                            class="form-control input-senha-premium"
+                            placeholder="Confirme sua senha"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <button
+                            type="button"
+                            class="btn-toggle-senha"
+                            onclick="toggleSenha('confirmar_senha', this)"
+                            aria-label="Mostrar ou ocultar senha"
+                        >
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-text-custom">Repita a mesma senha para confirmar o cadastro.</div>
                 </div>
 
                 <button type="submit" class="btn btn-premium btn-primary-premium w-100">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>
-                    Entrar
+                    <i class="bi bi-person-plus-fill me-2"></i>
+                    Criar conta
                 </button>
 
                 <div class="divider">ou</div>
 
-                <a href="{{ url_for('register') }}" class="btn btn-premium btn-secondary-premium w-100 text-decoration-none d-flex align-items-center justify-content-center">
-                    <i class="bi bi-person-plus-fill me-2"></i>
-                    Criar conta
+                <a href="{{ url_for('login') }}" class="btn btn-premium btn-secondary-premium w-100 text-decoration-none d-flex align-items-center justify-content-center">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    Voltar para login
                 </a>
 
                 <div class="footer-note">
-                    Ainda não possui cadastro? <a href="{{ url_for('register') }}">Registrar agora</a>
+                    Já possui cadastro? <a href="{{ url_for('login') }}">Entrar no sistema</a>
                 </div>
             </form>
         </div>
@@ -430,6 +523,46 @@
             campo.type = "password";
             icone.classList.remove("bi-eye-slash");
             icone.classList.add("bi-eye");
+        }
+    }
+
+    function avaliarSenha() {
+        const senha = document.getElementById("senha").value;
+        const strengthFill = document.getElementById("strengthFill");
+        const strengthText = document.getElementById("strengthText");
+
+        let score = 0;
+
+        if (senha.length >= 6) score++;
+        if (senha.length >= 8) score++;
+        if (/[A-Z]/.test(senha)) score++;
+        if (/[a-z]/.test(senha)) score++;
+        if (/[0-9]/.test(senha)) score++;
+        if (/[^A-Za-z0-9]/.test(senha)) score++;
+
+        if (!senha) {
+            strengthFill.style.width = "0%";
+            strengthFill.style.background = "#dc3545";
+            strengthText.textContent = "Força da senha: não informada";
+            strengthText.style.color = "#6b7280";
+            return;
+        }
+
+        if (score <= 2) {
+            strengthFill.style.width = "30%";
+            strengthFill.style.background = "#dc3545";
+            strengthText.textContent = "Força da senha: fraca";
+            strengthText.style.color = "#dc3545";
+        } else if (score <= 4) {
+            strengthFill.style.width = "65%";
+            strengthFill.style.background = "#fd7e14";
+            strengthText.textContent = "Força da senha: média";
+            strengthText.style.color = "#fd7e14";
+        } else {
+            strengthFill.style.width = "100%";
+            strengthFill.style.background = "#198754";
+            strengthText.textContent = "Força da senha: forte";
+            strengthText.style.color = "#198754";
         }
     }
 </script>

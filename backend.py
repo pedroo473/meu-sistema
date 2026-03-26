@@ -771,6 +771,62 @@ def login():
 
     return render_template("login.html")
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+        nome = request.form.get("nome", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        senha = request.form.get("senha", "")
+        confirmar_senha = request.form.get("confirmar_senha", "")
+
+        if not nome:
+            flash("Informe o nome.", "warning")
+            return redirect(url_for("register"))
+
+        if not email:
+            flash("Informe o e-mail.", "warning")
+            return redirect(url_for("register"))
+
+        if not senha:
+            flash("Informe a senha.", "warning")
+            return redirect(url_for("register"))
+
+        if len(senha) < 6:
+            flash("A senha deve ter pelo menos 6 caracteres.", "warning")
+            return redirect(url_for("register"))
+
+        if senha != confirmar_senha:
+            flash("As senhas não coincidem.", "warning")
+            return redirect(url_for("register"))
+
+        usuario_existente = Usuario.query.filter_by(email=email).first()
+        if usuario_existente:
+            flash("Este e-mail já está cadastrado.", "danger")
+            return redirect(url_for("register"))
+
+        try:
+            novo_usuario = Usuario(
+                nome=nome,
+                email=email,
+                ativo=True
+            )
+            novo_usuario.set_senha(senha)
+
+            db.session.add(novo_usuario)
+            db.session.commit()
+
+            flash("Cadastro realizado com sucesso. Agora faça login.", "success")
+            return redirect(url_for("login"))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Erro ao cadastrar usuário: {str(e)}", "danger")
+            return redirect(url_for("register"))
+
+    return render_template("register.html")
 
 @app.route("/logout")
 @login_required
@@ -778,6 +834,13 @@ def logout():
     logout_user()
     flash("Você saiu do sistema com sucesso.", "success")
     return redirect(url_for("login"))
+
+@app.route("/usuarios")
+@login_required
+def listar_usuarios():
+    usuarios = Usuario.query.all()
+    return render_template("usuarios.html", usuarios=usuarios)
+
 
 
 @app.route("/")

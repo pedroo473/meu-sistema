@@ -1,11 +1,25 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
+        <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Empresas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
+
+.page-shell {
+    max-width: 1460px;
+    position: relative;
+    border: 3px solid rgba(37, 99, 235, 0.30);
+    border-radius: 28px;
+    box-shadow:
+        0 0 0 2px rgba(37, 99, 235, 0.10),
+        0 16px 45px rgba(37, 99, 235, 0.14);
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(6px);
+}
         :root {
             --bg: #f4f7fb;
             --bg-soft: #f8fafc;
@@ -693,6 +707,180 @@
             word-break: break-word;
         }
 
+        .top-user-bar {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            z-index: 999;
+        }
+
+        .admin-dropdown {
+            position: relative;
+        }
+
+        .admin-trigger {
+            min-width: 260px;
+            border: 1px solid #e5e7eb;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(14px);
+            border-radius: 18px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            box-shadow: 0 14px 35px rgba(15, 23, 42, 0.14);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .admin-trigger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+        }
+
+        .admin-trigger-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: left;
+        }
+
+        .admin-avatar,
+        .admin-menu-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1f2937, #111827);
+            color: #fff;
+            font-size: 18px;
+            box-shadow: 0 8px 20px rgba(17, 24, 39, 0.18);
+            flex-shrink: 0;
+        }
+
+        .admin-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .admin-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .admin-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: #111827;
+            margin-top: 3px;
+        }
+
+        .admin-arrow {
+            font-size: 16px;
+            color: #475569;
+            transition: transform 0.25s ease;
+        }
+
+        .admin-arrow.rotated {
+            transform: rotate(180deg);
+        }
+
+        .admin-menu {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: 290px;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(16px);
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            box-shadow: 0 22px 50px rgba(15, 23, 42, 0.16);
+            padding: 14px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+            transition: all 0.22s ease;
+        }
+
+        .admin-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .admin-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 4px 4px 10px 4px;
+        }
+
+        .admin-menu-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .admin-menu-subtitle {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .admin-menu-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #dbe4ee, transparent);
+            margin: 10px 0;
+        }
+
+        .admin-menu-item {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-decoration: none;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 12px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.18s ease;
+            cursor: pointer;
+        }
+
+        .admin-menu-item:hover {
+            background: #f4f8ff;
+            color: #1f6feb;
+        }
+
+        .admin-menu-item-button {
+            text-align: left;
+        }
+
+        .admin-menu-icon {
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .danger-item {
+            color: #dc2626;
+        }
+
+        .danger-item:hover {
+            background: #fff1f2;
+            color: #dc2626;
+        }
+
         @keyframes slideInToast {
             from {
                 opacity: 0;
@@ -756,49 +944,127 @@
             .hero-summary-card {
                 padding: 18px;
             }
+
+            .top-user-bar {
+                top: 14px;
+                right: 14px;
+                left: 14px;
+            }
+
+            .admin-dropdown {
+                width: 100%;
+            }
+
+            .admin-trigger {
+                width: 100%;
+                min-width: unset;
+            }
+
+            .admin-menu {
+                width: 100%;
+                right: 0;
+            }
         }
+
     </style>
 </head>
 <body>
 
-<div class="d-flex justify-content-end align-items-center gap-2 p-3">
-    <span class="badge bg-dark">Usuário: {{ current_user.nome }}</span>
-    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Sair</a>
-</div>
-
-<div class="toast-container-custom">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for categoria, mensagem in messages %}
-                <div class="toast-custom toast-{{ categoria }}">
-                    <div class="toast-icon">
-                        {% if categoria == "success" %}✅{% endif %}
-                        {% if categoria == "danger" %}❌{% endif %}
-                        {% if categoria == "warning" %}⚠️{% endif %}
-                        {% if categoria == "primary" %}🔎{% endif %}
-                        {% if categoria not in ["success", "danger", "warning", "primary"] %}ℹ️{% endif %}
-                    </div>
-
-                    <div class="toast-content">
-                        <div class="toast-title">
-                            {% if categoria == "success" %}Operação realizada{% endif %}
-                            {% if categoria == "danger" %}Algo deu errado{% endif %}
-                            {% if categoria == "warning" %}Atenção{% endif %}
-                            {% if categoria == "primary" %}Resultado do filtro{% endif %}
-                            {% if categoria not in ["success", "danger", "warning", "primary"] %}Aviso{% endif %}
-                        </div>
-                        <div class="toast-message">{{ mensagem }}</div>
-                    </div>
-
-                    <button type="button" class="toast-close" onclick="fecharToast(this)">×</button>
-                    <div class="toast-progress"></div>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-</div>
-
 <div class="container-fluid page-shell py-4 py-lg-5">
+
+    {% if current_user.is_authenticated %}
+    <div class="top-user-bar">
+        <div class="admin-dropdown" id="adminDropdown">
+            <button type="button" class="admin-trigger" onclick="toggleAdminMenu()">
+                <div class="admin-trigger-left">
+                    <span class="admin-avatar">👤</span>
+                    <div class="admin-info">
+                        <span class="admin-label">Usuário logado</span>
+                        <span class="admin-name">{{ current_user.nome }}</span>
+                    </div>
+                </div>
+                <span class="admin-arrow" id="adminArrow">▾</span>
+            </button>
+
+            <div class="admin-menu" id="adminMenu">
+                <div class="admin-menu-header">
+                    <div class="admin-menu-avatar">👤</div>
+                    <div>
+                        <div class="admin-menu-title">{{ current_user.nome }}</div>
+                        <div class="admin-menu-subtitle">Administrador do sistema</div>
+                    </div>
+                </div>
+
+                <div class="admin-menu-divider"></div>
+
+                <a href="{{ url_for('listar_usuarios') }}" class="admin-menu-item">
+                    <span class="admin-menu-icon">👥</span>
+                    <span>Ver usuários</span>
+                </a>
+
+                <a href="{{ url_for('register') }}" class="admin-menu-item">
+                    <span class="admin-menu-icon">➕</span>
+                    <span>Criar usuário</span>
+                </a>
+
+                <a href="{{ url_for('index') }}" class="admin-menu-item">
+                    <span class="admin-menu-icon">🏠</span>
+                    <span>Página inicial</span>
+                </a>
+
+                <button type="button" class="admin-menu-item admin-menu-item-button" onclick="alert('Depois podemos ligar essa opção a uma tela de perfil.')">
+                    <span class="admin-menu-icon">⚙️</span>
+                    <span>Configurações</span>
+                </button>
+
+                <div class="admin-menu-divider"></div>
+
+                <a href="{{ url_for('logout') }}" class="admin-menu-item danger-item">
+                    <span class="admin-menu-icon">🚪</span>
+                    <span>Sair</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not current_user.is_authenticated %}
+    <a href="{{ url_for('register') }}" class="btn btn-outline-primary w-100 mt-2 mb-3">
+        Criar conta
+    </a>
+    {% endif %}
+
+    <div class="toast-container-custom">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for categoria, mensagem in messages %}
+                    <div class="toast-custom toast-{{ categoria }}">
+                        <div class="toast-icon">
+                            {% if categoria == "success" %}✅{% endif %}
+                            {% if categoria == "danger" %}❌{% endif %}
+                            {% if categoria == "warning" %}⚠️{% endif %}
+                            {% if categoria == "primary" %}🔎{% endif %}
+                            {% if categoria not in ["success", "danger", "warning", "primary"] %}ℹ️{% endif %}
+                        </div>
+
+                        <div class="toast-content">
+                            <div class="toast-title">
+                                {% if categoria == "success" %}Operação realizada{% endif %}
+                                {% if categoria == "danger" %}Algo deu errado{% endif %}
+                                {% if categoria == "warning" %}Atenção{% endif %}
+                                {% if categoria == "primary" %}Resultado do filtro{% endif %}
+                                {% if categoria not in ["success", "danger", "warning", "primary"] %}Aviso{% endif %}
+                            </div>
+                            <div class="toast-message">{{ mensagem }}</div>
+                        </div>
+
+                        <button type="button" class="toast-close" onclick="fecharToast(this)">×</button>
+                        <div class="toast-progress"></div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
 
     <div class="hero p-4 p-lg-5 mb-4">
         <div class="row g-4 align-items-center">
@@ -940,6 +1206,10 @@
             </div>
         </form>
 
+        <a href="/usuarios" class="btn btn-dark mt-3">
+            👤 Ver usuários
+        </a>
+
         {% if busca or tipo %}
             <div class="mt-3 small text-secondary">
                 <strong>Filtro atual:</strong>
@@ -1007,8 +1277,8 @@
                     </div>
 
                     <button type="submit" class="btn btn-success px-4 text-white fw-bold shadow">
-    ➕ Salvar cadastro
-</button>
+                        ➕ Salvar cadastro
+                    </button>
                 </div>
             </form>
         </div>
@@ -1323,6 +1593,7 @@
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 function rolarParaCadastro() {
@@ -1331,6 +1602,14 @@ function rolarParaCadastro() {
 
 function rolarParaTabela() {
     document.getElementById("blocoTabela")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function toggleAdminMenu() {
+    const menu = document.getElementById("adminMenu");
+    const arrow = document.getElementById("adminArrow");
+    if (!menu || !arrow) return;
+    menu.classList.toggle("show");
+    arrow.classList.toggle("rotated");
 }
 
 function abrirModalExcluir(url, nome = "") {
@@ -1479,11 +1758,11 @@ function mostrarToastLocal(mensagem, categoria = "warning") {
     if (!container) return;
 
     const titulos = {
-    success: "Operação realizada",
-    danger: "Algo deu errado",
-    warning: "Atenção",
-    primary: "Resultado do filtro"
-};
+        success: "Operação realizada",
+        danger: "Algo deu errado",
+        warning: "Atenção",
+        primary: "Resultado do filtro"
+    };
 
     const icones = {
         success: "✅",
@@ -1522,6 +1801,19 @@ function abrirModalExcluirSelecionados() {
 function confirmarExclusaoSelecionados() {
     document.getElementById("formExcluirSelecionados").submit();
 }
+
+document.addEventListener("click", function (e) {
+    const dropdown = document.getElementById("adminDropdown");
+    const menu = document.getElementById("adminMenu");
+    const arrow = document.getElementById("adminArrow");
+
+    if (!dropdown || !menu || !arrow) return;
+
+    if (!dropdown.contains(e.target)) {
+        menu.classList.remove("show");
+        arrow.classList.remove("rotated");
+    }
+});
 
 document.addEventListener("DOMContentLoaded", function () {
     const selecionarTodos = document.getElementById("selecionarTodos");
@@ -1611,5 +1903,4 @@ document.addEventListener("DOMContentLoaded", function () {
 {% endif %}
 
 </body>
-
 </html>

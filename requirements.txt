@@ -2,3 +2,8 @@ Flask
 pandas
 openpyxl
 gunicorn
+SQLAlchemy
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-Login
+psycopg2-binary

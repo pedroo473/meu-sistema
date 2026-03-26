@@ -15,9 +15,13 @@ from io import BytesIO
 app = Flask(__name__)
 app.secret_key = "fd1e6978886a5dd23d"
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:9876@localhost:5432/sistema_empresas"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+database_url = os.environ.get("DATABASE_URL")
 
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -1144,6 +1148,7 @@ def criar_admin_padrao():
 
 if __name__ == "__main__":
     with app.app_context():
+        db.create_all()
         criar_admin_padrao()
 
     port = int(os.environ.get("PORT", 5000))

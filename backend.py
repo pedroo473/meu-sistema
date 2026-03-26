@@ -13,13 +13,19 @@ from datetime import datetime
 from io import BytesIO
 
 app = Flask(__name__)
-app.secret_key = "fd1e6978886a5dd23d"
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
+# =========================
+# BANCO DE DADOS
+# =========================
 database_url = os.environ.get("DATABASE_URL")
 
+# Se estiver rodando localmente no PyCharm, usa SQLite
 if not database_url:
-    raise RuntimeError("A variável DATABASE_URL não está configurada no Render.")
+    database_url = "sqlite:///local.db"
+    print("⚠️ DATABASE_URL não encontrada. Usando SQLite local.")
 
+# Compatibilidade com URLs antigas do postgres
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
@@ -28,9 +34,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
-login_manager = LoginManager()
-login_manager.init_app(app)
+login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message = "Faça login para acessar o sistema."
 login_manager.login_message_category = "warning"
@@ -72,12 +76,15 @@ class Usuario(UserMixin, db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(Usuario, int(user_id))
+    try:
+        return db.session.get(Usuario, int(user_id))
+    except (TypeError, ValueError):
+        return None
 
 
 def criar_admin_padrao():
-    email_admin = "admin@admin.com"
-    senha_admin = "123456"
+    email_admin = os.environ.get("ADMIN_EMAIL", "admin@admin.com")
+    senha_admin = os.environ.get("ADMIN_PASSWORD", "123456")
 
     usuario = Usuario.query.filter_by(email=email_admin).first()
 
@@ -220,10 +227,14 @@ def criar_backup(motivo="alteracao"):
     except Exception:
         return None
 
-    def resetar_sequence_empresas_se_vazio():
-        total = db.session.query(Empresa).count()
 
-        if total == 0:
+def resetar_sequence_empresas_se_vazio():
+    total = db.session.query(Empresa).count()
+
+    if total == 0:
+        uri = app.config["SQLALCHEMY_DATABASE_URI"]
+
+        if uri.startswith("postgresql"):
             db.session.execute(
                 text("SELECT setval(pg_get_serial_sequence('empresas', 'id'), 1, false)")
             )
@@ -680,7 +691,7 @@ def valor_coluna(linha, coluna):
     return linha.get(coluna, "")
 
 
-def importar_dataframe(df_origem, df_atual, proximo_codigo=None):
+def importar_dataframe(df_origem, df_atual):
     df_origem = normalizar_dataframe(df_origem)
 
     importados = []
@@ -728,7 +739,7 @@ def importar_dataframe(df_origem, df_atual, proximo_codigo=None):
         importados.append(registro)
         docs_existentes.add(doc_limpo)
 
-    return importados, ignorados, proximo_codigo
+    return importados, ignorados
 
 
 # =========================================================
@@ -966,8 +977,14 @@ def delete(id):
 @login_required
 def delete_all():
     try:
-        db.session.execute(text("TRUNCATE TABLE empresas RESTART IDENTITY CASCADE"))
-        db.session.commit()
+        uri = app.config["SQLALCHEMY_DATABASE_URI"]
+
+        if uri.startswith("sqlite"):
+            db.session.query(Empresa).delete()
+            db.session.commit()
+        else:
+            db.session.execute(text("TRUNCATE TABLE empresas RESTART IDENTITY CASCADE"))
+            db.session.commit()
 
         registrar_auditoria(
             "base_resetada",
@@ -1018,7 +1035,6 @@ def importar():
         return redirect(url_for("index"))
 
     df_atual = listar_empresas_db()
-    proximo_codigo = None
 
     total_importados = 0
     total_ignorados = 0
@@ -1045,10 +1061,9 @@ def importar():
             ignore_index=True
         ) if novos_registros else df_atual
 
-        importados, ignorados, proximo_codigo = importar_dataframe(
+        importados, ignorados = importar_dataframe(
             df_importado,
-            base_temp,
-            proximo_codigo
+            base_temp
         )
 
         novos_registros.extend(importados)
@@ -1130,30 +1145,11 @@ def calcular_completude(registro):
 # START
 # =========================================================
 
-def criar_admin_padrao():
-    email_admin = "admin@admin.com"
-    senha_admin = "123456"
-
-    usuario = Usuario.query.filter_by(email=email_admin).first()
-
-    if not usuario:
-        usuario = Usuario(
-            nome="Administrador",
-            email=email_admin,
-            ativo=True
-        )
-        usuario.set_senha(senha_admin)
-
-        db.session.add(usuario)
-        db.session.commit()
-
-        print("✅ Admin criado com sucesso")
+with app.app_context():
+    db.create_all()
+    criar_admin_padrao()
 
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-        criar_admin_padrao()
-
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)

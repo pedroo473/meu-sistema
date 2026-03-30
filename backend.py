@@ -20,12 +20,10 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 # =========================
 database_url = os.environ.get("DATABASE_URL")
 
-# Ambiente local
 if not database_url:
     database_url = "sqlite:///local.db"
     print("⚠️ DATABASE_URL não encontrada. Usando SQLite local.")
 
-# Compatibilidade com URL antiga
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
@@ -44,38 +42,49 @@ login_manager.login_message_category = "warning"
 # =========================
 # MODELOS
 # =========================
-class Empresa(db.Model):
-    __tablename__ = "empresas"
-
-    id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(200), nullable=False)
-    cpf_cnpj = db.Column(db.String(18), unique=True, nullable=False)
-    celular = db.Column(db.String(30))
-    uf = db.Column(db.String(2))
-    cidade = db.Column(db.String(120))
-    bairro = db.Column(db.String(120))
-    cep = db.Column(db.String(10))
-    endereco = db.Column(db.String(200))
-    numero = db.Column(db.String(50))
-    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
-    atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-
 class Usuario(UserMixin, db.Model):
     __tablename__ = "usuarios"
 
     id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(120), nullable=False)
+    nome = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     senha_hash = db.Column(db.String(255), nullable=False)
     ativo = db.Column(db.Boolean, default=True, nullable=False)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    registros = db.relationship(
+        "Empresa",
+        back_populates="usuario",
+        lazy=True,
+        cascade="all, delete-orphan",
+    )
 
     def set_senha(self, senha):
         self.senha_hash = generate_password_hash(senha)
 
     def check_senha(self, senha):
         return check_password_hash(self.senha_hash, senha)
+
+
+class Empresa(db.Model):
+    __tablename__ = "empresas"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False, index=True)
+
+    nome = db.Column(db.String(150), nullable=False)
+    cpf_cnpj = db.Column(db.String(20), nullable=False)
+    celular = db.Column(db.String(20))
+    uf = db.Column(db.String(2))
+    cidade = db.Column(db.String(100))
+    bairro = db.Column(db.String(100))
+    cep = db.Column(db.String(20))
+    endereco = db.Column(db.String(150))
+    numero = db.Column(db.String(20))
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    usuario = db.relationship("Usuario", back_populates="registros")
 
 
 @login_manager.user_loader
@@ -96,7 +105,7 @@ def criar_admin_padrao():
         usuario = Usuario(
             nome="Administrador",
             email=email_admin,
-            ativo=True
+            ativo=True,
         )
         usuario.set_senha(senha_admin)
 
@@ -110,7 +119,6 @@ def criar_admin_padrao():
 
 # =========================
 # CONFIGURAÇÕES DE EXCEL / AUDITORIA
-# Excel será usado SOMENTE para importação e exportação
 # =========================
 ARQUIVO_AUDITORIA = "auditoria.jsonl"
 
@@ -205,17 +213,20 @@ def registrar_auditoria(acao, detalhes=None):
         pass
 
 
-def resetar_sequence_empresas_se_vazio():
-    total = db.session.query(Empresa).count()
+def resetar_sequence_empresas_do_usuario_se_vazio(user_id):
+    total = Empresa.query.filter_by(user_id=user_id).count()
+    if total != 0:
+        return
 
-    if total == 0:
-        uri = app.config["SQLALCHEMY_DATABASE_URI"]
-
-        if uri.startswith("postgresql"):
+    uri = app.config["SQLALCHEMY_DATABASE_URI"]
+    if uri.startswith("postgresql"):
+        try:
             db.session.execute(
-                text("SELECT setval(pg_get_serial_sequence('empresas', 'id'), 1, false)")
+                text("SELECT setval(pg_get_serial_sequence('empresas', 'id'), COALESCE((SELECT MAX(id) FROM empresas), 1), true)")
             )
             db.session.commit()
+        except Exception:
+            db.session.rollback()
 
 
 # =========================================================
@@ -289,7 +300,6 @@ def validar_cpf(cpf):
 
     if len(cpf) != 11:
         return False
-
     if cpf == cpf[0] * 11:
         return False
 
@@ -312,7 +322,6 @@ def validar_cnpj(cnpj):
 
     if len(cnpj) != 14:
         return False
-
     if cnpj == cnpj[0] * 14:
         return False
 
@@ -335,7 +344,6 @@ def validar_cnpj(cnpj):
 
 def validar_documento(documento):
     doc = apenas_numeros(documento)
-
     if len(doc) == 11:
         return validar_cpf(doc)
     if len(doc) == 14:
@@ -384,20 +392,25 @@ def empresa_para_dict(empresa):
     }
 
 
-def listar_empresas_db():
-    empresas = Empresa.query.order_by(Empresa.id.desc()).all()
+def listar_empresas_db(user_id):
+    empresas = (
+        Empresa.query
+        .filter_by(user_id=user_id)
+        .order_by(Empresa.id.desc())
+        .all()
+    )
     dados = [empresa_para_dict(emp) for emp in empresas]
     return pd.DataFrame(dados, columns=COLUNAS)
 
 
-def buscar_empresa_db(id_registro):
-    return db.session.get(Empresa, id_registro)
+def buscar_empresa_db(id_registro, user_id):
+    return Empresa.query.filter_by(id=id_registro, user_id=user_id).first()
 
 
-def documento_ja_existe_db(documento, ignorar_id=None):
+def documento_ja_existe_db(documento, user_id, ignorar_id=None):
     doc = formatar_documento(documento)
 
-    query = Empresa.query.filter_by(cpf_cnpj=doc)
+    query = Empresa.query.filter_by(cpf_cnpj=doc, user_id=user_id)
     if ignorar_id is not None:
         query = query.filter(Empresa.id != ignorar_id)
 
@@ -483,15 +496,15 @@ def importar_dataframe(df_origem, df_atual):
             continue
 
         registro = {
-            "Nome": nome[:200],
-            "CPF/CNPJ": documento[:18],
-            "Celular": celular[:30],
+            "Nome": nome[:150],
+            "CPF/CNPJ": documento[:20],
+            "Celular": celular[:20],
             "UF": uf[:2],
-            "Cidade": cidade[:120],
-            "Bairro": bairro[:120],
-            "CEP": cep[:10],
-            "Endereço": endereco[:200],
-            "Número": numero[:50],
+            "Cidade": cidade[:100],
+            "Bairro": bairro[:100],
+            "CEP": cep[:20],
+            "Endereço": endereco[:150],
+            "Número": numero[:20],
         }
 
         importados.append(registro)
@@ -720,7 +733,7 @@ def logout():
 @app.route("/usuarios")
 @login_required
 def listar_usuarios():
-    usuarios = Usuario.query.order_by(Usuario.id.desc()).all()
+    usuarios = [current_user]
     return render_template("usuarios.html", usuarios=usuarios)
 
 
@@ -730,7 +743,7 @@ def listar_usuarios():
 @app.route("/")
 @login_required
 def index():
-    df = listar_empresas_db()
+    df = listar_empresas_db(current_user.id)
 
     busca = limpar_texto(request.args.get("busca", ""))
     tipo = limpar_texto(request.args.get("tipo", "")).lower()
@@ -774,8 +787,8 @@ def add():
 
     erros = validar_campos_obrigatorios(novo["Nome"], novo["CPF/CNPJ"])
 
-    if documento_ja_existe_db(novo["CPF/CNPJ"]):
-        erros.append("Já existe outro cadastro com este CPF/CNPJ.")
+    if documento_ja_existe_db(novo["CPF/CNPJ"], current_user.id):
+        erros.append("Você já possui outro cadastro com este CPF/CNPJ.")
 
     if erros:
         for erro in erros:
@@ -784,6 +797,7 @@ def add():
 
     try:
         empresa = Empresa(
+            user_id=current_user.id,
             nome=novo["Nome"],
             cpf_cnpj=novo["CPF/CNPJ"],
             celular=novo["Celular"],
@@ -802,6 +816,7 @@ def add():
             "cadastro_adicionado",
             {
                 "id": empresa.id,
+                "user_id": current_user.id,
                 "nome": empresa.nome,
                 "documento": empresa.cpf_cnpj,
             },
@@ -818,7 +833,7 @@ def add():
 @app.route("/edit/<int:id>")
 @login_required
 def edit(id):
-    empresa = buscar_empresa_db(id)
+    empresa = buscar_empresa_db(id, current_user.id)
 
     if not empresa:
         flash("Cadastro não encontrado.", "danger")
@@ -837,7 +852,7 @@ def edit(id):
 @app.route("/update/<int:id>", methods=["POST"])
 @login_required
 def update(id):
-    empresa = buscar_empresa_db(id)
+    empresa = buscar_empresa_db(id, current_user.id)
 
     if not empresa:
         flash("Cadastro não encontrado.", "danger")
@@ -846,8 +861,8 @@ def update(id):
     atualizado = montar_registro_form(request.form, id_existente=id)
     erros = validar_campos_obrigatorios(atualizado["Nome"], atualizado["CPF/CNPJ"])
 
-    if documento_ja_existe_db(atualizado["CPF/CNPJ"], ignorar_id=id):
-        erros.append("Já existe outro cadastro com este CPF/CNPJ.")
+    if documento_ja_existe_db(atualizado["CPF/CNPJ"], current_user.id, ignorar_id=id):
+        erros.append("Você já possui outro cadastro com este CPF/CNPJ.")
 
     if erros:
         for erro in erros:
@@ -873,6 +888,7 @@ def update(id):
             "cadastro_editado",
             {
                 "id": str(id),
+                "user_id": current_user.id,
                 "antes": antes,
                 "depois": atualizado,
             },
@@ -889,7 +905,7 @@ def update(id):
 @app.route("/delete/<int:id>")
 @login_required
 def delete(id):
-    empresa = buscar_empresa_db(id)
+    empresa = buscar_empresa_db(id, current_user.id)
 
     if not empresa:
         flash("Cadastro não encontrado.", "danger")
@@ -901,12 +917,13 @@ def delete(id):
         db.session.delete(empresa)
         db.session.commit()
 
-        resetar_sequence_empresas_se_vazio()
+        resetar_sequence_empresas_do_usuario_se_vazio(current_user.id)
 
         registrar_auditoria(
             "cadastro_excluido",
             {
                 "id": str(id),
+                "user_id": current_user.id,
                 "nome": registro["Nome"],
                 "documento": registro["CPF/CNPJ"],
             },
@@ -941,7 +958,10 @@ def delete_selected():
             flash("Nenhum ID válido foi enviado para exclusão.", "warning")
             return redirect(url_for("index"))
 
-        empresas = Empresa.query.filter(Empresa.id.in_(ids_int)).all()
+        empresas = Empresa.query.filter(
+            Empresa.id.in_(ids_int),
+            Empresa.user_id == current_user.id,
+        ).all()
 
         if not empresas:
             flash("Nenhum cadastro encontrado para os itens selecionados.", "warning")
@@ -951,19 +971,21 @@ def delete_selected():
         for empresa in empresas:
             excluidos.append({
                 "id": str(empresa.id),
+                "user_id": current_user.id,
                 "nome": empresa.nome,
-                "documento": empresa.cpf_cnpj
+                "documento": empresa.cpf_cnpj,
             })
             db.session.delete(empresa)
 
         db.session.commit()
-        resetar_sequence_empresas_se_vazio()
+        resetar_sequence_empresas_do_usuario_se_vazio(current_user.id)
 
         registrar_auditoria(
             "cadastros_excluidos_em_massa",
             {
                 "quantidade": len(excluidos),
-                "registros": excluidos
+                "user_id": current_user.id,
+                "registros": excluidos,
             },
         )
 
@@ -980,21 +1002,29 @@ def delete_selected():
 @login_required
 def delete_all():
     try:
-        uri = app.config["SQLALCHEMY_DATABASE_URI"]
+        registros = Empresa.query.filter_by(user_id=current_user.id).all()
 
-        if uri.startswith("sqlite"):
-            db.session.query(Empresa).delete()
-            db.session.commit()
-        else:
-            db.session.execute(text("TRUNCATE TABLE empresas RESTART IDENTITY CASCADE"))
-            db.session.commit()
+        if not registros:
+            flash("Você não possui cadastros para excluir.", "warning")
+            return redirect(url_for("index"))
+
+        quantidade = len(registros)
+        for registro in registros:
+            db.session.delete(registro)
+
+        db.session.commit()
+        resetar_sequence_empresas_do_usuario_se_vazio(current_user.id)
 
         registrar_auditoria(
-            "base_resetada",
-            {"acao": "todos os cadastros excluidos e ids reiniciados"}
+            "base_usuario_resetada",
+            {
+                "user_id": current_user.id,
+                "quantidade": quantidade,
+                "acao": "todos os cadastros do usuário foram excluídos",
+            },
         )
 
-        flash("Todos os cadastros foram excluídos e os IDs foram reiniciados.", "success")
+        flash("Todos os seus cadastros foram excluídos com sucesso.", "success")
     except Exception as e:
         db.session.rollback()
         flash(f"Erro ao limpar base: {str(e)}", "danger")
@@ -1005,7 +1035,7 @@ def delete_all():
 @app.route("/export")
 @login_required
 def export():
-    df = listar_empresas_db()
+    df = listar_empresas_db(current_user.id)
     output = BytesIO()
 
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
@@ -1016,11 +1046,12 @@ def export():
     registrar_auditoria(
         "base_exportada",
         {
+            "user_id": current_user.id,
             "quantidade_registros": int(len(df)),
         },
     )
 
-    nome_arquivo = f"empresas_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    nome_arquivo = f"empresas_usuario_{current_user.id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
     return send_file(
         output,
         as_attachment=True,
@@ -1038,7 +1069,7 @@ def importar():
         flash("Selecione ao menos uma planilha .xlsx para importar.", "warning")
         return redirect(url_for("index"))
 
-    df_atual = listar_empresas_db()
+    df_atual = listar_empresas_db(current_user.id)
 
     total_importados = 0
     total_ignorados = 0
@@ -1062,7 +1093,7 @@ def importar():
 
         base_temp = pd.concat(
             [df_atual, pd.DataFrame(novos_registros)],
-            ignore_index=True
+            ignore_index=True,
         ) if novos_registros else df_atual
 
         importados, ignorados = importar_dataframe(df_importado, base_temp)
@@ -1081,6 +1112,7 @@ def importar():
     try:
         for registro in novos_registros:
             empresa = Empresa(
+                user_id=current_user.id,
                 nome=registro["Nome"],
                 cpf_cnpj=registro["CPF/CNPJ"],
                 celular=registro["Celular"],
@@ -1098,6 +1130,7 @@ def importar():
         registrar_auditoria(
             "importacao_realizada",
             {
+                "user_id": current_user.id,
                 "importados": total_importados,
                 "ignorados": total_ignorados,
                 "erros_arquivo": total_erros_arquivo,
@@ -1105,20 +1138,21 @@ def importar():
         )
 
         flash(
-            f"Importação concluída: {total_importados} registro(s) importado(s), "
-            f"{total_ignorados} ignorado(s) e {total_erros_arquivo} arquivo(s) com erro.",
+            f"Importação concluída: {total_importados} registro(s) importado(s), {total_ignorados} ignorado(s), {total_erros_arquivo} arquivo(s) com erro.",
             "success",
         )
     except Exception as e:
         db.session.rollback()
-        flash(f"Erro ao importar planilhas: {str(e)}", "danger")
+        flash(f"Erro ao importar planilha: {str(e)}", "danger")
 
     return redirect(url_for("index"))
 
 
-# =========================================================
-# INICIALIZAÇÃO
-# =========================================================
+@app.route("/health")
+def health():
+    return {"status": "ok"}, 200
+
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

@@ -20,12 +20,12 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 # =========================
 database_url = os.environ.get("DATABASE_URL")
 
-# Se estiver rodando localmente no PyCharm, usa SQLite
+# Ambiente local
 if not database_url:
     database_url = "sqlite:///local.db"
     print("⚠️ DATABASE_URL não encontrada. Usando SQLite local.")
 
-# Compatibilidade com URLs antigas do postgres
+# Compatibilidade com URL antiga
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
@@ -34,12 +34,16 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message = "Faça login para acessar o sistema."
 login_manager.login_message_category = "warning"
 
 
+# =========================
+# MODELOS
+# =========================
 class Empresa(db.Model):
     __tablename__ = "empresas"
 
@@ -103,8 +107,11 @@ def criar_admin_padrao():
         print("Login:", email_admin)
         print("Senha:", senha_admin)
 
-ARQUIVO = "empresas.xlsx"
-PASTA_BACKUP = "backups"
+
+# =========================
+# CONFIGURAÇÕES DE EXCEL / AUDITORIA
+# Excel será usado SOMENTE para importação e exportação
+# =========================
 ARQUIVO_AUDITORIA = "auditoria.jsonl"
 
 COLUNAS = [
@@ -161,7 +168,6 @@ ALIAS_COLUNAS = {
 # =========================================================
 # UTILITÁRIOS BÁSICOS
 # =========================================================
-
 def apenas_numeros(valor):
     return re.sub(r"\D", "", str(valor or ""))
 
@@ -186,19 +192,7 @@ def timestamp_agora():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-def garantir_pastas():
-    os.makedirs(PASTA_BACKUP, exist_ok=True)
-
-
-def garantir_arquivo_base():
-    garantir_pastas()
-    if not os.path.exists(ARQUIVO):
-        df = pd.DataFrame(columns=COLUNAS)
-        df.to_excel(ARQUIVO, index=False)
-
-
 def registrar_auditoria(acao, detalhes=None):
-    garantir_pastas()
     payload = {
         "data_hora": timestamp_agora(),
         "acao": acao,
@@ -209,23 +203,6 @@ def registrar_auditoria(acao, detalhes=None):
             f.write(json.dumps(payload, ensure_ascii=False) + "\n")
     except Exception:
         pass
-
-
-def criar_backup(motivo="alteracao"):
-    garantir_arquivo_base()
-    garantir_pastas()
-
-    if not os.path.exists(ARQUIVO):
-        return None
-
-    nome_backup = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{motivo}.xlsx"
-    destino = os.path.join(PASTA_BACKUP, nome_backup)
-
-    try:
-        shutil.copy2(ARQUIVO, destino)
-        return destino
-    except Exception:
-        return None
 
 
 def resetar_sequence_empresas_se_vazio():
@@ -240,46 +217,10 @@ def resetar_sequence_empresas_se_vazio():
             )
             db.session.commit()
 
-# FUNÇÕES BANCO DE DADOS
-
-def empresa_para_dict(empresa):
-    return {
-        "ID": str(empresa.id),
-        "Nome": empresa.nome or "",
-        "CPF/CNPJ": formatar_documento(empresa.cpf_cnpj),
-        "Celular": formatar_celular(empresa.celular),
-        "UF": empresa.uf or "",
-        "Cidade": empresa.cidade or "",
-        "Bairro": empresa.bairro or "",
-        "CEP": formatar_cep(empresa.cep),
-        "Endereço": empresa.endereco or "",
-        "Número": empresa.numero or "",
-    }
-
-
-def listar_empresas_db():
-    empresas = Empresa.query.order_by(Empresa.id.desc()).all()
-    dados = [empresa_para_dict(emp) for emp in empresas]
-    return pd.DataFrame(dados, columns=COLUNAS)
-
-
-def buscar_empresa_db(id_registro):
-    return db.session.get(Empresa, id_registro)
-
-
-def documento_ja_existe_db(documento, ignorar_id=None):
-    doc = formatar_documento(documento)
-
-    query = Empresa.query.filter_by(cpf_cnpj=doc)
-    if ignorar_id is not None:
-        query = query.filter(Empresa.id != ignorar_id)
-
-    return db.session.query(query.exists()).scalar()
 
 # =========================================================
 # FORMATAÇÃO
 # =========================================================
-
 def formatar_cep(cep):
     cep = apenas_numeros(cep)[:8]
     if len(cep) == 8:
@@ -343,7 +284,6 @@ def padronizar_endereco(endereco):
 # =========================================================
 # VALIDAÇÕES
 # =========================================================
-
 def validar_cpf(cpf):
     cpf = apenas_numeros(cpf)
 
@@ -427,9 +367,46 @@ def validar_campos_obrigatorios(nome, documento):
 
 
 # =========================================================
-# LEITURA / ESCRITA DA BASE
+# FUNÇÕES DE BANCO DE DADOS
 # =========================================================
+def empresa_para_dict(empresa):
+    return {
+        "ID": str(empresa.id),
+        "Nome": empresa.nome or "",
+        "CPF/CNPJ": formatar_documento(empresa.cpf_cnpj),
+        "Celular": formatar_celular(empresa.celular),
+        "UF": empresa.uf or "",
+        "Cidade": empresa.cidade or "",
+        "Bairro": empresa.bairro or "",
+        "CEP": formatar_cep(empresa.cep),
+        "Endereço": empresa.endereco or "",
+        "Número": empresa.numero or "",
+    }
 
+
+def listar_empresas_db():
+    empresas = Empresa.query.order_by(Empresa.id.desc()).all()
+    dados = [empresa_para_dict(emp) for emp in empresas]
+    return pd.DataFrame(dados, columns=COLUNAS)
+
+
+def buscar_empresa_db(id_registro):
+    return db.session.get(Empresa, id_registro)
+
+
+def documento_ja_existe_db(documento, ignorar_id=None):
+    doc = formatar_documento(documento)
+
+    query = Empresa.query.filter_by(cpf_cnpj=doc)
+    if ignorar_id is not None:
+        query = query.filter(Empresa.id != ignorar_id)
+
+    return db.session.query(query.exists()).scalar()
+
+
+# =========================================================
+# EXCEL: APENAS IMPORTAÇÃO / EXPORTAÇÃO
+# =========================================================
 def normalizar_dataframe(df):
     if df is None or df.empty:
         return pd.DataFrame(columns=COLUNAS)
@@ -466,78 +443,66 @@ def normalizar_dataframe(df):
     return df
 
 
-def ler_dados():
-    garantir_arquivo_base()
-
-    try:
-        df = pd.read_excel(ARQUIVO, dtype=str)
-    except Exception:
-        df = pd.DataFrame(columns=COLUNAS)
-
-    df = normalizar_dataframe(df)
-
-    ids_validos = []
-    proximo = 1
-
-    for valor in df["ID"]:
-        numeros = apenas_numeros(valor)
-        if numeros:
-            ids_validos.append(str(int(numeros)))
-        else:
-            ids_validos.append(str(proximo))
-            proximo += 1
-
-    df["ID"] = ids_validos
-    return df
+def valor_coluna(linha, coluna):
+    if coluna is None:
+        return ""
+    return linha.get(coluna, "")
 
 
-def salvar_dados(df, motivo_backup="alteracao"):
-    df = normalizar_dataframe(df)
+def importar_dataframe(df_origem, df_atual):
+    df_origem = normalizar_dataframe(df_origem)
 
-    backup_criado = criar_backup(motivo_backup)
-    if backup_criado:
-        registrar_auditoria("backup_criado", {"arquivo": backup_criado})
+    importados = []
+    ignorados = 0
 
-    df.to_excel(ARQUIVO, index=False)
+    docs_existentes = set(df_atual["CPF/CNPJ"].astype(str).apply(apenas_numeros).tolist()) if not df_atual.empty else set()
 
+    for _, linha in df_origem.iterrows():
+        nome = padronizar_nome(valor_coluna(linha, "Nome"))
+        documento = formatar_documento(valor_coluna(linha, "CPF/CNPJ"))
+        celular = formatar_celular(valor_coluna(linha, "Celular"))
+        uf = padronizar_uf(valor_coluna(linha, "UF"))
+        cidade = padronizar_cidade(valor_coluna(linha, "Cidade"))
+        bairro = padronizar_bairro(valor_coluna(linha, "Bairro"))
+        cep = formatar_cep(valor_coluna(linha, "CEP"))
+        endereco = padronizar_endereco(valor_coluna(linha, "Endereço"))
+        numero = limpar_texto(valor_coluna(linha, "Número"))
 
-def proximo_id(df):
-    if df.empty:
-        return 1
-
-    ids = pd.to_numeric(df["ID"], errors="coerce").dropna()
-    if ids.empty:
-        return 1
-
-    return int(ids.max()) + 1
-
-
-def buscar_por_id(df, id_registro):
-    filtro = df["ID"].astype(str) == str(id_registro)
-    resultado = df[filtro]
-    if resultado.empty:
-        return None, None
-    idx = resultado.index[0]
-    return idx, resultado.iloc[0].to_dict()
-
-
-def documento_ja_existe(df, documento, ignorar_id=None):
-    doc_limpo = apenas_numeros(documento)
-
-    for _, linha in df.iterrows():
-        id_linha = str(linha["ID"])
-        doc_linha = apenas_numeros(linha["CPF/CNPJ"])
-        if ignorar_id is not None and id_linha == str(ignorar_id):
+        if not nome or not documento:
+            ignorados += 1
             continue
-        if doc_linha and doc_linha == doc_limpo:
-            return True
-    return False
+
+        doc_limpo = apenas_numeros(documento)
+
+        if not validar_documento(documento):
+            ignorados += 1
+            continue
+
+        if doc_limpo in docs_existentes:
+            ignorados += 1
+            continue
+
+        registro = {
+            "Nome": nome[:200],
+            "CPF/CNPJ": documento[:18],
+            "Celular": celular[:30],
+            "UF": uf[:2],
+            "Cidade": cidade[:120],
+            "Bairro": bairro[:120],
+            "CEP": cep[:10],
+            "Endereço": endereco[:200],
+            "Número": numero[:50],
+        }
+
+        importados.append(registro)
+        docs_existentes.add(doc_limpo)
+
+    return importados, ignorados
 
 
 # =========================================================
 # RESUMO / FILTRO / ORDENAÇÃO / PAGINAÇÃO
 # =========================================================
-
 def aplicar_filtros(df, busca="", tipo=""):
     df_filtrado = df.copy()
 
@@ -585,8 +550,7 @@ def aplicar_ordenacao(df, ordem="id_desc"):
             na_position="last",
             kind="stable",
         )
-        df_ordenado = df_ordenado.drop(columns=["_id_num"])
-        return df_ordenado
+        return df_ordenado.drop(columns=["_id_num"])
 
     if ordem == "nome_asc":
         return df_ordenado.sort_values(by="Nome", ascending=True, na_position="last", kind="stable")
@@ -602,15 +566,14 @@ def aplicar_ordenacao(df, ordem="id_desc"):
 
     df_ordenado["_id_num"] = pd.to_numeric(df_ordenado["ID"], errors="coerce")
     df_ordenado = df_ordenado.sort_values(by="_id_num", ascending=False, na_position="last", kind="stable")
-    df_ordenado = df_ordenado.drop(columns=["_id_num"])
-    return df_ordenado
+    return df_ordenado.drop(columns=["_id_num"])
 
 
 def gerar_resumo(df_total, df_filtrado):
-    documentos = df_total["CPF/CNPJ"].astype(str).apply(apenas_numeros)
+    documentos = df_total["CPF/CNPJ"].astype(str).apply(apenas_numeros) if not df_total.empty else pd.Series(dtype=str)
 
-    total_pessoas = int((documentos.str.len() == 11).sum())
-    total_empresas = int((documentos.str.len() == 14).sum())
+    total_pessoas = int((documentos.str.len() == 11).sum()) if not df_total.empty else 0
+    total_empresas = int((documentos.str.len() == 14).sum()) if not df_total.empty else 0
 
     return {
         "total_registros": int(len(df_total)),
@@ -646,9 +609,8 @@ def paginar_dataframe(df, pagina=1, por_pagina=10):
 # =========================================================
 # PREPARAÇÃO DE REGISTRO
 # =========================================================
-
 def montar_registro_form(form, id_existente=None):
-    registro = {
+    return {
         "ID": str(id_existente) if id_existente is not None else "",
         "Nome": padronizar_nome(form.get("nome")),
         "CPF/CNPJ": formatar_documento(form.get("cpf_cnpj")),
@@ -660,96 +622,17 @@ def montar_registro_form(form, id_existente=None):
         "Endereço": padronizar_endereco(form.get("endereco")),
         "Número": limpar_texto(form.get("numero")),
     }
-    return registro
 
 
-def lista_erros_registro(df, registro, ignorar_id=None):
-    erros = validar_campos_obrigatorios(registro["Nome"], registro["CPF/CNPJ"])
-
-    if documento_ja_existe(df, registro["CPF/CNPJ"], ignorar_id=ignorar_id):
-        erros.append("Já existe outro cadastro com este CPF/CNPJ.")
-
-    return erros
+def calcular_completude(registro):
+    campos = ["Nome", "CPF/CNPJ", "Celular", "UF", "Cidade", "Bairro", "CEP", "Endereço", "Número"]
+    preenchidos = sum(1 for campo in campos if limpar_texto(registro.get(campo)))
+    return int((preenchidos / len(campos)) * 100) if campos else 0
 
 
 # =========================================================
-# IMPORTAÇÃO
+# ROTAS DE AUTENTICAÇÃO
 # =========================================================
-
-def detectar_coluna(df, *nomes):
-    mapa = {normalizar_chave_coluna(col): col for col in df.columns}
-    for nome in nomes:
-        chave = normalizar_chave_coluna(nome)
-        if chave in mapa:
-            return mapa[chave]
-    return None
-
-
-def valor_coluna(linha, coluna):
-    if coluna is None:
-        return ""
-    return linha.get(coluna, "")
-
-
-def importar_dataframe(df_origem, df_atual):
-    df_origem = normalizar_dataframe(df_origem)
-
-    importados = []
-    ignorados = 0
-
-    docs_existentes = set(df_atual["CPF/CNPJ"].astype(str).apply(apenas_numeros).tolist())
-
-    for _, linha in df_origem.iterrows():
-        nome = padronizar_nome(valor_coluna(linha, "Nome"))
-        documento = formatar_documento(valor_coluna(linha, "CPF/CNPJ"))
-        celular = formatar_celular(valor_coluna(linha, "Celular"))
-        uf = padronizar_uf(valor_coluna(linha, "UF"))
-        cidade = padronizar_cidade(valor_coluna(linha, "Cidade"))
-        bairro = padronizar_bairro(valor_coluna(linha, "Bairro"))
-        cep = formatar_cep(valor_coluna(linha, "CEP"))
-        endereco = padronizar_endereco(valor_coluna(linha, "Endereço"))
-        numero = limpar_texto(valor_coluna(linha, "Número"))
-
-        if not nome or not documento:
-            ignorados += 1
-            continue
-
-        doc_limpo = apenas_numeros(documento)
-
-        if not validar_documento(documento):
-            ignorados += 1
-            continue
-
-        if doc_limpo in docs_existentes:
-            ignorados += 1
-            continue
-
-        registro = {
-            "Nome": nome[:200],
-            "CPF/CNPJ": documento[:18],
-            "Celular": celular[:30],
-            "UF": uf[:2],
-            "Cidade": cidade[:120],
-            "Bairro": bairro[:120],
-            "CEP": cep[:10],
-            "Endereço": endereco[:200],
-            "Número": numero[:50],
-        }
-
-        importados.append(registro)
-        docs_existentes.add(doc_limpo)
-
-    return importados, ignorados
-
-
-# =========================================================
-# ROTAS
-# =========================================================
-
-# =========================================================
-# ROTAS
-# =========================================================
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
@@ -771,14 +654,15 @@ def login():
 
     return render_template("login.html")
 
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for("index"))
 
     if request.method == "POST":
-        nome = request.form.get("nome", "").strip()
-        email = request.form.get("email", "").strip().lower()
+        nome = limpar_texto(request.form.get("nome"))
+        email = limpar_texto(request.form.get("email")).lower()
         senha = request.form.get("senha", "")
         confirmar_senha = request.form.get("confirmar_senha", "")
 
@@ -808,11 +692,7 @@ def register():
             return redirect(url_for("register"))
 
         try:
-            novo_usuario = Usuario(
-                nome=nome,
-                email=email,
-                ativo=True
-            )
+            novo_usuario = Usuario(nome=nome, email=email, ativo=True)
             novo_usuario.set_senha(senha)
 
             db.session.add(novo_usuario)
@@ -828,6 +708,7 @@ def register():
 
     return render_template("register.html")
 
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -835,14 +716,17 @@ def logout():
     flash("Você saiu do sistema com sucesso.", "success")
     return redirect(url_for("login"))
 
+
 @app.route("/usuarios")
 @login_required
 def listar_usuarios():
-    usuarios = Usuario.query.all()
+    usuarios = Usuario.query.order_by(Usuario.id.desc()).all()
     return render_template("usuarios.html", usuarios=usuarios)
 
 
-
+# =========================================================
+# ROTAS PRINCIPAIS
+# =========================================================
 @app.route("/")
 @login_required
 def index():
@@ -1035,6 +919,7 @@ def delete(id):
 
     return redirect(url_for("index"))
 
+
 @app.route("/delete_selected", methods=["POST"])
 @login_required
 def delete_selected():
@@ -1090,6 +975,7 @@ def delete_selected():
 
     return redirect(url_for("index"))
 
+
 @app.route("/delete_all", methods=["POST"])
 @login_required
 def delete_all():
@@ -1114,6 +1000,7 @@ def delete_all():
         flash(f"Erro ao limpar base: {str(e)}", "danger")
 
     return redirect(url_for("index"))
+
 
 @app.route("/export")
 @login_required
@@ -1178,10 +1065,7 @@ def importar():
             ignore_index=True
         ) if novos_registros else df_atual
 
-        importados, ignorados = importar_dataframe(
-            df_importado,
-            base_temp
-        )
+        importados, ignorados = importar_dataframe(df_importado, base_temp)
 
         novos_registros.extend(importados)
         total_importados += len(importados)
@@ -1227,46 +1111,18 @@ def importar():
         )
     except Exception as e:
         db.session.rollback()
-        flash(f"Erro ao importar planilha: {str(e)}", "danger")
+        flash(f"Erro ao importar planilhas: {str(e)}", "danger")
 
     return redirect(url_for("index"))
 
 
 # =========================================================
-# FUNÇÕES EXTRAS DA TELA DE EDIÇÃO
+# INICIALIZAÇÃO
 # =========================================================
-
-def calcular_completude(registro):
-    campos = [
-        "Nome",
-        "CPF/CNPJ",
-        "Celular",
-        "UF",
-        "Cidade",
-        "Bairro",
-        "CEP",
-        "Endereço",
-        "Número",
-    ]
-
-    preenchidos = 0
-    for campo in campos:
-        if limpar_texto(registro.get(campo)):
-            preenchidos += 1
-
-    percentual = int(round((preenchidos / len(campos)) * 100))
-    return percentual
-
-
-# =========================================================
-# START
-# =========================================================
-
-with app.app_context():
-    db.create_all()
-    criar_admin_padrao()
-
-
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+        criar_admin_padrao()
+
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)

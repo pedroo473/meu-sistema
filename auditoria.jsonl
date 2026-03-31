@@ -40,3 +40,19 @@
 {"data_hora": "2026-03-26 14:24:28", "acao": "cadastros_excluidos_em_massa", "detalhes": {"quantidade": 2, "registros": [{"id": "1", "nome": "pedro", "documento": "144.354.456-62"}, {"id": "2", "nome": "empresa fudida", "documento": "24.296.895/0001-11"}]}}
 {"data_hora": "2026-03-30 11:00:03", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "nome": "aa", "documento": "16.513.178/0001-76"}}
 {"data_hora": "2026-03-30 11:07:44", "acao": "cadastros_excluidos_em_massa", "detalhes": {"quantidade": 1, "registros": [{"id": "1", "nome": "aa", "documento": "16.513.178/0001-76"}]}}
+{"data_hora": "2026-03-31 09:09:37", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "user_id": 1, "nome": "aaa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-31 09:09:40", "acao": "cadastro_excluido", "detalhes": {"id": "1", "user_id": 1, "nome": "aaa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-31 09:34:55", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-31 09:35:01", "acao": "cadastro_excluido", "detalhes": {"id": "1", "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-31 09:35:09", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-31 09:35:16", "acao": "cadastro_editado", "detalhes": {"id": "1", "user_id": 1, "antes": {"ID": "1", "Nome": "aa", "CPF/CNPJ": "144.354.456-62", "Celular": "", "UF": "", "Cidade": "", "Bairro": "", "CEP": "", "Endereço": "", "Número": ""}, "depois": {"ID": "1", "Nome": "aa", "CPF/CNPJ": "144.354.456-62", "Celular": "", "UF": "", "Cidade": "", "Bairro": "", "CEP": "", "Endereço": "", "Número": ""}}}
+{"data_hora": "2026-03-31 09:45:38", "acao": "cadastros_excluidos_em_massa", "detalhes": {"quantidade": 1, "user_id": 1, "registros": [{"id": "1", "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}]}}
+{"data_hora": "2026-03-31 09:56:06", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-31 09:56:14", "acao": "cadastro_excluido", "detalhes": {"id": "1", "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-31 09:56:20", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "user_id": 1, "nome": "asfsaf", "documento": "16.513.178/0001-76"}}
+{"data_hora": "2026-03-31 09:56:24", "acao": "cadastro_excluido", "detalhes": {"id": "1", "user_id": 1, "nome": "asfsaf", "documento": "16.513.178/0001-76"}}
+{"data_hora": "2026-03-31 10:34:27", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-31 10:34:35", "acao": "cadastro_excluido", "detalhes": {"id": "1", "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-31 10:40:30", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-03-31 10:42:50", "acao": "cadastro_editado", "detalhes": {"id": "1", "user_id": 1, "antes": {"ID": "1", "Nome": "aa", "CPF/CNPJ": "144.354.456-62", "Celular": "", "UF": "", "Cidade": "", "Bairro": "", "CEP": "", "Endereço": "", "Número": ""}, "depois": {"ID": "1", "Nome": "aa", "CPF/CNPJ": "144.354.456-62", "Celular": "(31) 99249-4648", "UF": "MG", "Cidade": "Contagem", "Bairro": "Riacho das Pedras", "CEP": "32280-430", "Endereço": "Rua Rio Congo", "Número": "999"}}}
+{"data_hora": "2026-03-31 10:43:01", "acao": "cadastros_excluidos_em_massa", "detalhes": {"quantidade": 1, "user_id": 1, "registros": [{"id": "1", "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}]}}

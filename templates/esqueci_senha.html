@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Sistema de Empresas</title>
+    <title>Recuperar Senha | Sistema de Empresas</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -96,7 +96,7 @@
         }
 
         .auth-title {
-            font-size: 2.2rem;
+            font-size: 2.1rem;
             font-weight: 800;
             margin: 0;
             line-height: 1.1;
@@ -131,8 +131,7 @@
             margin-bottom: 8px;
         }
 
-        .input-premium,
-        .input-senha-premium {
+        .input-premium {
             width: 100%;
             height: 58px;
             border-radius: 18px;
@@ -145,59 +144,15 @@
             transition: all 0.25s ease;
         }
 
-        .input-premium::placeholder,
-        .input-senha-premium::placeholder {
+        .input-premium::placeholder {
             color: #94a3b8;
         }
 
-        .input-premium:focus,
-        .input-senha-premium:focus {
+        .input-premium:focus {
             outline: none;
             border-color: var(--azul-primario);
             box-shadow: 0 0 0 5px rgba(31, 111, 235, 0.14);
             transform: translateY(-1px);
-        }
-
-        .campo-senha {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-senha-premium {
-            padding-right: 58px;
-        }
-
-        .btn-toggle-senha {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 40px;
-            height: 40px;
-            border: none;
-            background: transparent;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: #64748b;
-            transition: all 0.22s ease;
-        }
-
-        .btn-toggle-senha:hover {
-            background: rgba(31, 111, 235, 0.08);
-            color: var(--azul-primario);
-            transform: translateY(-50%) scale(1.05);
-        }
-
-        .btn-toggle-senha:active {
-            transform: translateY(-50%) scale(0.96);
-        }
-
-        .btn-toggle-senha i {
-            font-size: 1.1rem;
         }
 
         .btn-premium {
@@ -225,38 +180,6 @@
             transform: translateY(0);
         }
 
-        .btn-secondary-premium {
-            background: #fff;
-            color: #334155;
-            border: 1.5px solid var(--borda);
-        }
-
-        .btn-secondary-premium:hover {
-            background: #f8fbff;
-            border-color: #c8d7f2;
-            transform: translateY(-1px);
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin: 22px 0;
-            color: #94a3b8;
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(to right, transparent, #d7e3f5, transparent);
-        }
-
         .alert {
             border: none;
             border-radius: 16px;
@@ -273,8 +196,8 @@
 
         .footer-note {
             text-align: center;
-            margin-top: 20px;
-            font-size: 13px;
+            margin-top: 22px;
+            font-size: 14px;
             color: #64748b;
         }
 
@@ -286,11 +209,6 @@
 
         .footer-note a:hover {
             text-decoration: underline;
-        }
-
-        .mb-3,
-        .mb-4 {
-            animation: fadeUp 0.55s ease;
         }
 
         @keyframes fadeUp {
@@ -318,7 +236,6 @@
             }
 
             .input-premium,
-            .input-senha-premium,
             .btn-premium {
                 height: 54px;
                 border-radius: 16px;
@@ -333,18 +250,18 @@
         <div class="auth-header">
             <div class="auth-header-content">
                 <div class="auth-badge">
-                    <i class="bi bi-shield-lock-fill"></i>
-                    Acesso seguro
+                    <i class="bi bi-key-fill"></i>
+                    Recuperação de acesso
                 </div>
-                <h1 class="auth-title">Sistema de Empresas</h1>
-                <p class="auth-subtitle">Entre com seu e-mail e senha para acessar o sistema</p>
+                <h1 class="auth-title">Esqueceu sua senha?</h1>
+                <p class="auth-subtitle">Recupere seu acesso de forma rápida e segura</p>
             </div>
         </div>
 
         <div class="auth-body">
-            <div class="section-title">Bem-vindo de volta</div>
+            <div class="section-title">Recuperar senha</div>
             <div class="section-subtitle">
-                Faça login para continuar gerenciando seus cadastros com segurança.
+                Informe seu e-mail cadastrado para gerar um link de redefinição.
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -358,88 +275,34 @@
                 {% endif %}
             {% endwith %}
 
-            <form method="POST" action="{{ url_for('login') }}" autocomplete="on">
-                <div class="mb-3">
+            <form method="POST">
+                <div class="mb-4">
                     <label for="email" class="form-label">E-mail</label>
                     <input
                         type="email"
                         name="email"
                         id="email"
                         class="form-control input-premium"
-                        placeholder="Digite seu e-mail"
+                        placeholder="Digite seu e-mail cadastrado"
                         required
-                        autocomplete="email"
                     >
-                    <div class="form-text-custom">Use o e-mail cadastrado para acessar sua conta.</div>
-                </div>
-
-                <div class="mb-4">
-                    <label for="senha_login" class="form-label">Senha</label>
-                    <div class="campo-senha">
-                        <input
-                            type="password"
-                            name="senha"
-                            id="senha_login"
-                            class="form-control input-senha-premium"
-                            placeholder="Digite sua senha"
-                            required
-                            autocomplete="current-password"
-                        >
-                        <button
-                            type="button"
-                            class="btn-toggle-senha"
-                            onclick="toggleSenha('senha_login', this)"
-                            aria-label="Mostrar ou ocultar senha"
-                        >
-                            <i class="bi bi-eye"></i>
-                        </button>
+                    <div class="form-text-custom">
+                        Use o mesmo e-mail que você utiliza para entrar no sistema.
                     </div>
-                    <div class="form-text-custom">Clique no ícone para mostrar ou ocultar a senha.</div>
                 </div>
 
                 <button type="submit" class="btn btn-premium btn-primary-premium w-100">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>
-                    Entrar
+                    <i class="bi bi-send-fill me-2"></i>
+                    Gerar link de recuperação
                 </button>
-
-                <div class="text-center mt-3">
-    <a href="{{ url_for('esqueci_senha') }}" class="text-decoration-none text-primary fw-semibold">
-        Esqueci minha senha
-    </a>
-</div>
-
-
-                <div class="divider">ou</div>
-
-                <a href="{{ url_for('register') }}" class="btn btn-premium btn-secondary-premium w-100 text-decoration-none d-flex align-items-center justify-content-center">
-                    <i class="bi bi-person-plus-fill me-2"></i>
-                    Criar conta
-                </a>
-
-                <div class="footer-note">
-                    Ainda não possui cadastro? <a href="{{ url_for('register') }}">Registrar agora</a>
-                </div>
             </form>
+
+            <div class="footer-note">
+                Lembrou sua senha? <a href="{{ url_for('login') }}">Voltar ao login</a>
+            </div>
         </div>
     </div>
 </div>
-
-<script>
-    function toggleSenha(inputId, botao) {
-        const campo = document.getElementById(inputId);
-        const icone = botao.querySelector("i");
-
-        if (campo.type === "password") {
-            campo.type = "text";
-            icone.classList.remove("bi-eye");
-            icone.classList.add("bi-eye-slash");
-        } else {
-            campo.type = "password";
-            icone.classList.remove("bi-eye-slash");
-            icone.classList.add("bi-eye");
-        }
-    }
-</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 

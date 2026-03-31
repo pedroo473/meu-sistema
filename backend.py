@@ -1,5 +1,12 @@
 from sqlalchemy import text
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import (
+    LoginManager,
+    UserMixin,
+    login_user,
+    login_required,
+    logout_user,
+    current_user,
+)
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -8,27 +15,57 @@ import pandas as pd
 import os
 import re
 import json
-import shutil
 from datetime import datetime
 from io import BytesIO
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
-# =========================
-# BANCO DE DADOS
-# =========================
+secret_key = os.environ.get("SECRET_KEY")
+if not secret_key:
+    secret_key = os.urandom(32).hex()
+    print("⚠️ SECRET_KEY não encontrada. Usando chave aleatória local temporária.")
+
+app.config["SECRET_KEY"] = secret_key
+
+serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
+
 database_url = os.environ.get("DATABASE_URL")
-
 if not database_url:
-    database_url = "sqlite:///local.db"
-    print("⚠️ DATABASE_URL não encontrada. Usando SQLite local.")
+    database_url = f"sqlite:///{os.path.join(BASE_DIR, 'local.db')}"
+    print("⚠️ DATABASE_URL não encontrada. Usando SQLite local em local.db.")
+
+
+# =========================================================
+# APP / CONFIG
+# =========================================================
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+app = Flask(__name__)
+
+secret_key = os.environ.get("SECRET_KEY")
+if not secret_key:
+    # fallback seguro para ambiente local
+    secret_key = os.urandom(32).hex()
+    print("⚠️ SECRET_KEY não encontrada. Usando chave aleatória local temporária.")
+
+app.config["SECRET_KEY"] = secret_key
+
+database_url = os.environ.get("DATABASE_URL")
+if not database_url:
+    database_url = f"sqlite:///{os.path.join(BASE_DIR, 'local.db')}"
+    print("⚠️ DATABASE_URL não encontrada. Usando SQLite local em local.db.")
 
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_pre_ping": True,
+}
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -38,19 +75,18 @@ login_manager.login_view = "login"
 login_manager.login_message = "Faça login para acessar o sistema."
 login_manager.login_message_category = "warning"
 
-
-# =========================
+# =========================================================
 # MODELOS
-# =========================
+# =========================================================
 class Usuario(UserMixin, db.Model):
     __tablename__ = "usuarios"
 
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(150), nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False, index=True)
     senha_hash = db.Column(db.String(255), nullable=False)
     ativo = db.Column(db.Boolean, default=True, nullable=False)
-    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     registros = db.relationship(
         "Empresa",
@@ -73,7 +109,7 @@ class Empresa(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False, index=True)
 
     nome = db.Column(db.String(150), nullable=False)
-    cpf_cnpj = db.Column(db.String(20), nullable=False)
+    cpf_cnpj = db.Column(db.String(20), nullable=False, index=True)
     celular = db.Column(db.String(20))
     uf = db.Column(db.String(2))
     cidade = db.Column(db.String(100))
@@ -81,8 +117,8 @@ class Empresa(db.Model):
     cep = db.Column(db.String(20))
     endereco = db.Column(db.String(150))
     numero = db.Column(db.String(20))
-    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
-    atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     usuario = db.relationship("Usuario", back_populates="registros")
 
@@ -95,32 +131,10 @@ def load_user(user_id):
         return None
 
 
-def criar_admin_padrao():
-    email_admin = os.environ.get("ADMIN_EMAIL", "admin@admin.com")
-    senha_admin = os.environ.get("ADMIN_PASSWORD", "123456")
-
-    usuario = Usuario.query.filter_by(email=email_admin).first()
-
-    if not usuario:
-        usuario = Usuario(
-            nome="Administrador",
-            email=email_admin,
-            ativo=True,
-        )
-        usuario.set_senha(senha_admin)
-
-        db.session.add(usuario)
-        db.session.commit()
-
-        print("✅ Admin criado com sucesso")
-        print("Login:", email_admin)
-        print("Senha:", senha_admin)
-
-
-# =========================
-# CONFIGURAÇÕES DE EXCEL / AUDITORIA
-# =========================
-ARQUIVO_AUDITORIA = "auditoria.jsonl"
+# =========================================================
+# CONSTANTES
+# =========================================================
+ARQUIVO_AUDITORIA = os.path.join(BASE_DIR, "auditoria.jsonl")
 
 COLUNAS = [
     "ID",
@@ -172,7 +186,6 @@ ALIAS_COLUNAS = {
     "n": "Número",
 }
 
-
 # =========================================================
 # UTILITÁRIOS BÁSICOS
 # =========================================================
@@ -210,7 +223,43 @@ def registrar_auditoria(acao, detalhes=None):
         with open(ARQUIVO_AUDITORIA, "a", encoding="utf-8") as f:
             f.write(json.dumps(payload, ensure_ascii=False) + "\n")
     except Exception:
-        pass
+        app.logger.exception("Erro ao registrar auditoria")
+
+
+def criar_admin_padrao():
+    """
+    Em produção: crie ADMIN_EMAIL e ADMIN_PASSWORD no ambiente.
+    Localmente, se não existir nenhum usuário, cria um admin básico para teste.
+    """
+    usuario_existente = Usuario.query.first()
+    if usuario_existente:
+        return
+
+    email_admin = os.environ.get("ADMIN_EMAIL")
+    senha_admin = os.environ.get("ADMIN_PASSWORD")
+
+    if not email_admin or not senha_admin:
+        if app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite"):
+            email_admin = "admin@admin.com"
+            senha_admin = "123456"
+            print("⚠️ Admin local criado com credenciais padrão para ambiente de teste.")
+        else:
+            print("⚠️ ADMIN_EMAIL / ADMIN_PASSWORD não configurados. Admin padrão não será criado.")
+            return
+
+    usuario = Usuario(
+        nome="Administrador",
+        email=email_admin,
+        ativo=True,
+    )
+    usuario.set_senha(senha_admin)
+
+    db.session.add(usuario)
+    db.session.commit()
+
+    print("✅ Admin criado com sucesso")
+    print("Login:", email_admin)
+    print("Senha:", senha_admin)
 
 
 def resetar_sequence_empresas_do_usuario_se_vazio(user_id):
@@ -222,11 +271,16 @@ def resetar_sequence_empresas_do_usuario_se_vazio(user_id):
     if uri.startswith("postgresql"):
         try:
             db.session.execute(
-                text("SELECT setval(pg_get_serial_sequence('empresas', 'id'), COALESCE((SELECT MAX(id) FROM empresas), 1), true)")
+                text(
+                    "SELECT setval("
+                    "pg_get_serial_sequence('empresas', 'id'), "
+                    "COALESCE((SELECT MAX(id) FROM empresas), 1), true)"
+                )
             )
             db.session.commit()
         except Exception:
             db.session.rollback()
+            app.logger.exception("Erro ao resetar sequence do PostgreSQL")
 
 
 # =========================================================
@@ -375,7 +429,7 @@ def validar_campos_obrigatorios(nome, documento):
 
 
 # =========================================================
-# FUNÇÕES DE BANCO DE DADOS
+# FUNÇÕES DE BANCO
 # =========================================================
 def empresa_para_dict(empresa):
     return {
@@ -418,7 +472,7 @@ def documento_ja_existe_db(documento, user_id, ignorar_id=None):
 
 
 # =========================================================
-# EXCEL: APENAS IMPORTAÇÃO / EXPORTAÇÃO
+# EXCEL
 # =========================================================
 def normalizar_dataframe(df):
     if df is None or df.empty:
@@ -468,7 +522,10 @@ def importar_dataframe(df_origem, df_atual):
     importados = []
     ignorados = 0
 
-    docs_existentes = set(df_atual["CPF/CNPJ"].astype(str).apply(apenas_numeros).tolist()) if not df_atual.empty else set()
+    docs_existentes = (
+        set(df_atual["CPF/CNPJ"].astype(str).apply(apenas_numeros).tolist())
+        if not df_atual.empty else set()
+    )
 
     for _, linha in df_origem.iterrows():
         nome = padronizar_nome(valor_coluna(linha, "Nome"))
@@ -514,7 +571,7 @@ def importar_dataframe(df_origem, df_atual):
 
 
 # =========================================================
-# RESUMO / FILTRO / ORDENAÇÃO / PAGINAÇÃO
+# FILTRO / ORDENAÇÃO / RESUMO / PAGINAÇÃO
 # =========================================================
 def aplicar_filtros(df, busca="", tipo=""):
     df_filtrado = df.copy()
@@ -714,15 +771,16 @@ def register():
             flash("Cadastro realizado com sucesso. Agora faça login.", "success")
             return redirect(url_for("login"))
 
-        except Exception as e:
+        except Exception:
             db.session.rollback()
-            flash(f"Erro ao cadastrar usuário: {str(e)}", "danger")
+            app.logger.exception("Erro ao cadastrar usuário")
+            flash("Erro interno ao cadastrar usuário.", "danger")
             return redirect(url_for("register"))
 
     return render_template("register.html")
 
 
-@app.route("/logout")
+@app.route("/logout", methods=["POST"])
 @login_required
 def logout():
     logout_user()
@@ -735,6 +793,64 @@ def logout():
 def listar_usuarios():
     usuarios = [current_user]
     return render_template("usuarios.html", usuarios=usuarios)
+
+@app.route("/esqueci-senha", methods=["GET", "POST"])
+def esqueci_senha():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+
+        usuario = Usuario.query.filter_by(email=email).first()
+
+        if usuario:
+            token = serializer.dumps(email, salt="recuperar-senha")
+            link = url_for("redefinir_senha", token=token, _external=True)
+
+            print("LINK DE RECUPERAÇÃO:", link)
+            flash("Encontramos seu cadastro. O link de recuperação foi gerado.", "success")
+        else:
+            flash("Não localizamos esse e-mail no sistema. Verifique e tente novamente.", "warning")
+
+        return redirect(url_for("esqueci_senha"))
+
+    return render_template("esqueci_senha.html")
+
+@app.route("/redefinir-senha/<token>", methods=["GET", "POST"])
+def redefinir_senha(token):
+    try:
+        email = serializer.loads(token, salt="recuperar-senha", max_age=3600)
+    except SignatureExpired:
+        flash("O link expirou. Solicite uma nova recuperação.", "danger")
+        return redirect(url_for("esqueci_senha"))
+    except BadSignature:
+        flash("Link inválido.", "danger")
+        return redirect(url_for("login"))
+
+    usuario = Usuario.query.filter_by(email=email).first()
+    if not usuario:
+        flash("Usuário não encontrado.", "danger")
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        nova_senha = request.form.get("nova_senha", "")
+        confirmar_senha = request.form.get("confirmar_senha", "")
+
+        if len(nova_senha) < 6:
+            flash("A senha deve ter pelo menos 6 caracteres.", "warning")
+            return redirect(url_for("redefinir_senha", token=token))
+
+        if nova_senha != confirmar_senha:
+            flash("As senhas não coincidem.", "warning")
+            return redirect(url_for("redefinir_senha", token=token))
+
+        usuario.set_senha(nova_senha)
+        db.session.commit()
+
+        flash("Senha redefinida com sucesso. Faça login.", "success")
+        return redirect(url_for("login"))
+
+    return render_template("redefinir_senha.html", token=token)
+
+
 
 
 # =========================================================
@@ -823,9 +939,10 @@ def add():
         )
 
         flash("Cadastro salvo com sucesso.", "success")
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        flash(f"Erro ao salvar cadastro: {str(e)}", "danger")
+        app.logger.exception("Erro ao salvar cadastro")
+        flash("Erro interno ao salvar cadastro.", "danger")
 
     return redirect(url_for("index"))
 
@@ -895,14 +1012,15 @@ def update(id):
         )
 
         flash("Cadastro atualizado com sucesso.", "success")
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        flash(f"Erro ao atualizar cadastro: {str(e)}", "danger")
+        app.logger.exception("Erro ao atualizar cadastro")
+        flash("Erro interno ao atualizar cadastro.", "danger")
 
     return redirect(url_for("index"))
 
 
-@app.route("/delete/<int:id>")
+@app.route("/delete/<int:id>", methods=["POST"])
 @login_required
 def delete(id):
     empresa = buscar_empresa_db(id, current_user.id)
@@ -930,9 +1048,10 @@ def delete(id):
         )
 
         flash("Cadastro excluído com sucesso.", "success")
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        flash(f"Erro ao excluir cadastro: {str(e)}", "danger")
+        app.logger.exception("Erro ao excluir cadastro")
+        flash("Erro interno ao excluir cadastro.", "danger")
 
     return redirect(url_for("index"))
 
@@ -991,9 +1110,10 @@ def delete_selected():
 
         flash(f"{len(excluidos)} cadastro(s) excluído(s) com sucesso.", "success")
 
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        flash(f"Erro ao excluir cadastros selecionados: {str(e)}", "danger")
+        app.logger.exception("Erro ao excluir cadastros selecionados")
+        flash("Erro interno ao excluir cadastros selecionados.", "danger")
 
     return redirect(url_for("index"))
 
@@ -1025,9 +1145,10 @@ def delete_all():
         )
 
         flash("Todos os seus cadastros foram excluídos com sucesso.", "success")
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        flash(f"Erro ao limpar base: {str(e)}", "danger")
+        app.logger.exception("Erro ao limpar base do usuário")
+        flash("Erro interno ao limpar a base.", "danger")
 
     return redirect(url_for("index"))
 
@@ -1138,12 +1259,14 @@ def importar():
         )
 
         flash(
-            f"Importação concluída: {total_importados} registro(s) importado(s), {total_ignorados} ignorado(s), {total_erros_arquivo} arquivo(s) com erro.",
+            f"Importação concluída: {total_importados} registro(s) importado(s), "
+            f"{total_ignorados} ignorado(s) e {total_erros_arquivo} arquivo(s) com erro.",
             "success",
         )
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        flash(f"Erro ao importar planilha: {str(e)}", "danger")
+        app.logger.exception("Erro ao importar planilha")
+        flash("Erro interno ao importar planilha.", "danger")
 
     return redirect(url_for("index"))
 
@@ -1153,10 +1276,14 @@ def health():
     return {"status": "ok"}, 200
 
 
+# =========================================================
+# START
+# =========================================================
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
         criar_admin_padrao()
 
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    debug_mode = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(host="0.0.0.0", port=port, debug=debug_mode)

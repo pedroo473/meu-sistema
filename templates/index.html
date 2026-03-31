@@ -1,1286 +1,1289 @@
-<!DOCTYPE html>
+                <div class="row g-3">
+                    <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-        <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Empresas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-
-.page-shell {
-    max-width: 1460px;
-    position: relative;
-    border: 3px solid rgba(37, 99, 235, 0.30);
-    border-radius: 28px;
-    box-shadow:
-        0 0 0 2px rgba(37, 99, 235, 0.10),
-        0 16px 45px rgba(37, 99, 235, 0.14);
-    padding: 24px;
-    background: rgba(255, 255, 255, 0.22);
-    backdrop-filter: blur(6px);
-}
-        :root {
-            --bg: #f4f7fb;
-            --bg-soft: #f8fafc;
-            --card: rgba(255, 255, 255, 0.88);
-            --card-solid: #ffffff;
-            --text: #17212b;
-            --muted: #6b7280;
-            --line: #e7edf4;
-            --primary: #2563eb;
-            --primary-2: #1d4ed8;
-            --success: #16a34a;
-            --warning: #f59e0b;
-            --danger: #dc2626;
-            --dark: #0f172a;
-            --shadow-xl: 0 20px 50px rgba(15, 23, 42, 0.10);
-            --shadow-lg: 0 14px 32px rgba(15, 23, 42, 0.08);
-            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.06);
-            --radius-xl: 26px;
-            --radius-lg: 20px;
-            --radius-md: 14px;
-        }
-
-        * {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            box-sizing: border-box;
-        }
-
-        body {
-            background:
-                radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 30%),
-                radial-gradient(circle at top right, rgba(34, 197, 94, 0.06), transparent 25%),
-                linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
-            color: var(--text);
-        }
-
-        .page-shell {
-            max-width: 1460px;
-        }
-
-        .hero {
-            position: relative;
-            overflow: hidden;
-            border-radius: 30px;
-            background:
-                linear-gradient(135deg, rgba(37, 99, 235, 0.98), rgba(29, 78, 216, 0.92)),
-                linear-gradient(180deg, #2563eb, #1d4ed8);
-            color: #fff;
-            box-shadow: var(--shadow-xl);
-        }
-
-        .hero::before {
-            content: "";
-            position: absolute;
-            inset: auto -100px -100px auto;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(255,255,255,0.18), transparent 65%);
-            pointer-events: none;
-        }
-
-        .hero::after {
-            content: "";
-            position: absolute;
-            inset: -80px auto auto -60px;
-            width: 240px;
-            height: 240px;
-            background: radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%);
-            pointer-events: none;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background: rgba(255,255,255,0.14);
-            border: 1px solid rgba(255,255,255,0.18);
-            color: #fff;
-            padding: 10px 16px;
-            border-radius: 999px;
-            font-size: 0.92rem;
-            font-weight: 700;
-            backdrop-filter: blur(8px);
-            line-height: 1;
-        }
-
-        .hero-title {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 900;
-            line-height: 1.05;
-            letter-spacing: -1px;
-            margin: 0;
-        }
-
-        .hero-subtitle {
-            color: rgba(255,255,255,0.86);
-            font-size: 1rem;
-            max-width: 720px;
-            margin: 0;
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn,
-        .btn-hero-light,
-        .btn-hero-ghost,
-        .btn-soft,
-        .btn-acao {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            line-height: 1;
-            vertical-align: middle;
-        }
-
-        .btn-hero-light {
-            background: #fff;
-            color: var(--primary-2);
-            border: none;
-            font-weight: 800;
-            border-radius: 14px;
-            min-height: 50px;
-            padding: 0 18px;
-            box-shadow: 0 10px 24px rgba(0,0,0,0.08);
-            text-decoration: none;
-        }
-
-        .btn-hero-ghost {
-            background: rgba(255,255,255,0.10);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.18);
-            font-weight: 800;
-            border-radius: 14px;
-            min-height: 50px;
-            padding: 0 18px;
-            backdrop-filter: blur(8px);
-            text-decoration: none;
-        }
-
-        .glass-card,
-        .solid-card {
-            border: 1px solid rgba(231, 237, 244, 0.9);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .glass-card {
-            background: var(--card);
-            backdrop-filter: blur(14px);
-        }
-
-        .solid-card {
-            background: var(--card-solid);
-        }
-
-        .hero-summary-card {
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid rgba(255,255,255,0.35);
-            border-radius: 26px;
-            padding: 24px;
-            box-shadow: 0 18px 30px rgba(15, 23, 42, 0.10);
-            color: #17212b;
-            backdrop-filter: blur(12px);
-        }
-
-        .hero-summary-title {
-            font-size: 1.05rem;
-            font-weight: 900;
-            color: #111827;
-            margin-bottom: 4px;
-        }
-
-        .hero-summary-subtitle {
-            color: #64748b;
-            font-size: 0.92rem;
-            margin-bottom: 18px;
-        }
-
-        .hero-summary-live {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 42px;
-            padding: 0 14px;
-            border-radius: 999px;
-            background: #eef5ff;
-            color: #1d4ed8;
-            border: 1px solid #dbeafe;
-            font-size: 0.84rem;
-            font-weight: 900;
-            line-height: 1;
-            white-space: nowrap;
-        }
-
-        .hero-mini-card {
-            background: #ffffff;
-            border: 1px solid #edf2f7;
-            border-radius: 18px;
-            padding: 16px;
-            height: 100%;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
-        }
-
-        .hero-mini-label {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        .hero-mini-value {
-            font-size: 2rem;
-            line-height: 1;
-            font-weight: 900;
-            color: #0f172a;
-            margin: 0;
-        }
-
-        .hero-mini-value.sm {
-            font-size: 1.45rem;
-        }
-
-        .metric-card {
-            position: relative;
-            overflow: hidden;
-            padding: 22px;
-            height: 100%;
-        }
-
-        .metric-card::after {
-            content: "";
-            position: absolute;
-            top: -32px;
-            right: -32px;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.10), transparent 70%);
-        }
-
-        .metric-icon {
-            width: 54px;
-            height: 54px;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            margin-bottom: 14px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
-        }
-
-        .metric-icon.total {
-            background: linear-gradient(135deg, rgba(37,99,235,0.16), rgba(37,99,235,0.08));
-        }
-
-        .metric-icon.pessoas {
-            background: linear-gradient(135deg, rgba(22,163,74,0.16), rgba(22,163,74,0.08));
-        }
-
-        .metric-icon.empresas {
-            background: linear-gradient(135deg, rgba(245,158,11,0.20), rgba(245,158,11,0.08));
-        }
-
-        .metric-icon.resultados {
-            background: linear-gradient(135deg, rgba(15,23,42,0.12), rgba(15,23,42,0.05));
-        }
-
-        .metric-label {
-            font-size: 0.92rem;
-            color: var(--muted);
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-
-        .metric-value {
-            font-size: 2rem;
-            font-weight: 900;
-            line-height: 1;
-            letter-spacing: -1px;
-            margin: 0 0 6px 0;
-        }
-
-        .metric-foot {
-            color: var(--muted);
-            font-size: 0.84rem;
-            margin: 0;
-        }
-
-        .section-title {
-            font-size: 1.08rem;
-            font-weight: 900;
-            margin: 0;
-            letter-spacing: -0.3px;
-        }
-
-        .section-subtitle {
-            font-size: 0.92rem;
-            color: var(--muted);
-            margin: 4px 0 0 0;
-        }
-
-        .section-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: 999px;
-            padding: 8px 12px;
-            background: #eef5ff;
-            color: var(--primary-2);
-            border: 1px solid #dbeafe;
-            font-size: 0.88rem;
-            font-weight: 800;
-        }
-
-        .form-control,
-        .form-select {
-            min-height: 50px;
-            border-radius: 16px;
-            border: 1px solid #dfe7ef;
-            background: #fff;
-            box-shadow: none !important;
-            padding-left: 14px;
-            padding-right: 14px;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #93c5fd;
-            box-shadow: 0 0 0 0.22rem rgba(37, 99, 235, 0.12) !important;
-        }
-
-        .btn {
-            border-radius: 16px;
-            min-height: 50px;
-            font-weight: 800;
-            padding-left: 18px;
-            padding-right: 18px;
-        }
-
-        .btn-soft {
-            background: #f8fafc;
-            border: 1px solid #e5ebf2;
-            color: #334155;
-        }
-
-        .register-card {
-            overflow: hidden;
-        }
-
-        .register-header {
-            padding: 22px 24px 0 24px;
-        }
-
-        .register-body {
-            padding: 18px 24px 24px 24px;
-        }
-
-        .table-shell {
-            overflow: hidden;
-        }
-
-        .table-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            padding: 0 0 18px 0;
-        }
-
-        .bulk-bar {
-            background: linear-gradient(180deg, #fafcff, #f7faff);
-            border: 1px solid var(--line);
-            border-radius: 18px;
-            padding: 14px 16px;
-        }
-
-        .tabela-registros {
-            margin: 0;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        .tabela-registros thead th {
-            background: linear-gradient(180deg, #17212b, #111827);
-            color: #fff;
-            border: none;
-            padding: 16px 14px;
-            font-size: 0.90rem;
-            font-weight: 800;
-            white-space: nowrap;
-            vertical-align: middle;
-        }
-
-        .tabela-registros thead th:first-child {
-            border-top-left-radius: 16px;
-        }
-
-        .tabela-registros thead th:last-child {
-            border-top-right-radius: 16px;
-        }
-
-        .tabela-registros tbody td {
-            background: #fff;
-            border-color: #edf2f7;
-            padding: 15px 14px;
-            vertical-align: middle;
-        }
-
-        .tabela-registros tbody tr {
-            transition: 0.18s ease;
-        }
-
-        .tabela-registros tbody tr:hover td {
-            background: #fbfdff;
-        }
-
-        .tabela-registros tbody tr.linha-selecionada td {
-            background: #f8fbff;
-        }
-
-        .id-pill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 54px;
-            padding: 7px 10px;
-            border-radius: 999px;
-            background: #eff6ff;
-            color: var(--primary-2);
-            font-weight: 900;
-            font-size: 0.84rem;
-            border: 1px solid #dbeafe;
-        }
-
-        .name-block {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            min-width: 0;
-        }
-
-        .name-main {
-            font-weight: 800;
-            color: #111827;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 260px;
-        }
-
-        .name-sub {
-            color: var(--muted);
-            font-size: 0.84rem;
-        }
-
-        .doc-pill,
-        .city-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: 999px;
-            padding: 8px 12px;
-            background: #f8fafc;
-            border: 1px solid #e8eef5;
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: #334155;
-            line-height: 1;
-        }
-
-        .acoes-wrap {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .btn-acao {
-            min-height: 40px;
-            border-radius: 12px;
-            font-size: 0.84rem;
-            font-weight: 800;
-            padding: 0 12px;
-        }
-
-        .empty-state {
-            padding: 56px 24px;
-            text-align: center;
-        }
-
-        .empty-icon {
-            width: 74px;
-            height: 74px;
-            margin: 0 auto 14px auto;
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #eff6ff, #f8fafc);
-            font-size: 34px;
-        }
-
-        .empty-title {
-            font-size: 1.18rem;
-            font-weight: 900;
-            margin: 0 0 8px 0;
-        }
-
-        .empty-text {
-            color: var(--muted);
-            max-width: 480px;
-            margin: 0 auto;
-        }
-
-        .pagination-shell {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            padding-top: 18px;
-        }
-
-        .page-meta {
-            color: var(--muted);
-            font-size: 0.92rem;
-        }
-
-        .page-link {
-            border-radius: 12px !important;
-            margin: 0 3px;
-            border: 1px solid #e5ebf2;
-            color: #334155;
-            font-weight: 700;
-            min-height: unset;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-        }
-
-        .page-item.active .page-link {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .toast-container-custom {
-            position: fixed;
-            top: 18px;
-            right: 18px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: min(420px, calc(100vw - 24px));
-        }
-
-        .toast-custom {
-            position: relative;
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            padding: 16px 18px;
-            border-radius: 18px;
-            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14);
-            background: rgba(255,255,255,0.97);
-            backdrop-filter: blur(10px);
-            border: 1px solid #e8eef5;
-            overflow: hidden;
-            animation: slideInToast 0.35s ease;
-        }
-
-        .toast-icon {
-            flex-shrink: 0;
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 19px;
-            background: #f8fafc;
-        }
-
-        .toast-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .toast-title {
-            font-size: 0.96rem;
-            font-weight: 900;
-            margin-bottom: 4px;
-            color: #111827;
-        }
-
-        .toast-message {
-            font-size: 0.92rem;
-            color: #475569;
-            line-height: 1.45;
-            word-break: break-word;
-        }
-
-        .toast-close {
-            border: none;
-            background: transparent;
-            color: #94a3b8;
-            font-size: 24px;
-            line-height: 1;
-            cursor: pointer;
-            padding: 0;
-            margin-left: 4px;
-        }
-
-        .toast-progress {
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            height: 4px;
-            width: 100%;
-            transform-origin: left;
-            animation: toastProgress 5s linear forwards;
-        }
-
-        .toast-success { border-left: 5px solid var(--success); }
-        .toast-success .toast-icon { background: rgba(22,163,74,0.12); }
-        .toast-success .toast-progress { background: var(--success); }
-
-        .toast-danger { border-left: 5px solid var(--danger); }
-        .toast-danger .toast-icon { background: rgba(220,38,38,0.12); }
-        .toast-danger .toast-progress { background: var(--danger); }
-
-        .toast-warning { border-left: 5px solid var(--warning); }
-        .toast-warning .toast-icon { background: rgba(245,158,11,0.16); }
-        .toast-warning .toast-progress { background: var(--warning); }
-
-        .toast-primary { border-left: 5px solid var(--primary); }
-        .toast-primary .toast-icon { background: rgba(37,99,235,0.12); }
-        .toast-primary .toast-progress { background: var(--primary); }
-
-        .toast-hide {
-            animation: slideOutToast 0.28s ease forwards;
-        }
-
-        .modal-content {
-            border: 0;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
-        }
-
-        .modal-info-grid {
-            display: grid;
-            gap: 12px;
-        }
-
-        .modal-info-item {
-            border: 1px solid #edf2f7;
-            background: #fbfdff;
-            border-radius: 16px;
-            padding: 14px 16px;
-        }
-
-        .modal-info-label {
-            color: var(--muted);
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 800;
-            margin-bottom: 5px;
-        }
-
-        .modal-info-value {
-            color: #111827;
-            font-size: 0.97rem;
-            font-weight: 800;
-            word-break: break-word;
-        }
-
-        .top-user-bar {
-            position: fixed;
-            top: 20px;
-            right: 30px;
-            z-index: 999;
-        }
-
-        .admin-dropdown {
-            position: relative;
-        }
-
-        .admin-trigger {
-            min-width: 260px;
-            border: 1px solid #e5e7eb;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(14px);
-            border-radius: 18px;
-            padding: 12px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 14px;
-            box-shadow: 0 14px 35px rgba(15, 23, 42, 0.14);
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-
-        .admin-trigger:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
-        }
-
-        .admin-trigger-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-align: left;
-        }
-
-        .admin-avatar,
-        .admin-menu-avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #1f2937, #111827);
-            color: #fff;
-            font-size: 18px;
-            box-shadow: 0 8px 20px rgba(17, 24, 39, 0.18);
-            flex-shrink: 0;
-        }
-
-        .admin-info {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.1;
-        }
-
-        .admin-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        .admin-name {
-            font-size: 15px;
-            font-weight: 800;
-            color: #111827;
-            margin-top: 3px;
-        }
-
-        .admin-arrow {
-            font-size: 16px;
-            color: #475569;
-            transition: transform 0.25s ease;
-        }
-
-        .admin-arrow.rotated {
-            transform: rotate(180deg);
-        }
-
-        .admin-menu {
-            position: absolute;
-            top: calc(100% + 12px);
-            right: 0;
-            width: 290px;
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(16px);
-            border: 1px solid #e5e7eb;
-            border-radius: 20px;
-            box-shadow: 0 22px 50px rgba(15, 23, 42, 0.16);
-            padding: 14px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(8px);
-            transition: all 0.22s ease;
-        }
-
-        .admin-menu.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .admin-menu-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 4px 4px 10px 4px;
-        }
-
-        .admin-menu-title {
-            font-size: 15px;
-            font-weight: 800;
-            color: #111827;
-        }
-
-        .admin-menu-subtitle {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 2px;
-        }
-
-        .admin-menu-divider {
-            height: 1px;
-            background: linear-gradient(to right, transparent, #dbe4ee, transparent);
-            margin: 10px 0;
-        }
-
-        .admin-menu-item {
-            width: 100%;
-            border: none;
-            background: transparent;
-            text-decoration: none;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 12px;
-            border-radius: 14px;
-            font-size: 14px;
-            font-weight: 700;
-            transition: all 0.18s ease;
-            cursor: pointer;
-        }
-
-        .admin-menu-item:hover {
-            background: #f4f8ff;
-            color: #1f6feb;
-        }
-
-        .admin-menu-item-button {
-            text-align: left;
-        }
-
-        .admin-menu-icon {
-            width: 20px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .danger-item {
-            color: #dc2626;
-        }
-
-        .danger-item:hover {
-            background: #fff1f2;
-            color: #dc2626;
-        }
-
-        @keyframes slideInToast {
-            from {
-                opacity: 0;
-                transform: translateX(40px) translateY(-8px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0) translateY(0);
-            }
-        }
-
-        @keyframes slideOutToast {
-            from {
-                opacity: 1;
-                transform: translateX(0) scale(1);
-            }
-            to {
-                opacity: 0;
-                transform: translateX(28px) scale(0.97);
-            }
-        }
-
-        @keyframes toastProgress {
-            from { transform: scaleX(1); }
-            to { transform: scaleX(0); }
-        }
-
-        @media (max-width: 991px) {
-            .name-main {
-                max-width: 180px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .hero {
-                border-radius: 24px;
-            }
-
-            .toast-container-custom {
-                top: 12px;
-                right: 12px;
-                left: 12px;
-                width: auto;
-            }
-
-            .metric-value {
-                font-size: 1.7rem;
-            }
-
-            .table-toolbar,
-            .pagination-shell {
-                align-items: stretch;
-            }
-
-            .hero-actions .btn,
-            .hero-actions .btn-hero-light,
-            .hero-actions .btn-hero-ghost {
-                width: 100%;
-            }
-
-            .hero-summary-card {
-                padding: 18px;
-            }
-
-            .top-user-bar {
-                top: 14px;
-                right: 14px;
-                left: 14px;
-            }
-
-            .admin-dropdown {
-                width: 100%;
-            }
-
-            .admin-trigger {
-                width: 100%;
-                min-width: unset;
-            }
-
-            .admin-menu {
-                width: 100%;
-                right: 0;
-            }
-        }
-
-    </style>
-</head>
-<body>
-
-<div class="container-fluid page-shell py-4 py-lg-5">
-
-    {% if current_user.is_authenticated %}
-    <div class="top-user-bar">
-        <div class="admin-dropdown" id="adminDropdown">
-            <button type="button" class="admin-trigger" onclick="toggleAdminMenu()">
-                <div class="admin-trigger-left">
-                    <span class="admin-avatar">👤</span>
-                    <div class="admin-info">
-                        <span class="admin-label">Usuário logado</span>
-                        <span class="admin-name">{{ current_user.nome }}</span>
-                    </div>
-                </div>
-                <span class="admin-arrow" id="adminArrow">▾</span>
-            </button>
-
-            <div class="admin-menu" id="adminMenu">
-                <div class="admin-menu-header">
-                    <div class="admin-menu-avatar">👤</div>
-                    <div>
-                        <div class="admin-menu-title">{{ current_user.nome }}</div>
-                        <div class="admin-menu-subtitle">Administrador do sistema</div>
-                    </div>
-                </div>
-
-                <div class="admin-menu-divider"></div>
-
-                <a href="{{ url_for('listar_usuarios') }}" class="admin-menu-item">
-                    <span class="admin-menu-icon">👥</span>
-                    <span>Ver usuários</span>
-                </a>
-
-                <a href="{{ url_for('register') }}" class="admin-menu-item">
-                    <span class="admin-menu-icon">➕</span>
-                    <span>Criar usuário</span>
-                </a>
-
-                <a href="{{ url_for('index') }}" class="admin-menu-item">
-                    <span class="admin-menu-icon">🏠</span>
-                    <span>Página inicial</span>
-                </a>
-
-                <button type="button" class="admin-menu-item admin-menu-item-button" onclick="alert('Depois podemos ligar essa opção a uma tela de perfil.')">
-                    <span class="admin-menu-icon">⚙️</span>
-                    <span>Configurações</span>
-                </button>
-
-                <div class="admin-menu-divider"></div>
-
-                <a href="{{ url_for('logout') }}" class="admin-menu-item danger-item">
-                    <span class="admin-menu-icon">🚪</span>
-                    <span>Sair</span>
-                </a>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if not current_user.is_authenticated %}
-    <a href="{{ url_for('register') }}" class="btn btn-outline-primary w-100 mt-2 mb-3">
-        Criar conta
-    </a>
-    {% endif %}
-
-    <div class="toast-container-custom">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for categoria, mensagem in messages %}
-                    <div class="toast-custom toast-{{ categoria }}">
-                        <div class="toast-icon">
-                            {% if categoria == "success" %}✅{% endif %}
-                            {% if categoria == "danger" %}❌{% endif %}
-                            {% if categoria == "warning" %}⚠️{% endif %}
-                            {% if categoria == "primary" %}🔎{% endif %}
-                            {% if categoria not in ["success", "danger", "warning", "primary"] %}ℹ️{% endif %}
-                        </div>
-
-                        <div class="toast-content">
-                            <div class="toast-title">
-                                {% if categoria == "success" %}Operação realizada{% endif %}
-                                {% if categoria == "danger" %}Algo deu errado{% endif %}
-                                {% if categoria == "warning" %}Atenção{% endif %}
-                                {% if categoria == "primary" %}Resultado do filtro{% endif %}
-                                {% if categoria not in ["success", "danger", "warning", "primary"] %}Aviso{% endif %}
-                            </div>
-                            <div class="toast-message">{{ mensagem }}</div>
-                        </div>
-
-                        <button type="button" class="toast-close" onclick="fecharToast(this)">×</button>
-                        <div class="toast-progress"></div>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
-
-    <div class="hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-lg-8">
-                <div class="hero-badge mb-3">📊 Painel de gestão • versão premium</div>
-                <h1 class="hero-title mb-3">Sistema de Empresas</h1>
-                <p class="hero-subtitle mb-4">
-                    Gerencie cadastros com visual profissional, filtros inteligentes, ações rápidas, importação de planilhas e organização de alto nível.
-                </p>
-
-                <div class="hero-actions">
-                    <button type="button" class="btn-hero-light" onclick="rolarParaCadastro()">➕ Novo cadastro</button>
-                    <a href="/export" class="btn-hero-ghost">📥 Exportar Excel</a>
-                    <button type="button" class="btn-hero-ghost" onclick="rolarParaTabela()">📋 Ver registros</button>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-                <div class="hero-summary-card h-100">
-                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3 flex-wrap">
-                        <div>
-                            <div class="hero-summary-title">Resumo rápido</div>
-                            <div class="hero-summary-subtitle">Visão geral do ambiente atual.</div>
-                        </div>
-                        <div class="hero-summary-live">Ao vivo</div>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <div class="hero-mini-card">
-                                <div class="hero-mini-label">Total</div>
-                                <p class="hero-mini-value">{{ resumo.total_registros }}</p>
+                        <style>
+
+                            .page-shell {
+                                max-width: 1460px;
+                                position: relative;
+                                border: 3px solid rgba(37, 99, 235, 0.30);
+                                border-radius: 28px;
+                                box-shadow:
+                                    0 0 0 2px rgba(37, 99, 235, 0.10),
+                                    0 16px 45px rgba(37, 99, 235, 0.14);
+                                padding: 24px;
+                                background: rgba(255, 255, 255, 0.22);
+                                backdrop-filter: blur(6px);
+                            }
+                                    :root {
+                                        --bg: #f4f7fb;
+                                        --bg-soft: #f8fafc;
+                                        --card: rgba(255, 255, 255, 0.88);
+                                        --card-solid: #ffffff;
+                                        --text: #17212b;
+                                        --muted: #6b7280;
+                                        --line: #e7edf4;
+                                        --primary: #2563eb;
+                                        --primary-2: #1d4ed8;
+                                        --success: #16a34a;
+                                        --warning: #f59e0b;
+                                        --danger: #dc2626;
+                                        --dark: #0f172a;
+                                        --shadow-xl: 0 20px 50px rgba(15, 23, 42, 0.10);
+                                        --shadow-lg: 0 14px 32px rgba(15, 23, 42, 0.08);
+                                        --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.06);
+                                        --radius-xl: 26px;
+                                        --radius-lg: 20px;
+                                        --radius-md: 14px;
+                                    }
+
+                                    * {
+                                        -webkit-font-smoothing: antialiased;
+                                        -moz-osx-font-smoothing: grayscale;
+                                        box-sizing: border-box;
+                                    }
+
+                                    body {
+                                        background:
+                                            radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 30%),
+                                            radial-gradient(circle at top right, rgba(34, 197, 94, 0.06), transparent 25%),
+                                            linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+                                        color: var(--text);
+                                    }
+
+                                    .page-shell {
+                                        max-width: 1460px;
+                                    }
+
+                                    .hero {
+                                        position: relative;
+                                        overflow: hidden;
+                                        border-radius: 30px;
+                                        background:
+                                            linear-gradient(135deg, rgba(37, 99, 235, 0.98), rgba(29, 78, 216, 0.92)),
+                                            linear-gradient(180deg, #2563eb, #1d4ed8);
+                                        color: #fff;
+                                        box-shadow: var(--shadow-xl);
+                                    }
+
+                                    .hero::before {
+                                        content: "";
+                                        position: absolute;
+                                        inset: auto -100px -100px auto;
+                                        width: 300px;
+                                        height: 300px;
+                                        background: radial-gradient(circle, rgba(255,255,255,0.18), transparent 65%);
+                                        pointer-events: none;
+                                    }
+
+                                    .hero::after {
+                                        content: "";
+                                        position: absolute;
+                                        inset: -80px auto auto -60px;
+                                        width: 240px;
+                                        height: 240px;
+                                        background: radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%);
+                                        pointer-events: none;
+                                    }
+
+                                    .hero-badge {
+                                        display: inline-flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        gap: 8px;
+                                        background: rgba(255,255,255,0.14);
+                                        border: 1px solid rgba(255,255,255,0.18);
+                                        color: #fff;
+                                        padding: 10px 16px;
+                                        border-radius: 999px;
+                                        font-size: 0.92rem;
+                                        font-weight: 700;
+                                        backdrop-filter: blur(8px);
+                                        line-height: 1;
+                                    }
+
+                                    .hero-title {
+                                        font-size: clamp(2rem, 4vw, 3rem);
+                                        font-weight: 900;
+                                        line-height: 1.05;
+                                        letter-spacing: -1px;
+                                        margin: 0;
+                                    }
+
+                                    .hero-subtitle {
+                                        color: rgba(255,255,255,0.86);
+                                        font-size: 1rem;
+                                        max-width: 720px;
+                                        margin: 0;
+                                    }
+
+                                    .hero-actions {
+                                        display: flex;
+                                        gap: 12px;
+                                        flex-wrap: wrap;
+                                    }
+
+                                    .btn,
+                                    .btn-hero-light,
+                                    .btn-hero-ghost,
+                                    .btn-soft,
+                                    .btn-acao {
+                                        display: inline-flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        gap: 8px;
+                                        line-height: 1;
+                                        vertical-align: middle;
+                                    }
+
+                                    .btn-hero-light {
+                                        background: #fff;
+                                        color: var(--primary-2);
+                                        border: none;
+                                        font-weight: 800;
+                                        border-radius: 14px;
+                                        min-height: 50px;
+                                        padding: 0 18px;
+                                        box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+                                        text-decoration: none;
+                                    }
+
+                                    .btn-hero-ghost {
+                                        background: rgba(255,255,255,0.10);
+                                        color: #fff;
+                                        border: 1px solid rgba(255,255,255,0.18);
+                                        font-weight: 800;
+                                        border-radius: 14px;
+                                        min-height: 50px;
+                                        padding: 0 18px;
+                                        backdrop-filter: blur(8px);
+                                        text-decoration: none;
+                                    }
+
+                                    .glass-card,
+                                    .solid-card {
+                                        border: 1px solid rgba(231, 237, 244, 0.9);
+                                        border-radius: var(--radius-xl);
+                                        box-shadow: var(--shadow-lg);
+                                    }
+
+                                    .glass-card {
+                                        background: var(--card);
+                                        backdrop-filter: blur(14px);
+                                    }
+
+                                    .solid-card {
+                                        background: var(--card-solid);
+                                    }
+
+                                    .hero-summary-card {
+                                        background: rgba(255, 255, 255, 0.92);
+                                        border: 1px solid rgba(255,255,255,0.35);
+                                        border-radius: 26px;
+                                        padding: 24px;
+                                        box-shadow: 0 18px 30px rgba(15, 23, 42, 0.10);
+                                        color: #17212b;
+                                        backdrop-filter: blur(12px);
+                                    }
+
+                                    .hero-summary-title {
+                                        font-size: 1.05rem;
+                                        font-weight: 900;
+                                        color: #111827;
+                                        margin-bottom: 4px;
+                                    }
+
+                                    .hero-summary-subtitle {
+                                        color: #64748b;
+                                        font-size: 0.92rem;
+                                        margin-bottom: 18px;
+                                    }
+
+                                    .hero-summary-live {
+                                        display: inline-flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        min-height: 42px;
+                                        padding: 0 14px;
+                                        border-radius: 999px;
+                                        background: #eef5ff;
+                                        color: #1d4ed8;
+                                        border: 1px solid #dbeafe;
+                                        font-size: 0.84rem;
+                                        font-weight: 900;
+                                        line-height: 1;
+                                        white-space: nowrap;
+                                    }
+
+                                    .hero-mini-card {
+                                        background: #ffffff;
+                                        border: 1px solid #edf2f7;
+                                        border-radius: 18px;
+                                        padding: 16px;
+                                        height: 100%;
+                                        box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+                                    }
+
+                                    .hero-mini-label {
+                                        font-size: 0.85rem;
+                                        color: #64748b;
+                                        margin-bottom: 8px;
+                                        font-weight: 700;
+                                    }
+
+                                    .hero-mini-value {
+                                        font-size: 2rem;
+                                        line-height: 1;
+                                        font-weight: 900;
+                                        color: #0f172a;
+                                        margin: 0;
+                                    }
+
+                                    .hero-mini-value.sm {
+                                        font-size: 1.45rem;
+                                    }
+
+                                    .metric-card {
+                                        position: relative;
+                                        overflow: hidden;
+                                        padding: 22px;
+                                        height: 100%;
+                                    }
+
+                                    .metric-card::after {
+                                        content: "";
+                                        position: absolute;
+                                        top: -32px;
+                                        right: -32px;
+                                        width: 120px;
+                                        height: 120px;
+                                        border-radius: 50%;
+                                        background: linear-gradient(135deg, rgba(37, 99, 235, 0.10), transparent 70%);
+                                    }
+
+                                    .metric-icon {
+                                        width: 54px;
+                                        height: 54px;
+                                        border-radius: 18px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-size: 24px;
+                                        margin-bottom: 14px;
+                                        box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+                                    }
+
+                                    .metric-icon.total {
+                                        background: linear-gradient(135deg, rgba(37,99,235,0.16), rgba(37,99,235,0.08));
+                                    }
+
+                                    .metric-icon.pessoas {
+                                        background: linear-gradient(135deg, rgba(22,163,74,0.16), rgba(22,163,74,0.08));
+                                    }
+
+                                    .metric-icon.empresas {
+                                        background: linear-gradient(135deg, rgba(245,158,11,0.20), rgba(245,158,11,0.08));
+                                    }
+
+                                    .metric-icon.resultados {
+                                        background: linear-gradient(135deg, rgba(15,23,42,0.12), rgba(15,23,42,0.05));
+                                    }
+
+                                    .metric-label {
+                                        font-size: 0.92rem;
+                                        color: var(--muted);
+                                        font-weight: 700;
+                                        margin-bottom: 6px;
+                                    }
+
+                                    .metric-value {
+                                        font-size: 2rem;
+                                        font-weight: 900;
+                                        line-height: 1;
+                                        letter-spacing: -1px;
+                                        margin: 0 0 6px 0;
+                                    }
+
+                                    .metric-foot {
+                                        color: var(--muted);
+                                        font-size: 0.84rem;
+                                        margin: 0;
+                                    }
+
+                                    .section-title {
+                                        font-size: 1.08rem;
+                                        font-weight: 900;
+                                        margin: 0;
+                                        letter-spacing: -0.3px;
+                                    }
+
+                                    .section-subtitle {
+                                        font-size: 0.92rem;
+                                        color: var(--muted);
+                                        margin: 4px 0 0 0;
+                                    }
+
+                                    .section-chip {
+                                        display: inline-flex;
+                                        align-items: center;
+                                        gap: 8px;
+                                        border-radius: 999px;
+                                        padding: 8px 12px;
+                                        background: #eef5ff;
+                                        color: var(--primary-2);
+                                        border: 1px solid #dbeafe;
+                                        font-size: 0.88rem;
+                                        font-weight: 800;
+                                    }
+
+                                    .form-control,
+                                    .form-select {
+                                        min-height: 50px;
+                                        border-radius: 16px;
+                                        border: 1px solid #dfe7ef;
+                                        background: #fff;
+                                        box-shadow: none !important;
+                                        padding-left: 14px;
+                                        padding-right: 14px;
+                                    }
+
+                                    .form-control:focus,
+                                    .form-select:focus {
+                                        border-color: #93c5fd;
+                                        box-shadow: 0 0 0 0.22rem rgba(37, 99, 235, 0.12) !important;
+                                    }
+
+                                    .btn {
+                                        border-radius: 16px;
+                                        min-height: 50px;
+                                        font-weight: 800;
+                                        padding-left: 18px;
+                                        padding-right: 18px;
+                                    }
+
+                                    .btn-soft {
+                                        background: #f8fafc;
+                                        border: 1px solid #e5ebf2;
+                                        color: #334155;
+                                    }
+
+                                    .register-card {
+                                        overflow: hidden;
+                                    }
+
+                                    .register-header {
+                                        padding: 22px 24px 0 24px;
+                                    }
+
+                                    .register-body {
+                                        padding: 18px 24px 24px 24px;
+                                    }
+
+                                    .table-shell {
+                                        overflow: hidden;
+                                    }
+
+                                    .table-toolbar {
+                                        display: flex;
+                                        justify-content: space-between;
+                                        align-items: center;
+                                        gap: 12px;
+                                        flex-wrap: wrap;
+                                        padding: 0 0 18px 0;
+                                    }
+
+                                    .bulk-bar {
+                                        background: linear-gradient(180deg, #fafcff, #f7faff);
+                                        border: 1px solid var(--line);
+                                        border-radius: 18px;
+                                        padding: 14px 16px;
+                                    }
+
+                                    .tabela-registros {
+                                        margin: 0;
+                                        border-collapse: separate;
+                                        border-spacing: 0;
+                                    }
+
+                                    .tabela-registros thead th {
+                                        background: linear-gradient(180deg, #17212b, #111827);
+                                        color: #fff;
+                                        border: none;
+                                        padding: 16px 14px;
+                                        font-size: 0.90rem;
+                                        font-weight: 800;
+                                        white-space: nowrap;
+                                        vertical-align: middle;
+                                    }
+
+                                    .tabela-registros thead th:first-child {
+                                        border-top-left-radius: 16px;
+                                    }
+
+                                    .tabela-registros thead th:last-child {
+                                        border-top-right-radius: 16px;
+                                    }
+
+                                    .tabela-registros tbody td {
+                                        background: #fff;
+                                        border-color: #edf2f7;
+                                        padding: 15px 14px;
+                                        vertical-align: middle;
+                                    }
+
+                                    .tabela-registros tbody tr {
+                                        transition: 0.18s ease;
+                                    }
+
+                                    .tabela-registros tbody tr:hover td {
+                                        background: #fbfdff;
+                                    }
+
+                                    .tabela-registros tbody tr.linha-selecionada td {
+                                        background: #f8fbff;
+                                    }
+
+                                    .id-pill {
+                                        display: inline-flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        min-width: 54px;
+                                        padding: 7px 10px;
+                                        border-radius: 999px;
+                                        background: #eff6ff;
+                                        color: var(--primary-2);
+                                        font-weight: 900;
+                                        font-size: 0.84rem;
+                                        border: 1px solid #dbeafe;
+                                    }
+
+                                    .name-block {
+                                        display: flex;
+                                        flex-direction: column;
+                                        gap: 4px;
+                                        min-width: 0;
+                                    }
+
+                                    .name-main {
+                                        font-weight: 800;
+                                        color: #111827;
+                                        white-space: nowrap;
+                                        overflow: hidden;
+                                        text-overflow: ellipsis;
+                                        max-width: 260px;
+                                    }
+
+                                    .name-sub {
+                                        color: var(--muted);
+                                        font-size: 0.84rem;
+                                    }
+
+                                    .doc-pill,
+                                    .city-pill {
+                                        display: inline-flex;
+                                        align-items: center;
+                                        gap: 8px;
+                                        border-radius: 999px;
+                                        padding: 8px 12px;
+                                        background: #f8fafc;
+                                        border: 1px solid #e8eef5;
+                                        font-size: 0.88rem;
+                                        font-weight: 700;
+                                        color: #334155;
+                                        line-height: 1;
+                                    }
+
+                                    .acoes-wrap {
+                                        display: flex;
+                                        justify-content: center;
+                                        gap: 8px;
+                                        flex-wrap: wrap;
+                                    }
+
+                                    .btn-acao {
+                                        min-height: 40px;
+                                        border-radius: 12px;
+                                        font-size: 0.84rem;
+                                        font-weight: 800;
+                                        padding: 0 12px;
+                                    }
+
+                                    .empty-state {
+                                        padding: 56px 24px;
+                                        text-align: center;
+                                    }
+
+                                    .empty-icon {
+                                        width: 74px;
+                                        height: 74px;
+                                        margin: 0 auto 14px auto;
+                                        border-radius: 24px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        background: linear-gradient(135deg, #eff6ff, #f8fafc);
+                                        font-size: 34px;
+                                    }
+
+                                    .empty-title {
+                                        font-size: 1.18rem;
+                                        font-weight: 900;
+                                        margin: 0 0 8px 0;
+                                    }
+
+                                    .empty-text {
+                                        color: var(--muted);
+                                        max-width: 480px;
+                                        margin: 0 auto;
+                                    }
+
+                                    .pagination-shell {
+                                        display: flex;
+                                        justify-content: space-between;
+                                        align-items: center;
+                                        gap: 12px;
+                                        flex-wrap: wrap;
+                                        padding-top: 18px;
+                                    }
+
+                                    .page-meta {
+                                        color: var(--muted);
+                                        font-size: 0.92rem;
+                                    }
+
+                                    .page-link {
+                                        border-radius: 12px !important;
+                                        margin: 0 3px;
+                                        border: 1px solid #e5ebf2;
+                                        color: #334155;
+                                        font-weight: 700;
+                                        min-height: unset;
+                                        display: inline-flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        line-height: 1;
+                                    }
+
+                                    .page-item.active .page-link {
+                                        background: var(--primary);
+                                        border-color: var(--primary);
+                                    }
+
+                                    .toast-container-custom {
+                                        position: fixed;
+                                        top: 18px;
+                                        right: 18px;
+                                        z-index: 9999;
+                                        display: flex;
+                                        flex-direction: column;
+                                        gap: 12px;
+                                        width: min(420px, calc(100vw - 24px));
+                                    }
+
+                                    .toast-custom {
+                                        position: relative;
+                                        display: flex;
+                                        align-items: flex-start;
+                                        gap: 14px;
+                                        padding: 16px 18px;
+                                        border-radius: 18px;
+                                        box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14);
+                                        background: rgba(255,255,255,0.97);
+                                        backdrop-filter: blur(10px);
+                                        border: 1px solid #e8eef5;
+                                        overflow: hidden;
+                                        animation: slideInToast 0.35s ease;
+                                    }
+
+                                    .toast-icon {
+                                        flex-shrink: 0;
+                                        width: 42px;
+                                        height: 42px;
+                                        border-radius: 14px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-size: 19px;
+                                        background: #f8fafc;
+                                    }
+
+                                    .toast-content {
+                                        flex: 1;
+                                        min-width: 0;
+                                    }
+
+                                    .toast-title {
+                                        font-size: 0.96rem;
+                                        font-weight: 900;
+                                        margin-bottom: 4px;
+                                        color: #111827;
+                                    }
+
+                                    .toast-message {
+                                        font-size: 0.92rem;
+                                        color: #475569;
+                                        line-height: 1.45;
+                                        word-break: break-word;
+                                    }
+
+                                    .toast-close {
+                                        border: none;
+                                        background: transparent;
+                                        color: #94a3b8;
+                                        font-size: 24px;
+                                        line-height: 1;
+                                        cursor: pointer;
+                                        padding: 0;
+                                        margin-left: 4px;
+                                    }
+
+                                    .toast-progress {
+                                        position: absolute;
+                                        left: 0;
+                                        bottom: 0;
+                                        height: 4px;
+                                        width: 100%;
+                                        transform-origin: left;
+                                        animation: toastProgress 5s linear forwards;
+                                    }
+
+                                    .toast-success { border-left: 5px solid var(--success); }
+                                    .toast-success .toast-icon { background: rgba(22,163,74,0.12); }
+                                    .toast-success .toast-progress { background: var(--success); }
+
+                                    .toast-danger { border-left: 5px solid var(--danger); }
+                                    .toast-danger .toast-icon { background: rgba(220,38,38,0.12); }
+                                    .toast-danger .toast-progress { background: var(--danger); }
+
+                                    .toast-warning { border-left: 5px solid var(--warning); }
+                                    .toast-warning .toast-icon { background: rgba(245,158,11,0.16); }
+                                    .toast-warning .toast-progress { background: var(--warning); }
+
+                                    .toast-primary { border-left: 5px solid var(--primary); }
+                                    .toast-primary .toast-icon { background: rgba(37,99,235,0.12); }
+                                    .toast-primary .toast-progress { background: var(--primary); }
+
+                                    .toast-hide {
+                                        animation: slideOutToast 0.28s ease forwards;
+                                    }
+
+                                    .modal-content {
+                                        border: 0;
+                                        border-radius: 24px;
+                                        overflow: hidden;
+                                        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+                                    }
+
+                                    .modal-info-grid {
+                                        display: grid;
+                                        gap: 12px;
+                                    }
+
+                                    .modal-info-item {
+                                        border: 1px solid #edf2f7;
+                                        background: #fbfdff;
+                                        border-radius: 16px;
+                                        padding: 14px 16px;
+                                    }
+
+                                    .modal-info-label {
+                                        color: var(--muted);
+                                        font-size: 0.78rem;
+                                        text-transform: uppercase;
+                                        letter-spacing: 0.5px;
+                                        font-weight: 800;
+                                        margin-bottom: 5px;
+                                    }
+
+                                    .modal-info-value {
+                                        color: #111827;
+                                        font-size: 0.97rem;
+                                        font-weight: 800;
+                                        word-break: break-word;
+                                    }
+
+                                    .top-user-bar {
+                                        position: fixed;
+                                        top: 20px;
+                                        right: 30px;
+                                        z-index: 999;
+                                    }
+
+                                    .admin-dropdown {
+                                        position: relative;
+                                    }
+
+                                    .admin-trigger {
+                                        min-width: 260px;
+                                        border: 1px solid #e5e7eb;
+                                        background: rgba(255, 255, 255, 0.92);
+                                        backdrop-filter: blur(14px);
+                                        border-radius: 18px;
+                                        padding: 12px 14px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: space-between;
+                                        gap: 14px;
+                                        box-shadow: 0 14px 35px rgba(15, 23, 42, 0.14);
+                                        cursor: pointer;
+                                        transition: all 0.25s ease;
+                                    }
+
+                                    .admin-trigger:hover {
+                                        transform: translateY(-1px);
+                                        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+                                    }
+
+                                    .admin-trigger-left {
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 12px;
+                                        text-align: left;
+                                    }
+
+                                    .admin-avatar,
+                                    .admin-menu-avatar {
+                                        width: 42px;
+                                        height: 42px;
+                                        border-radius: 14px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        background: linear-gradient(135deg, #1f2937, #111827);
+                                        color: #fff;
+                                        font-size: 18px;
+                                        box-shadow: 0 8px 20px rgba(17, 24, 39, 0.18);
+                                        flex-shrink: 0;
+                                    }
+
+                                    .admin-info {
+                                        display: flex;
+                                        flex-direction: column;
+                                        line-height: 1.1;
+                                    }
+
+                                    .admin-label {
+                                        font-size: 11px;
+                                        font-weight: 700;
+                                        color: #64748b;
+                                        text-transform: uppercase;
+                                        letter-spacing: 0.04em;
+                                    }
+
+                                    .admin-name {
+                                        font-size: 15px;
+                                        font-weight: 800;
+                                        color: #111827;
+                                        margin-top: 3px;
+                                    }
+
+                                    .admin-arrow {
+                                        font-size: 16px;
+                                        color: #475569;
+                                        transition: transform 0.25s ease;
+                                    }
+
+                                    .admin-arrow.rotated {
+                                        transform: rotate(180deg);
+                                    }
+
+                                    .admin-menu {
+                                        position: absolute;
+                                        top: calc(100% + 12px);
+                                        right: 0;
+                                        width: 290px;
+                                        background: rgba(255, 255, 255, 0.96);
+                                        backdrop-filter: blur(16px);
+                                        border: 1px solid #e5e7eb;
+                                        border-radius: 20px;
+                                        box-shadow: 0 22px 50px rgba(15, 23, 42, 0.16);
+                                        padding: 14px;
+                                        opacity: 0;
+                                        visibility: hidden;
+                                        transform: translateY(8px);
+                                        transition: all 0.22s ease;
+                                    }
+
+                                    .admin-menu.show {
+                                        opacity: 1;
+                                        visibility: visible;
+                                        transform: translateY(0);
+                                    }
+
+                                    .admin-menu-header {
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 12px;
+                                        padding: 4px 4px 10px 4px;
+                                    }
+
+                                    .admin-menu-title {
+                                        font-size: 15px;
+                                        font-weight: 800;
+                                        color: #111827;
+                                    }
+
+                                    .admin-menu-subtitle {
+                                        font-size: 12px;
+                                        color: #64748b;
+                                        margin-top: 2px;
+                                    }
+
+                                    .admin-menu-divider {
+                                        height: 1px;
+                                        background: linear-gradient(to right, transparent, #dbe4ee, transparent);
+                                        margin: 10px 0;
+                                    }
+
+                                    .admin-menu-item {
+                                        width: 100%;
+                                        border: none;
+                                        background: transparent;
+                                        text-decoration: none;
+                                        color: #1f2937;
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 12px;
+                                        padding: 12px 12px;
+                                        border-radius: 14px;
+                                        font-size: 14px;
+                                        font-weight: 700;
+                                        transition: all 0.18s ease;
+                                        cursor: pointer;
+                                    }
+
+                                    .admin-menu-item:hover {
+                                        background: #f4f8ff;
+                                        color: #1f6feb;
+                                    }
+
+                                    .admin-menu-item-button {
+                                        text-align: left;
+                                    }
+
+                                    .admin-menu-icon {
+                                        width: 20px;
+                                        text-align: center;
+                                        flex-shrink: 0;
+                                    }
+
+                                    .danger-item {
+                                        color: #dc2626;
+                                    }
+
+                                    .danger-item:hover {
+                                        background: #fff1f2;
+                                        color: #dc2626;
+                                    }
+
+                                    @keyframes slideInToast {
+                                        from {
+                                            opacity: 0;
+                                            transform: translateX(40px) translateY(-8px);
+                                        }
+                                        to {
+                                            opacity: 1;
+                                            transform: translateX(0) translateY(0);
+                                        }
+                                    }
+
+                                    @keyframes slideOutToast {
+                                        from {
+                                            opacity: 1;
+                                            transform: translateX(0) scale(1);
+                                        }
+                                        to {
+                                            opacity: 0;
+                                            transform: translateX(28px) scale(0.97);
+                                        }
+                                    }
+
+                                    @keyframes toastProgress {
+                                        from { transform: scaleX(1); }
+                                        to { transform: scaleX(0); }
+                                    }
+
+                                    @media (max-width: 991px) {
+                                        .name-main {
+                                            max-width: 180px;
+                                        }
+                                    }
+
+                                    @media (max-width: 576px) {
+                                        .hero {
+                                            border-radius: 24px;
+                                        }
+
+                                        .toast-container-custom {
+                                            top: 12px;
+                                            right: 12px;
+                                            left: 12px;
+                                            width: auto;
+                                        }
+
+                                        .metric-value {
+                                            font-size: 1.7rem;
+                                        }
+
+                                        .table-toolbar,
+                                        .pagination-shell {
+                                            align-items: stretch;
+                                        }
+
+                                        .hero-actions .btn,
+                                        .hero-actions .btn-hero-light,
+                                        .hero-actions .btn-hero-ghost {
+                                            width: 100%;
+                                        }
+
+                                        .hero-summary-card {
+                                            padding: 18px;
+                                        }
+
+                                        .top-user-bar {
+                                            top: 14px;
+                                            right: 14px;
+                                            left: 14px;
+                                        }
+
+                                        .admin-dropdown {
+                                            width: 100%;
+                                        }
+
+                                        .admin-trigger {
+                                            width: 100%;
+                                            min-width: unset;
+                                        }
+
+                                        .admin-menu {
+                                            width: 100%;
+                                            right: 0;
+                                        }
+                                    }
+
+                        </style>
+                    </head>
+                    <body>
+
+                    <div class="container-fluid page-shell py-4 py-lg-5">
+
+                        {% if current_user.is_authenticated %}
+                        <div class="top-user-bar">
+                            <div class="admin-dropdown" id="adminDropdown">
+                                <button type="button" class="admin-trigger" onclick="toggleAdminMenu()">
+                                    <div class="admin-trigger-left">
+                                        <span class="admin-avatar">👤</span>
+                                        <div class="admin-info">
+                                            <span class="admin-label">Usuário logado</span>
+                                            <span class="admin-name">{{ current_user.nome }}</span>
+                                        </div>
+                                    </div>
+                                    <span class="admin-arrow" id="adminArrow">▾</span>
+                                </button>
+
+                                <div class="admin-menu" id="adminMenu">
+                                    <div class="admin-menu-header">
+                                        <div class="admin-menu-avatar">👤</div>
+                                        <div>
+                                            <div class="admin-menu-title">{{ current_user.nome }}</div>
+                                            <div class="admin-menu-subtitle">Administrador do sistema</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="admin-menu-divider"></div>
+
+                                    <a href="{{ url_for('listar_usuarios') }}" class="admin-menu-item">
+                                        <span class="admin-menu-icon">👥</span>
+                                        <span>Ver usuários</span>
+                                    </a>
+
+                                    <a href="{{ url_for('register') }}" class="admin-menu-item">
+                                        <span class="admin-menu-icon">➕</span>
+                                        <span>Criar usuário</span>
+                                    </a>
+
+                                    <a href="{{ url_for('index') }}" class="admin-menu-item">
+                                        <span class="admin-menu-icon">🏠</span>
+                                        <span>Página inicial</span>
+                                    </a>
+
+                                    <button type="button" class="admin-menu-item admin-menu-item-button" onclick="alert('Depois podemos ligar essa opção a uma tela de perfil.')">
+                                        <span class="admin-menu-icon">⚙️</span>
+                                        <span>Configurações</span>
+                                    </button>
+
+                                    <div class="admin-menu-divider"></div>
+
+                                    <form method="POST" action="{{ url_for('logout') }}" class="m-0">
+                                        <button type="submit" class="admin-menu-item danger-item w-100 text-start border-0 bg-transparent">
+                                            <span class="admin-menu-icon">🚪</span>
+                                            <span>Sair</span>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
+                        {% endif %}
 
-                        <div class="col-6">
-                            <div class="hero-mini-card">
-                                <div class="hero-mini-label">Filtrados</div>
-                                <p class="hero-mini-value">{{ resumo.total_filtrado }}</p>
+                        {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('register') }}" class="btn btn-outline-primary w-100 mt-2 mb-3">
+                            Criar conta
+                        </a>
+                        {% endif %}
+
+                        <div class="toast-container-custom">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                            {% for categoria, mensagem in messages %}
+                            <div class="toast-custom toast-{{ categoria }}">
+                                <div class="toast-icon">
+                                    {% if categoria == "success" %}✅{% endif %}
+                                    {% if categoria == "danger" %}❌{% endif %}
+                                    {% if categoria == "warning" %}⚠️{% endif %}
+                                    {% if categoria == "primary" %}🔎{% endif %}
+                                    {% if categoria not in ["success", "danger", "warning", "primary"] %}ℹ️{% endif %}
+                                </div>
+
+                                <div class="toast-content">
+                                    <div class="toast-title">
+                                        {% if categoria == "success" %}Operação realizada{% endif %}
+                                        {% if categoria == "danger" %}Algo deu errado{% endif %}
+                                        {% if categoria == "warning" %}Atenção{% endif %}
+                                        {% if categoria == "primary" %}Resultado do filtro{% endif %}
+                                        {% if categoria not in ["success", "danger", "warning", "primary"] %}Aviso{% endif %}
+                                    </div>
+                                    <div class="toast-message">{{ mensagem }}</div>
+                                </div>
+
+                                <button type="button" class="toast-close" onclick="fecharToast(this)">×</button>
+                                <div class="toast-progress"></div>
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+
+                        <div class="hero p-4 p-lg-5 mb-4">
+                            <div class="row g-4 align-items-center">
+                                <div class="col-lg-8">
+                                    <div class="hero-badge mb-3">📊 Painel de gestão • </div>
+                                    <h1 class="hero-title mb-3">Sistema de Empresas</h1>
+                                    <p class="hero-subtitle mb-4">
+                                        Gerencie cadastros com visual profissional, filtros inteligentes, ações rápidas, importação de planilhas e organização de alto nível.
+                                    </p>
+
+                                    <div class="hero-actions">
+                                        <button type="button" class="btn-hero-light" onclick="rolarParaCadastro()">➕ Novo cadastro</button>
+                                        <a href="/export" class="btn-hero-ghost">📥 Exportar Excel</a>
+                                        <button type="button" class="btn-hero-ghost" onclick="rolarParaTabela()">📋 Ver registros</button>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <div class="hero-summary-card h-100">
+                                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3 flex-wrap">
+                                            <div>
+                                                <div class="hero-summary-title">Resumo rápido</div>
+                                                <div class="hero-summary-subtitle">Visão geral do ambiente atual.</div>
+                                            </div>
+                                            <div class="hero-summary-live">Ao vivo</div>
+                                        </div>
+
+                                        <div class="row g-3">
+                                            <div class="col-6">
+                                                <div class="hero-mini-card">
+                                                    <div class="hero-mini-label">Total</div>
+                                                    <p class="hero-mini-value">{{ resumo.total_registros }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-6">
+                                                <div class="hero-mini-card">
+                                                    <div class="hero-mini-label">Filtrados</div>
+                                                    <p class="hero-mini-value">{{ resumo.total_filtrado }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-6">
+                                                <div class="hero-mini-card">
+                                                    <div class="hero-mini-label">Pessoas</div>
+                                                    <p class="hero-mini-value sm">{{ resumo.total_pessoas }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-6">
+                                                <div class="hero-mini-card">
+                                                    <div class="hero-mini-label">Empresas</div>
+                                                    <p class="hero-mini-value sm">{{ resumo.total_empresas }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-6">
-                            <div class="hero-mini-card">
-                                <div class="hero-mini-label">Pessoas</div>
-                                <p class="hero-mini-value sm">{{ resumo.total_pessoas }}</p>
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6 col-xl-3">
+                                <div class="solid-card metric-card">
+                                    <div class="metric-icon total">📁</div>
+                                    <div class="metric-label">Total de registros</div>
+                                    <p class="metric-value">{{ resumo.total_registros }}</p>
+                                    <p class="metric-foot">Base completa do sistema.</p>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-xl-3">
+                                <div class="solid-card metric-card">
+                                    <div class="metric-icon pessoas">👤</div>
+                                    <div class="metric-label">Pessoas</div>
+                                    <p class="metric-value">{{ resumo.total_pessoas }}</p>
+                                    <p class="metric-foot">Cadastros com CPF.</p>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-xl-3">
+                                <div class="solid-card metric-card">
+                                    <div class="metric-icon empresas">🏢</div>
+                                    <div class="metric-label">Empresas</div>
+                                    <p class="metric-value">{{ resumo.total_empresas }}</p>
+                                    <p class="metric-foot">Cadastros com CNPJ.</p>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-xl-3">
+                                <div class="solid-card metric-card">
+                                    <div class="metric-icon resultados">🔎</div>
+                                    <div class="metric-label">Resultados atuais</div>
+                                    <p class="metric-value">{{ resumo.total_filtrado }}</p>
+                                    <p class="metric-foot">Após filtros e ordenação.</p>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-6">
-                            <div class="hero-mini-card">
-                                <div class="hero-mini-label">Empresas</div>
-                                <p class="hero-mini-value sm">{{ resumo.total_empresas }}</p>
+                        <div class="solid-card p-4 mb-4">
+                            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                                <div>
+                                    <h2 class="section-title">🔎 Filtros e ordenação</h2>
+                                    <p class="section-subtitle">Localize registros por texto, tipo e ordem de exibição.</p>
+                                </div>
+
+                                {% if busca or tipo %}
+                                <div class="section-chip">🎯 Filtro ativo</div>
+                                {% endif %}
                             </div>
+
+                            <form method="GET" class="row g-3">
+                                <div class="col-lg-4">
+                                    <input type="text" name="busca" class="form-control" placeholder="Buscar por nome, documento, cidade..." value="{{ busca }}">
+                                </div>
+
+                                <div class="col-lg-2">
+                                    <select name="tipo" class="form-select">
+                                        <option value="">Todos</option>
+                                        <option value="pessoa" {% if tipo == "pessoa" %}selected{% endif %}>Pessoa</option>
+                                        <option value="empresa" {% if tipo == "empresa" %}selected{% endif %}>Empresa</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-lg-3">
+                                    <select name="ordem" class="form-select">
+                                        <option value="id_desc" {% if ordem == "id_desc" %}selected{% endif %}>Mais recentes primeiro</option>
+                                        <option value="id_asc" {% if ordem == "id_asc" %}selected{% endif %}>ID crescente</option>
+                                        <option value="nome_asc" {% if ordem == "nome_asc" %}selected{% endif %}>Nome A-Z</option>
+                                        <option value="nome_desc" {% if ordem == "nome_desc" %}selected{% endif %}>Nome Z-A</option>
+                                        <option value="cidade_asc" {% if ordem == "cidade_asc" %}selected{% endif %}>Cidade A-Z</option>
+                                        <option value="cidade_desc" {% if ordem == "cidade_desc" %}selected{% endif %}>Cidade Z-A</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-lg-3 d-flex gap-2">
+                                    <button class="btn btn-primary w-100">🔎 Buscar</button>
+                                    <a href="/" class="btn btn-soft w-100">🧹 Limpar</a>
+                                </div>
+                            </form>
+
+                            <a href="/usuarios" class="btn btn-dark mt-3">
+                                👤 Ver usuários
+                            </a>
+
+                            {% if busca or tipo %}
+                            <div class="mt-3 small text-secondary">
+                                <strong>Filtro atual:</strong>
+                                {% if busca %} Busca = "{{ busca }}" {% endif %}
+                                {% if busca and tipo %} | {% endif %}
+                                {% if tipo %} Tipo = "{{ tipo|capitalize }}" {% endif %}
+                            </div>
+                            {% endif %}
                         </div>
-                    </div>
-                </div>
-            </div>
+
+                        <div class="register-card solid-card mb-4" id="blocoCadastro">
+                            <div class="register-header">
+                                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                                    <div>
+                                        <h2 class="section-title">👤 Adicionar empresa ou pessoa</h2>
+                                        <p class="section-subtitle">Cadastro rápido com preenchimento elegante e consulta automática de CEP.</p>
+                                    </div>
+                                    <div class="section-chip">Preenchimento inteligente</div>
+                                </div>
+                            </div>
+
+                            <div class="register-body">
+                                <form method="POST" action="/add" id="formCadastro" class="quick-form">
+    <div class="row g-3">
+        <div class="col-12 col-lg-6">
+            <input type="text" name="nome" id="nome" class="form-control" placeholder="Nome" required>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+            <input type="text" name="cpf_cnpj" id="cpf_cnpj" class="form-control" placeholder="CPF/CNPJ" oninput="formatarCpfCnpj(this)" required>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+            <input type="text" name="celular" id="celular" class="form-control" placeholder="Celular" oninput="formatarCelular(this)">
+        </div>
+
+        <div class="col-12 col-md-4 col-lg-2">
+            <input type="text" name="cep" id="cep" class="form-control" placeholder="CEP" maxlength="9">
+        </div>
+
+        <div class="col-12 col-md-8 col-lg-5">
+            <input type="text" name="endereco" id="endereco" class="form-control" placeholder="Endereço">
+        </div>
+
+        <div class="col-12 col-md-4 col-lg-2">
+            <input type="text" name="numero" id="numero" class="form-control" placeholder="Número">
+        </div>
+
+        <div class="col-12 col-md-2 col-lg-1">
+            <input type="text" name="uf" id="uf" class="form-control text-uppercase" placeholder="UF" maxlength="2">
+        </div>
+
+        <div class="col-12 col-md-5 col-lg-3">
+            <input type="text" name="cidade" id="cidade" class="form-control" placeholder="Cidade">
+        </div>
+
+        <div class="col-12 col-md-5 col-lg-3">
+            <input type="text" name="bairro" id="bairro" class="form-control" placeholder="Bairro">
         </div>
     </div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-md-6 col-xl-3">
-            <div class="solid-card metric-card">
-                <div class="metric-icon total">📁</div>
-                <div class="metric-label">Total de registros</div>
-                <p class="metric-value">{{ resumo.total_registros }}</p>
-                <p class="metric-foot">Base completa do sistema.</p>
-            </div>
+    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mt-4">
+        <div class="small text-secondary">
+            Revise os dados antes de confirmar o envio.
         </div>
 
-        <div class="col-md-6 col-xl-3">
-            <div class="solid-card metric-card">
-                <div class="metric-icon pessoas">👤</div>
-                <div class="metric-label">Pessoas</div>
-                <p class="metric-value">{{ resumo.total_pessoas }}</p>
-                <p class="metric-foot">Cadastros com CPF.</p>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-xl-3">
-            <div class="solid-card metric-card">
-                <div class="metric-icon empresas">🏢</div>
-                <div class="metric-label">Empresas</div>
-                <p class="metric-value">{{ resumo.total_empresas }}</p>
-                <p class="metric-foot">Cadastros com CNPJ.</p>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-xl-3">
-            <div class="solid-card metric-card">
-                <div class="metric-icon resultados">🔎</div>
-                <div class="metric-label">Resultados atuais</div>
-                <p class="metric-value">{{ resumo.total_filtrado }}</p>
-                <p class="metric-foot">Após filtros e ordenação.</p>
-            </div>
-        </div>
+        <button type="button" class="btn btn-success px-4 text-white fw-bold shadow" onclick="abrirModalCadastro()">
+    ➕ Salvar cadastro
+</button>
     </div>
-
-    <div class="solid-card p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
-            <div>
-                <h2 class="section-title">🔎 Filtros e ordenação</h2>
-                <p class="section-subtitle">Localize registros por texto, tipo e ordem de exibição.</p>
-            </div>
-
-            {% if busca or tipo %}
-                <div class="section-chip">🎯 Filtro ativo</div>
-            {% endif %}
-        </div>
-
-        <form method="GET" class="row g-3">
-            <div class="col-lg-4">
-                <input type="text" name="busca" class="form-control" placeholder="Buscar por nome, documento, cidade..." value="{{ busca }}">
-            </div>
-
-            <div class="col-lg-2">
-                <select name="tipo" class="form-select">
-                    <option value="">Todos</option>
-                    <option value="pessoa" {% if tipo == "pessoa" %}selected{% endif %}>Pessoa</option>
-                    <option value="empresa" {% if tipo == "empresa" %}selected{% endif %}>Empresa</option>
-                </select>
-            </div>
-
-            <div class="col-lg-3">
-                <select name="ordem" class="form-select">
-                    <option value="id_desc" {% if ordem == "id_desc" %}selected{% endif %}>Mais recentes primeiro</option>
-                    <option value="id_asc" {% if ordem == "id_asc" %}selected{% endif %}>ID crescente</option>
-                    <option value="nome_asc" {% if ordem == "nome_asc" %}selected{% endif %}>Nome A-Z</option>
-                    <option value="nome_desc" {% if ordem == "nome_desc" %}selected{% endif %}>Nome Z-A</option>
-                    <option value="cidade_asc" {% if ordem == "cidade_asc" %}selected{% endif %}>Cidade A-Z</option>
-                    <option value="cidade_desc" {% if ordem == "cidade_desc" %}selected{% endif %}>Cidade Z-A</option>
-                </select>
-            </div>
-
-            <div class="col-lg-3 d-flex gap-2">
-                <button class="btn btn-primary w-100">🔎 Buscar</button>
-                <a href="/" class="btn btn-soft w-100">🧹 Limpar</a>
-            </div>
-        </form>
-
-        <a href="/usuarios" class="btn btn-dark mt-3">
-            👤 Ver usuários
-        </a>
-
-        {% if busca or tipo %}
-            <div class="mt-3 small text-secondary">
-                <strong>Filtro atual:</strong>
-                {% if busca %} Busca = "{{ busca }}" {% endif %}
-                {% if busca and tipo %} | {% endif %}
-                {% if tipo %} Tipo = "{{ tipo|capitalize }}" {% endif %}
-            </div>
-        {% endif %}
-    </div>
-
-    <div class="register-card solid-card mb-4" id="blocoCadastro">
-        <div class="register-header">
-            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-                <div>
-                    <h2 class="section-title">👤 Adicionar empresa ou pessoa</h2>
-                    <p class="section-subtitle">Cadastro rápido com preenchimento elegante e consulta automática de CEP.</p>
-                </div>
-                <div class="section-chip">Preenchimento inteligente</div>
-            </div>
-        </div>
-
-        <div class="register-body">
-            <form method="POST" action="/add" id="formCadastro" class="quick-form">
-                <div class="row g-3">
-                    <div class="col-xl-4">
-                        <input type="text" name="nome" id="nome" class="form-control" placeholder="Nome" required>
-                    </div>
-
-                    <div class="col-xl-3">
-                        <input type="text" name="cpf_cnpj" id="cpf_cnpj" class="form-control" placeholder="CPF/CNPJ" oninput="formatarCpfCnpj(this)" required>
-                    </div>
-
-                    <div class="col-xl-3">
-                        <input type="text" name="celular" id="celular" class="form-control" placeholder="Celular" oninput="formatarCelular(this)">
-                    </div>
-
-                    <div class="col-xl-2">
-                        <input type="text" name="cep" id="cep" class="form-control" placeholder="CEP" maxlength="9">
-                    </div>
-
-                    <div class="col-xl-4">
-                        <input type="text" name="endereco" id="endereco" class="form-control" placeholder="Endereço">
-                    </div>
-
-                    <div class="col-xl-2">
-                        <input type="text" name="numero" id="numero" class="form-control" placeholder="Número">
-                    </div>
-
-                    <div class="col-xl-1">
-                        <input type="text" name="uf" id="uf" class="form-control text-uppercase" placeholder="UF" maxlength="2">
-                    </div>
-
-                    <div class="col-xl-3">
-                        <input type="text" name="cidade" id="cidade" class="form-control" placeholder="Cidade">
-                    </div>
-
-                    <div class="col-xl-2">
-                        <input type="text" name="bairro" id="bairro" class="form-control" placeholder="Bairro">
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mt-4">
-                    <div class="small text-secondary">
-                        Revise os dados antes de confirmar o envio.
-                    </div>
-
-                    <button type="submit" class="btn btn-success px-4 text-white fw-bold shadow">
-                        ➕ Salvar cadastro
-                    </button>
-                </div>
-            </form>
+</form>
         </div>
     </div>
 
@@ -1453,10 +1456,15 @@
                 <p class="mb-0 text-secondary">Registro: <span id="nomeRegistroExcluir" class="fw-bold"></span></p>
             </div>
 
-            <div class="modal-footer">
-                <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Cancelar</button>
-                <a href="#" id="btnConfirmarExclusao" class="btn btn-danger">Sim, excluir</a>
-            </div>
+           <div class="modal-footer">
+    <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Cancelar</button>
+
+    <form method="POST" id="formExcluirIndividual" class="m-0">
+        <button type="submit" class="btn btn-danger">
+            Sim, excluir
+        </button>
+    </form>
+</div>
         </div>
     </div>
 </div>
@@ -1613,7 +1621,7 @@ function toggleAdminMenu() {
 }
 
 function abrirModalExcluir(url, nome = "") {
-    document.getElementById("btnConfirmarExclusao").href = url;
+    document.getElementById("formExcluirIndividual").action = url;
     document.getElementById("nomeRegistroExcluir").textContent = nome;
     new bootstrap.Modal(document.getElementById("modalExcluir")).show();
 }

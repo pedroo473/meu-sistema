@@ -271,25 +271,29 @@ from email.mime.multipart import MIMEMultipart
 
 
 def enviar_email_recuperacao(destinatario, link):
+
     email_remetente = os.getenv("EMAIL_FROM")
     senha_app = os.getenv("EMAIL_APP_PASSWORD")
 
     if not email_remetente or not senha_app:
-        raise ValueError("EMAIL_FROM ou EMAIL_APP_PASSWORD não configurados.")
+        raise ValueError("Configuração de e-mail não encontrada.")
 
     assunto = "Recuperação de senha"
+
     corpo_html = f"""
     <html>
-        <body style="font-family: Arial, sans-serif; color: #333;">
-            <h2>Recuperação de senha</h2>
+    <body style="font-family: Arial; background:#f4f6f9; padding:20px;">
+        <div style="max-width:500px; margin:auto; background:#fff; padding:30px; border-radius:10px;">
+
+            <h2 style="color:#0d6efd;">Recuperação de senha</h2>
+
             <p>Recebemos uma solicitação para redefinir sua senha.</p>
-            <p>Clique no botão abaixo para criar uma nova senha:</p>
-            <p>
+
+            <p style="text-align:center; margin:30px 0;">
                 <a href="{link}" style="
-                    display:inline-block;
-                    padding:12px 20px;
                     background:#0d6efd;
                     color:#fff;
+                    padding:12px 20px;
                     text-decoration:none;
                     border-radius:8px;
                     font-weight:bold;
@@ -297,8 +301,19 @@ def enviar_email_recuperacao(destinatario, link):
                     Redefinir senha
                 </a>
             </p>
-            <p>Se você não fez esta solicitação, ignore este e-mail.</p>
-        </body>
+
+            <p style="font-size:14px; color:#666;">
+                Este link expira por segurança.
+            </p>
+
+            <hr>
+
+            <p style="font-size:12px; color:#999;">
+                Caso não tenha solicitado, ignore este e-mail.
+            </p>
+
+        </div>
+    </body>
     </html>
     """
 
@@ -306,22 +321,12 @@ def enviar_email_recuperacao(destinatario, link):
     msg["From"] = email_remetente
     msg["To"] = destinatario
     msg["Subject"] = assunto
+
     msg.attach(MIMEText(corpo_html, "html"))
 
-    smtp = None
-    try:
-        smtp = smtplib.SMTP("smtp.gmail.com", 587, timeout=20)
-        smtp.ehlo()
-        smtp.starttls()
-        smtp.ehlo()
-        smtp.login(email_remetente, senha_app)
-        smtp.send_message(msg)
-    finally:
-        if smtp:
-            try:
-                smtp.quit()
-            except:
-                pass
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as servidor:
+        servidor.login(email_remetente, senha_app)
+        servidor.send_message(msg)
 
 
 
@@ -836,66 +841,81 @@ def listar_usuarios():
     usuarios = [current_user]
     return render_template("usuarios.html", usuarios=usuarios)
 
+import traceback
+
+
+def gerar_token_recuperacao(email):
+    serializer = URLSafeTimedSerializer(app.secret_key)
+    return serializer.dumps(email, salt="recuperacao-senha")
+
+
+def validar_token_recuperacao(token, expiracao=1800):
+    serializer = URLSafeTimedSerializer(app.secret_key)
+    try:
+        return serializer.loads(token, salt="recuperacao-senha", max_age=expiracao)
+    except:
+        return None
+
 @app.route("/esqueci-senha", methods=["GET", "POST"])
 def esqueci_senha():
     if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
+        email = request.form.get("email", "").strip()
 
-        usuario = Usuario.query.filter_by(email=email).first()
+        try:
+            usuario = Usuario.query.filter_by(email=email).first()
 
-        if usuario:
-            token = serializer.dumps(email, salt="recuperar-senha")
-            link = url_for("redefinir_senha", token=token, _external=True)
+            # 🔒 NUNCA revelar se o e-mail existe
+            if usuario:
+                token = gerar_token_recuperacao(usuario.email)
+                link = url_for("redefinir_senha", token=token, _external=True)
 
-            try:
-                enviar_email_recuperacao(email, link)
-                flash("Se o e-mail estiver cadastrado, o link de recuperação foi enviado com sucesso.", "success")
-            except Exception as e:
-                print(f"Erro ao enviar e-mail de recuperação: {e}")
-                flash("Não foi possível enviar o e-mail de recuperação no momento. Tente novamente mais tarde.", "danger")
-        else:
-            # mantém comportamento seguro sem revelar se o e-mail existe ou não
-            flash("Se o e-mail estiver cadastrado, o link de recuperação foi enviado com sucesso.", "info")
+                enviar_email_recuperacao(usuario.email, link)
 
-        return redirect(url_for("login"))
+            flash("Se o e-mail existir no sistema, você receberá as instruções de recuperação.", "info")
+            return redirect(url_for("login"))
+
+        except Exception as e:
+            # log interno (sem mostrar pro usuário)
+            print("Erro ao recuperar senha:", e)
+
+            flash("Não foi possível processar a solicitação no momento.", "danger")
+            return redirect(url_for("login"))
 
     return render_template("esqueci_senha.html")
 
 @app.route("/redefinir-senha/<token>", methods=["GET", "POST"])
 def redefinir_senha(token):
-    try:
-        email = serializer.loads(token, salt="recuperar-senha", max_age=3600)
-    except SignatureExpired:
-        flash("O link expirou. Solicite uma nova recuperação.", "danger")
-        return redirect(url_for("esqueci_senha"))
-    except BadSignature:
-        flash("Link inválido.", "danger")
+    email = validar_token_recuperacao(token)
+
+    if not email:
+        flash("Link inválido ou expirado.", "danger")
         return redirect(url_for("login"))
 
     usuario = Usuario.query.filter_by(email=email).first()
+
     if not usuario:
         flash("Usuário não encontrado.", "danger")
         return redirect(url_for("login"))
 
     if request.method == "POST":
-        nova_senha = request.form.get("nova_senha", "")
-        confirmar_senha = request.form.get("confirmar_senha", "")
+        senha = request.form.get("senha", "").strip()
+        confirmar = request.form.get("confirmar", "").strip()
 
-        if len(nova_senha) < 6:
+        if senha != confirmar:
+            flash("As senhas não coincidem.", "danger")
+            return redirect(request.url)
+
+        if len(senha) < 6:
             flash("A senha deve ter pelo menos 6 caracteres.", "warning")
-            return redirect(url_for("redefinir_senha", token=token))
+            return redirect(request.url)
 
-        if nova_senha != confirmar_senha:
-            flash("As senhas não coincidem.", "warning")
-            return redirect(url_for("redefinir_senha", token=token))
-
-        usuario.set_senha(nova_senha)
+        usuario.set_senha(senha)
         db.session.commit()
 
-        flash("Senha redefinida com sucesso. Faça login.", "success")
+        flash("Senha redefinida com sucesso.", "success")
         return redirect(url_for("login"))
 
-    return render_template("redefinir_senha.html", token=token)
+    return render_template("reset_password.html")
 
 
 

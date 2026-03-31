@@ -12,6 +12,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask import Flask, render_template, request, redirect, send_file, flash, url_for
 import pandas as pd
+import smtplib
+from email.mime.text import MIMEText
 import os
 import re
 import json
@@ -25,29 +27,6 @@ app = Flask(__name__)
 
 secret_key = os.environ.get("SECRET_KEY")
 if not secret_key:
-    secret_key = os.urandom(32).hex()
-    print("⚠️ SECRET_KEY não encontrada. Usando chave aleatória local temporária.")
-
-app.config["SECRET_KEY"] = secret_key
-
-serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
-
-database_url = os.environ.get("DATABASE_URL")
-if not database_url:
-    database_url = f"sqlite:///{os.path.join(BASE_DIR, 'local.db')}"
-    print("⚠️ DATABASE_URL não encontrada. Usando SQLite local em local.db.")
-
-
-# =========================================================
-# APP / CONFIG
-# =========================================================
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-
-app = Flask(__name__)
-
-secret_key = os.environ.get("SECRET_KEY")
-if not secret_key:
-    # fallback seguro para ambiente local
     secret_key = os.urandom(32).hex()
     print("⚠️ SECRET_KEY não encontrada. Usando chave aleatória local temporária.")
 
@@ -67,8 +46,11 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
+serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
 
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
@@ -281,6 +263,45 @@ def resetar_sequence_empresas_do_usuario_se_vazio(user_id):
         except Exception:
             db.session.rollback()
             app.logger.exception("Erro ao resetar sequence do PostgreSQL")
+
+def enviar_email_recuperacao(destinatario, link):
+    remetente = os.environ.get("EMAIL_FROM")
+    senha = os.environ.get("EMAIL_APP_PASSWORD")
+
+    if not remetente or not senha:
+        raise RuntimeError("EMAIL_FROM ou EMAIL_APP_PASSWORD não configurados.")
+
+    html = f"""
+    <div style="font-family: Arial; background:#eef4ff; padding:20px;">
+        <div style="max-width:600px;margin:auto;background:#fff;border-radius:12px;padding:30px;">
+            <h2 style="color:#1f6feb;">Recuperação de senha</h2>
+            <p>Recebemos uma solicitação para redefinir sua senha.</p>
+            <div style="text-align:center;margin:30px;">
+                <a href="{link}" style="background:#1f6feb;color:#fff;padding:12px 20px;text-decoration:none;border-radius:8px;">
+                    Redefinir senha
+                </a>
+            </div>
+            <p>Ou copie o link:</p>
+            <p>{link}</p>
+            <hr>
+            <p style="font-size:12px;color:#777;">
+                Se não foi você, ignore este e-mail.
+            </p>
+        </div>
+    </div>
+    """
+
+    msg = MIMEText(html, "html")
+    msg["Subject"] = "Recuperação de senha"
+    msg["From"] = remetente
+    msg["To"] = destinatario
+
+    smtp = smtplib.SMTP("smtp.gmail.com", 587)
+    smtp.starttls()
+    smtp.login(remetente, senha)
+    smtp.send_message(msg)
+    smtp.quit()
+
 
 
 # =========================================================
@@ -798,15 +819,18 @@ def listar_usuarios():
 def esqueci_senha():
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
-
         usuario = Usuario.query.filter_by(email=email).first()
 
         if usuario:
-            token = serializer.dumps(email, salt="recuperar-senha")
-            link = url_for("redefinir_senha", token=token, _external=True)
+            try:
+                token = serializer.dumps(email, salt="recuperar-senha")
+                link = url_for("redefinir_senha", token=token, _external=True)
 
-            print("LINK DE RECUPERAÇÃO:", link)
-            flash("Encontramos seu cadastro. O link de recuperação foi gerado.", "success")
+                enviar_email_recuperacao(email, link)
+                flash("Enviamos o link de recuperação para o seu e-mail.", "success")
+            except Exception:
+                app.logger.exception("Erro ao enviar e-mail de recuperação")
+                flash("Não foi possível enviar o e-mail agora. Tente novamente.", "danger")
         else:
             flash("Não localizamos esse e-mail no sistema. Verifique e tente novamente.", "warning")
 

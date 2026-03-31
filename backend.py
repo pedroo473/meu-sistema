@@ -264,43 +264,64 @@ def resetar_sequence_empresas_do_usuario_se_vazio(user_id):
             db.session.rollback()
             app.logger.exception("Erro ao resetar sequence do PostgreSQL")
 
+import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+
 def enviar_email_recuperacao(destinatario, link):
-    remetente = os.environ.get("EMAIL_FROM")
-    senha = os.environ.get("EMAIL_APP_PASSWORD")
+    email_remetente = os.getenv("EMAIL_FROM")
+    senha_app = os.getenv("EMAIL_APP_PASSWORD")
 
-    if not remetente or not senha:
-        raise RuntimeError("EMAIL_FROM ou EMAIL_APP_PASSWORD não configurados.")
+    if not email_remetente or not senha_app:
+        raise ValueError("EMAIL_FROM ou EMAIL_APP_PASSWORD não configurados.")
 
-    html = f"""
-    <div style="font-family: Arial; background:#eef4ff; padding:20px;">
-        <div style="max-width:600px;margin:auto;background:#fff;border-radius:12px;padding:30px;">
-            <h2 style="color:#1f6feb;">Recuperação de senha</h2>
+    assunto = "Recuperação de senha"
+    corpo_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2>Recuperação de senha</h2>
             <p>Recebemos uma solicitação para redefinir sua senha.</p>
-            <div style="text-align:center;margin:30px;">
-                <a href="{link}" style="background:#1f6feb;color:#fff;padding:12px 20px;text-decoration:none;border-radius:8px;">
+            <p>Clique no botão abaixo para criar uma nova senha:</p>
+            <p>
+                <a href="{link}" style="
+                    display:inline-block;
+                    padding:12px 20px;
+                    background:#0d6efd;
+                    color:#fff;
+                    text-decoration:none;
+                    border-radius:8px;
+                    font-weight:bold;
+                ">
                     Redefinir senha
                 </a>
-            </div>
-            <p>Ou copie o link:</p>
-            <p>{link}</p>
-            <hr>
-            <p style="font-size:12px;color:#777;">
-                Se não foi você, ignore este e-mail.
             </p>
-        </div>
-    </div>
+            <p>Se você não fez esta solicitação, ignore este e-mail.</p>
+        </body>
+    </html>
     """
 
-    msg = MIMEText(html, "html")
-    msg["Subject"] = "Recuperação de senha"
-    msg["From"] = remetente
+    msg = MIMEMultipart()
+    msg["From"] = email_remetente
     msg["To"] = destinatario
+    msg["Subject"] = assunto
+    msg.attach(MIMEText(corpo_html, "html"))
 
-    smtp = smtplib.SMTP("smtp.gmail.com", 587)
-    smtp.starttls()
-    smtp.login(remetente, senha)
-    smtp.send_message(msg)
-    smtp.quit()
+    smtp = None
+    try:
+        smtp = smtplib.SMTP("smtp.gmail.com", 587, timeout=20)
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+        smtp.login(email_remetente, senha_app)
+        smtp.send_message(msg)
+    finally:
+        if smtp:
+            try:
+                smtp.quit()
+            except:
+                pass
 
 
 
@@ -819,22 +840,24 @@ def listar_usuarios():
 def esqueci_senha():
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
+
         usuario = Usuario.query.filter_by(email=email).first()
 
         if usuario:
+            token = serializer.dumps(email, salt="recuperar-senha")
+            link = url_for("redefinir_senha", token=token, _external=True)
+
             try:
-                token = serializer.dumps(email, salt="recuperar-senha")
-                link = url_for("redefinir_senha", token=token, _external=True)
-
                 enviar_email_recuperacao(email, link)
-                flash("Enviamos o link de recuperação para o seu e-mail.", "success")
-            except Exception:
-                app.logger.exception("Erro ao enviar e-mail de recuperação")
-                flash("Não foi possível enviar o e-mail agora. Tente novamente.", "danger")
+                flash("Se o e-mail estiver cadastrado, o link de recuperação foi enviado com sucesso.", "success")
+            except Exception as e:
+                print(f"Erro ao enviar e-mail de recuperação: {e}")
+                flash("Não foi possível enviar o e-mail de recuperação no momento. Tente novamente mais tarde.", "danger")
         else:
-            flash("Não localizamos esse e-mail no sistema. Verifique e tente novamente.", "warning")
+            # mantém comportamento seguro sem revelar se o e-mail existe ou não
+            flash("Se o e-mail estiver cadastrado, o link de recuperação foi enviado com sucesso.", "info")
 
-        return redirect(url_for("esqueci_senha"))
+        return redirect(url_for("login"))
 
     return render_template("esqueci_senha.html")
 

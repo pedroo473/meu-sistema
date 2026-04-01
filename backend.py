@@ -270,48 +270,62 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+email_remetente = os.getenv("EMAIL_FROM")
+senha_app = os.getenv("EMAIL_APP_PASSWORD")
 
-def enviar_email_recuperacao(destinatario, link):
-    email_remetente = os.getenv("EMAIL_FROM")
-    senha_app = os.getenv("EMAIL_APP_PASSWORD")
+print("=== DEBUG FUNÇÃO EMAIL ===")
+print("EMAIL_FROM:", email_remetente)
+print("DESTINATARIO:", destinatario)
+print("LINK:", link)
 
-    if not email_remetente or not senha_app:
-        raise ValueError("EMAIL_FROM ou EMAIL_APP_PASSWORD não configurados.")
+if not email_remetente or not senha_app:
+    raise ValueError("EMAIL_FROM ou EMAIL_APP_PASSWORD não configurados.")
 
-    assunto = "Recuperação de senha"
-    corpo_html = f"""
-    <html>
-        <body style="font-family: Arial, sans-serif; color: #333;">
-            <h2>Recuperação de senha</h2>
-            <p>Recebemos uma solicitação para redefinir sua senha.</p>
-            <p>Clique no botão abaixo para criar uma nova senha:</p>
-            <p>
-                <a href="{link}" style="
-                    display:inline-block;
-                    padding:12px 20px;
-                    background:#0d6efd;
-                    color:#fff;
-                    text-decoration:none;
-                    border-radius:8px;
-                    font-weight:bold;
-                ">
-                    Redefinir senha
-                </a>
-            </p>
-            <p>Se você não fez esta solicitação, ignore este e-mail.</p>
-        </body>
-    </html>
-    """
+assunto = "Recuperação de senha"
+corpo_html = f"""
+<html>
+    <body style="font-family: Arial, sans-serif; color: #333;">
+        <h2>Recuperação de senha</h2>
+        <p>Recebemos uma solicitação para redefinir sua senha.</p>
+        <p>Clique no botão abaixo para criar uma nova senha:</p>
+        <p>
+            <a href="{link}" style="
+                display:inline-block;
+                padding:12px 20px;
+                background:#0d6efd;
+                color:#fff;
+                text-decoration:none;
+                border-radius:8px;
+                font-weight:bold;
+            ">
+                Redefinir senha
+            </a>
+        </p>
+        <p>Se você não fez esta solicitação, ignore este e-mail.</p>
+    </body>
+</html>
+"""
 
-    msg = MIMEMultipart()
-    msg["From"] = email_remetente
-    msg["To"] = destinatario
-    msg["Subject"] = assunto
-    msg.attach(MIMEText(corpo_html, "html"))
+msg = MIMEMultipart()
+msg["From"] = email_remetente
+msg["To"] = destinatario
+msg["Subject"] = assunto
+msg.attach(MIMEText(corpo_html, "html"))
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as servidor:
-        servidor.login(email_remetente, senha_app)
-        servidor.send_message(msg)
+contexto = ssl.create_default_context()
+
+print("Conectando no SMTP...")
+
+with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=contexto, timeout=8) as servidor:
+    print("Conectado no SMTP")
+
+    print("Fazendo login...")
+    servidor.login(email_remetente, senha_app)
+    print("Login feito")
+
+    print("Enviando mensagem...")
+    servidor.send_message(msg)
+    print("Mensagem enviada com sucesso")
 
 
 
@@ -850,27 +864,32 @@ def esqueci_senha():
         try:
             email = request.form.get("email", "").strip()
 
+            print("=== INÍCIO RECUPERAÇÃO DE SENHA ===")
+            print("Email digitado:", email)
+
             if not email:
                 flash("Informe um e-mail válido.", "warning")
                 return redirect(url_for("esqueci_senha"))
 
             usuario = Usuario.query.filter_by(email=email).first()
+            print("Usuário encontrado:", usuario)
 
             if usuario:
-                # 🔐 Gera token
                 token = gerar_token_recuperacao(usuario.email)
+                print("Token gerado:", token)
 
-                # 🔗 Gera link correto (IMPORTANTE usar _external=True)
                 link = url_for("redefinir_senha", token=token, _external=True)
+                print("Link gerado:", link)
 
-                # 🚀 ENVIO EM SEGUNDO PLANO (resolve o erro do Render)
-                threading.Thread(
-                    target=enviar_email_recuperacao,
-                    args=(usuario.email, link),
-                    daemon=True
-                ).start()
+                try:
+                    print("Tentando enviar e-mail...")
+                    enviar_email_recuperacao(usuario.email, link)
+                    print("E-mail enviado com sucesso.")
+                except Exception as e:
+                    print("ERRO AO ENVIAR E-MAIL:", str(e))
+                    import traceback
+                    traceback.print_exc()
 
-            # 🔒 Segurança: nunca fala se o e-mail existe ou não
             flash("Se o e-mail estiver cadastrado, você receberá um link de recuperação.", "success")
             return redirect(url_for("login"))
 

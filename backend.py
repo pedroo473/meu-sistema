@@ -1,3 +1,5 @@
+import traceback
+from flask import request, render_template, redirect, url_for, flash
 import threading
 from sqlalchemy import text
 from flask_login import (
@@ -16,6 +18,7 @@ import pandas as pd
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import ssl
 import os
 import re
 import json
@@ -267,7 +270,13 @@ def resetar_sequence_empresas_do_usuario_se_vazio(user_id):
             app.logger.exception("Erro ao resetar sequence do PostgreSQL")
 
 
+
 def enviar_email_recuperacao(destinatario, link):
+    import os
+    import smtplib
+    import ssl
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
 
     email_remetente = os.getenv("EMAIL_FROM")
     senha_app = os.getenv("EMAIL_APP_PASSWORD")
@@ -284,10 +293,25 @@ def enviar_email_recuperacao(destinatario, link):
 
     corpo_html = f"""
     <html>
-        <body>
-            <h2>Recuperação de senha</h2>
-            <p>Clique no botão abaixo:</p>
-            <a href="{link}">Redefinir senha</a>
+        <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+            <h2 style="color: #0d6efd;">Recuperação de senha</h2>
+            <p>Recebemos uma solicitação para redefinir sua senha.</p>
+            <p>Clique no botão abaixo para criar uma nova senha:</p>
+            <p>
+                <a href="{link}" style="
+                    display:inline-block;
+                    padding:12px 20px;
+                    background:#0d6efd;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:8px;
+                    font-weight:bold;
+                ">
+                    Redefinir senha
+                </a>
+            </p>
+            <p>Se você não fez esta solicitação, ignore este e-mail.</p>
+            <p style="font-size: 12px; color: #666;">Link válido por 30 minutos.</p>
         </body>
     </html>
     """
@@ -302,7 +326,7 @@ def enviar_email_recuperacao(destinatario, link):
 
     print("Conectando no SMTP...")
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=contexto, timeout=8) as servidor:
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=contexto, timeout=10) as servidor:
         print("Conectado no SMTP")
 
         print("Fazendo login...")
@@ -312,8 +336,6 @@ def enviar_email_recuperacao(destinatario, link):
         print("Enviando mensagem...")
         servidor.send_message(msg)
         print("Mensagem enviada com sucesso")
-    print("Mensagem enviada com sucesso")
-
 
 
 # =========================================================
@@ -827,8 +849,6 @@ def listar_usuarios():
     usuarios = [current_user]
     return render_template("usuarios.html", usuarios=usuarios)
 
-import traceback
-
 
 def gerar_token_recuperacao(email):
     serializer = URLSafeTimedSerializer(app.secret_key)
@@ -842,14 +862,12 @@ def validar_token_recuperacao(token, expiracao=1800):
     except:
         return None
 
-import threading
-from flask import request, render_template, redirect, url_for, flash
 
 @app.route("/esqueci-senha", methods=["GET", "POST"])
 def esqueci_senha():
     if request.method == "POST":
         try:
-            email = request.form.get("email", "").strip()
+            email = request.form.get("email", "").strip().lower()
 
             print("=== INÍCIO RECUPERAÇÃO DE SENHA ===")
             print("Email digitado:", email)
@@ -874,7 +892,6 @@ def esqueci_senha():
                     print("E-mail enviado com sucesso.")
                 except Exception as e:
                     print("ERRO AO ENVIAR E-MAIL:", str(e))
-                    import traceback
                     traceback.print_exc()
 
             flash("Se o e-mail estiver cadastrado, você receberá um link de recuperação.", "success")
@@ -882,9 +899,7 @@ def esqueci_senha():
 
         except Exception as e:
             print("ERRO NA RECUPERAÇÃO DE SENHA:", str(e))
-            import traceback
             traceback.print_exc()
-
             flash("Erro ao processar a recuperação de senha.", "danger")
             return redirect(url_for("esqueci_senha"))
 

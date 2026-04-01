@@ -15,6 +15,7 @@ from flask import Flask, render_template, request, redirect, send_file, flash, u
 import pandas as pd
 import smtplib
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import os
 import re
 import json
@@ -265,66 +266,52 @@ def resetar_sequence_empresas_do_usuario_se_vazio(user_id):
             db.session.rollback()
             app.logger.exception("Erro ao resetar sequence do PostgreSQL")
 
-import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
-email_remetente = os.getenv("EMAIL_FROM")
-senha_app = os.getenv("EMAIL_APP_PASSWORD")
+def enviar_email_recuperacao(destinatario, link):
 
-print("=== DEBUG FUNÇÃO EMAIL ===")
-print("EMAIL_FROM:", email_remetente)
-print("DESTINATARIO:", destinatario)
-print("LINK:", link)
+    email_remetente = os.getenv("EMAIL_FROM")
+    senha_app = os.getenv("EMAIL_APP_PASSWORD")
 
-if not email_remetente or not senha_app:
-    raise ValueError("EMAIL_FROM ou EMAIL_APP_PASSWORD não configurados.")
+    print("=== DEBUG FUNÇÃO EMAIL ===")
+    print("EMAIL_FROM:", email_remetente)
+    print("DESTINATARIO:", destinatario)
+    print("LINK:", link)
 
-assunto = "Recuperação de senha"
-corpo_html = f"""
-<html>
-    <body style="font-family: Arial, sans-serif; color: #333;">
-        <h2>Recuperação de senha</h2>
-        <p>Recebemos uma solicitação para redefinir sua senha.</p>
-        <p>Clique no botão abaixo para criar uma nova senha:</p>
-        <p>
-            <a href="{link}" style="
-                display:inline-block;
-                padding:12px 20px;
-                background:#0d6efd;
-                color:#fff;
-                text-decoration:none;
-                border-radius:8px;
-                font-weight:bold;
-            ">
-                Redefinir senha
-            </a>
-        </p>
-        <p>Se você não fez esta solicitação, ignore este e-mail.</p>
-    </body>
-</html>
-"""
+    if not email_remetente or not senha_app:
+        raise ValueError("EMAIL_FROM ou EMAIL_APP_PASSWORD não configurados.")
 
-msg = MIMEMultipart()
-msg["From"] = email_remetente
-msg["To"] = destinatario
-msg["Subject"] = assunto
-msg.attach(MIMEText(corpo_html, "html"))
+    assunto = "Recuperação de senha"
 
-contexto = ssl.create_default_context()
+    corpo_html = f"""
+    <html>
+        <body>
+            <h2>Recuperação de senha</h2>
+            <p>Clique no botão abaixo:</p>
+            <a href="{link}">Redefinir senha</a>
+        </body>
+    </html>
+    """
 
-print("Conectando no SMTP...")
+    msg = MIMEMultipart()
+    msg["From"] = email_remetente
+    msg["To"] = destinatario
+    msg["Subject"] = assunto
+    msg.attach(MIMEText(corpo_html, "html"))
 
-with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=contexto, timeout=8) as servidor:
-    print("Conectado no SMTP")
+    contexto = ssl.create_default_context()
 
-    print("Fazendo login...")
-    servidor.login(email_remetente, senha_app)
-    print("Login feito")
+    print("Conectando no SMTP...")
 
-    print("Enviando mensagem...")
-    servidor.send_message(msg)
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=contexto, timeout=8) as servidor:
+        print("Conectado no SMTP")
+
+        print("Fazendo login...")
+        servidor.login(email_remetente, senha_app)
+        print("Login feito")
+
+        print("Enviando mensagem...")
+        servidor.send_message(msg)
+        print("Mensagem enviada com sucesso")
     print("Mensagem enviada com sucesso")
 
 

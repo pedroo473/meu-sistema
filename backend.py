@@ -273,69 +273,49 @@ def resetar_sequence_empresas_do_usuario_se_vazio(user_id):
 
 def enviar_email_recuperacao(destinatario, link):
     import os
-    import smtplib
-    import ssl
-    from email.mime.text import MIMEText
-    from email.mime.multipart import MIMEMultipart
+    import requests
 
-    email_remetente = os.getenv("EMAIL_FROM")
-    senha_app = os.getenv("EMAIL_APP_PASSWORD")
+    api_key = os.getenv("RESEND_API_KEY")
 
-    print("=== DEBUG FUNÇÃO EMAIL ===")
-    print("EMAIL_FROM:", email_remetente)
-    print("DESTINATARIO:", destinatario)
-    print("LINK:", link)
+    if not api_key:
+        raise ValueError("RESEND_API_KEY não configurada.")
 
-    if not email_remetente or not senha_app:
-        raise ValueError("EMAIL_FROM ou EMAIL_APP_PASSWORD não configurados.")
+    print("=== ENVIO VIA RESEND ===")
+    print("DESTINO:", destinatario)
 
-    assunto = "Recuperação de senha"
-
-    corpo_html = f"""
-    <html>
-        <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-            <h2 style="color: #0d6efd;">Recuperação de senha</h2>
-            <p>Recebemos uma solicitação para redefinir sua senha.</p>
-            <p>Clique no botão abaixo para criar uma nova senha:</p>
-            <p>
+    response = requests.post(
+        "https://api.resend.com/emails",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "from": "onboarding@resend.dev",
+            "to": [destinatario],
+            "subject": "Recuperação de senha",
+            "html": f"""
+            <div style="font-family: Arial;">
+                <h2>Recuperação de senha</h2>
+                <p>Clique no botão abaixo:</p>
                 <a href="{link}" style="
-                    display:inline-block;
-                    padding:12px 20px;
+                    padding:10px 20px;
                     background:#0d6efd;
-                    color:#ffffff;
+                    color:#fff;
                     text-decoration:none;
-                    border-radius:8px;
-                    font-weight:bold;
+                    border-radius:5px;
                 ">
                     Redefinir senha
                 </a>
-            </p>
-            <p>Se você não fez esta solicitação, ignore este e-mail.</p>
-            <p style="font-size: 12px; color: #666;">Link válido por 30 minutos.</p>
-        </body>
-    </html>
-    """
+            </div>
+            """,
+        },
+    )
 
-    msg = MIMEMultipart()
-    msg["From"] = email_remetente
-    msg["To"] = destinatario
-    msg["Subject"] = assunto
-    msg.attach(MIMEText(corpo_html, "html"))
+    print("STATUS:", response.status_code)
+    print("RESPOSTA:", response.text)
 
-    contexto = ssl.create_default_context()
-
-    print("Conectando no SMTP...")
-
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=contexto, timeout=10) as servidor:
-        print("Conectado no SMTP")
-
-        print("Fazendo login...")
-        servidor.login(email_remetente, senha_app)
-        print("Login feito")
-
-        print("Enviando mensagem...")
-        servidor.send_message(msg)
-        print("Mensagem enviada com sucesso")
+    if response.status_code != 200:
+        raise Exception("Erro ao enviar e-mail")
 
 
 # =========================================================

@@ -1,3 +1,4 @@
+import threading
 from sqlalchemy import text
 from flask_login import (
     LoginManager,
@@ -271,29 +272,25 @@ from email.mime.multipart import MIMEMultipart
 
 
 def enviar_email_recuperacao(destinatario, link):
-
     email_remetente = os.getenv("EMAIL_FROM")
     senha_app = os.getenv("EMAIL_APP_PASSWORD")
 
     if not email_remetente or not senha_app:
-        raise ValueError("Configuração de e-mail não encontrada.")
+        raise ValueError("EMAIL_FROM ou EMAIL_APP_PASSWORD não configurados.")
 
     assunto = "Recuperação de senha"
-
     corpo_html = f"""
     <html>
-    <body style="font-family: Arial; background:#f4f6f9; padding:20px;">
-        <div style="max-width:500px; margin:auto; background:#fff; padding:30px; border-radius:10px;">
-
-            <h2 style="color:#0d6efd;">Recuperação de senha</h2>
-
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2>Recuperação de senha</h2>
             <p>Recebemos uma solicitação para redefinir sua senha.</p>
-
-            <p style="text-align:center; margin:30px 0;">
+            <p>Clique no botão abaixo para criar uma nova senha:</p>
+            <p>
                 <a href="{link}" style="
+                    display:inline-block;
+                    padding:12px 20px;
                     background:#0d6efd;
                     color:#fff;
-                    padding:12px 20px;
                     text-decoration:none;
                     border-radius:8px;
                     font-weight:bold;
@@ -301,19 +298,8 @@ def enviar_email_recuperacao(destinatario, link):
                     Redefinir senha
                 </a>
             </p>
-
-            <p style="font-size:14px; color:#666;">
-                Este link expira por segurança.
-            </p>
-
-            <hr>
-
-            <p style="font-size:12px; color:#999;">
-                Caso não tenha solicitado, ignore este e-mail.
-            </p>
-
-        </div>
-    </body>
+            <p>Se você não fez esta solicitação, ignore este e-mail.</p>
+        </body>
     </html>
     """
 
@@ -321,10 +307,9 @@ def enviar_email_recuperacao(destinatario, link):
     msg["From"] = email_remetente
     msg["To"] = destinatario
     msg["Subject"] = assunto
-
     msg.attach(MIMEText(corpo_html, "html"))
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as servidor:
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as servidor:
         servidor.login(email_remetente, senha_app)
         servidor.send_message(msg)
 
@@ -856,30 +841,46 @@ def validar_token_recuperacao(token, expiracao=1800):
     except:
         return None
 
+import threading
+from flask import request, render_template, redirect, url_for, flash
+
 @app.route("/esqueci-senha", methods=["GET", "POST"])
 def esqueci_senha():
     if request.method == "POST":
-        email = request.form.get("email", "").strip()
-
         try:
+            email = request.form.get("email", "").strip()
+
+            if not email:
+                flash("Informe um e-mail válido.", "warning")
+                return redirect(url_for("esqueci_senha"))
+
             usuario = Usuario.query.filter_by(email=email).first()
 
-            # 🔒 NUNCA revelar se o e-mail existe
             if usuario:
+                # 🔐 Gera token
                 token = gerar_token_recuperacao(usuario.email)
+
+                # 🔗 Gera link correto (IMPORTANTE usar _external=True)
                 link = url_for("redefinir_senha", token=token, _external=True)
 
-                enviar_email_recuperacao(usuario.email, link)
+                # 🚀 ENVIO EM SEGUNDO PLANO (resolve o erro do Render)
+                threading.Thread(
+                    target=enviar_email_recuperacao,
+                    args=(usuario.email, link),
+                    daemon=True
+                ).start()
 
-            flash("Se o e-mail existir no sistema, você receberá as instruções de recuperação.", "info")
+            # 🔒 Segurança: nunca fala se o e-mail existe ou não
+            flash("Se o e-mail estiver cadastrado, você receberá um link de recuperação.", "success")
             return redirect(url_for("login"))
 
         except Exception as e:
-            # log interno (sem mostrar pro usuário)
-            print("Erro ao recuperar senha:", e)
+            print("ERRO NA RECUPERAÇÃO DE SENHA:", str(e))
+            import traceback
+            traceback.print_exc()
 
-            flash("Não foi possível processar a solicitação no momento.", "danger")
-            return redirect(url_for("login"))
+            flash("Erro ao processar a recuperação de senha.", "danger")
+            return redirect(url_for("esqueci_senha"))
 
     return render_template("esqueci_senha.html")
 

@@ -843,45 +843,27 @@ def validar_token_recuperacao(token, expiracao=1800):
         return None
 
 
+from itsdangerous import URLSafeTimedSerializer
+
 @app.route("/esqueci-senha", methods=["GET", "POST"])
 def esqueci_senha():
     if request.method == "POST":
-        try:
-            email = request.form.get("email", "").strip().lower()
+        email = request.form.get("email")
 
-            print("=== INÍCIO RECUPERAÇÃO DE SENHA ===")
-            print("Email digitado:", email)
+        usuario = Usuario.query.filter_by(email=email).first()
 
-            if not email:
-                flash("Informe um e-mail válido.", "warning")
-                return redirect(url_for("esqueci_senha"))
-
-            usuario = Usuario.query.filter_by(email=email).first()
-            print("Usuário encontrado:", usuario)
-
-            if usuario:
-                token = gerar_token_recuperacao(usuario.email)
-                print("Token gerado:", token)
-
-                link = url_for("redefinir_senha", token=token, _external=True)
-                print("Link gerado:", link)
-
-                try:
-                    print("Tentando enviar e-mail...")
-                    enviar_email_recuperacao(usuario.email, link)
-                    print("E-mail enviado com sucesso.")
-                except Exception as e:
-                    print("ERRO AO ENVIAR E-MAIL:", str(e))
-                    traceback.print_exc()
-
-            flash("Se o e-mail estiver cadastrado, você receberá um link de recuperação.", "success")
-            return redirect(url_for("login"))
-
-        except Exception as e:
-            print("ERRO NA RECUPERAÇÃO DE SENHA:", str(e))
-            traceback.print_exc()
-            flash("Erro ao processar a recuperação de senha.", "danger")
+        if not usuario:
+            flash("E-mail não encontrado.", "danger")
             return redirect(url_for("esqueci_senha"))
+
+        serializer = URLSafeTimedSerializer(app.secret_key)
+
+        token = serializer.dumps(email, salt="recuperar-senha")
+
+        link = url_for("redefinir_senha", token=token, _external=True)
+
+        # 🔥 AQUI É A MUDANÇA
+        return render_template("esqueci_senha.html", link=link)
 
     return render_template("esqueci_senha.html")
 

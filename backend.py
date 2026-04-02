@@ -831,15 +831,12 @@ def listar_usuarios():
 
 
 def gerar_token_recuperacao(email):
-    serializer = URLSafeTimedSerializer(app.secret_key)
     return serializer.dumps(email, salt="recuperacao-senha")
 
-
 def validar_token_recuperacao(token, expiracao=1800):
-    serializer = URLSafeTimedSerializer(app.secret_key)
     try:
         return serializer.loads(token, salt="recuperacao-senha", max_age=expiracao)
-    except:
+    except (SignatureExpired, BadSignature):
         return None
 
 
@@ -847,8 +844,10 @@ from itsdangerous import URLSafeTimedSerializer
 
 @app.route("/esqueci-senha", methods=["GET", "POST"])
 def esqueci_senha():
+    link = None
+
     if request.method == "POST":
-        email = request.form.get("email")
+        email = limpar_texto(request.form.get("email")).lower()
 
         usuario = Usuario.query.filter_by(email=email).first()
 
@@ -856,16 +855,13 @@ def esqueci_senha():
             flash("E-mail não encontrado.", "danger")
             return redirect(url_for("esqueci_senha"))
 
-        serializer = URLSafeTimedSerializer(app.secret_key)
-
-        token = serializer.dumps(email, salt="recuperar-senha")
+        token = gerar_token_recuperacao(email)
 
         link = url_for("redefinir_senha", token=token, _external=True)
 
-        # 🔥 AQUI É A MUDANÇA
         return render_template("esqueci_senha.html", link=link)
 
-    return render_template("esqueci_senha.html")
+    return render_template("esqueci_senha.html", link=link)
 
 @app.route("/redefinir-senha/<token>", methods=["GET", "POST"])
 def redefinir_senha(token):
@@ -885,6 +881,10 @@ def redefinir_senha(token):
         senha = request.form.get("senha", "").strip()
         confirmar = request.form.get("confirmar", "").strip()
 
+        if not senha or not confirmar:
+            flash("Preencha todos os campos.", "warning")
+            return redirect(request.url)
+
         if senha != confirmar:
             flash("As senhas não coincidem.", "danger")
             return redirect(request.url)
@@ -899,7 +899,7 @@ def redefinir_senha(token):
         flash("Senha redefinida com sucesso.", "success")
         return redirect(url_for("login"))
 
-    return render_template("reset_password.html")
+    return render_template("redefinir_senha.html")
 
 
 

@@ -4,32 +4,488 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redefinir Senha | Sistema de Empresas</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        :root {
+            --azul-primario: #1f6feb;
+            --azul-secundario: #0d47c9;
+            --azul-claro: #eaf2ff;
+            --borda: #d9e2f1;
+            --texto: #1f2937;
+            --texto-suave: #6b7280;
+            --branco: #ffffff;
+            --sucesso: #198754;
+            --erro: #dc3545;
+            --sombra-forte: 0 24px 60px rgba(15, 23, 42, 0.18);
+            --sombra-media: 0 12px 30px rgba(31, 111, 235, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background:
+                radial-gradient(circle at top left, rgba(31, 111, 235, 0.18), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(13, 71, 201, 0.16), transparent 30%),
+                linear-gradient(135deg, #eef4ff 0%, #f8fbff 50%, #edf3ff 100%);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--texto);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 16px;
+        }
+
+        .auth-wrapper {
+            width: 100%;
+            max-width: 560px;
+            animation: fadeUp 0.7s ease;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: var(--sombra-forte);
+        }
+
+        .auth-header {
+            position: relative;
+            padding: 36px 32px 30px;
+            background: linear-gradient(135deg, var(--azul-primario), var(--azul-secundario));
+            color: var(--branco);
+            text-align: center;
+        }
+
+        .auth-header::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.20), transparent 22%),
+                radial-gradient(circle at 80% 30%, rgba(255,255,255,0.14), transparent 18%),
+                radial-gradient(circle at 50% 100%, rgba(255,255,255,0.10), transparent 24%);
+            pointer-events: none;
+        }
+
+        .auth-header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.92);
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.18);
+            padding: 8px 14px;
+            border-radius: 999px;
+            margin-bottom: 16px;
+        }
+
+        .auth-title {
+            font-size: 2.1rem;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .auth-subtitle {
+            margin: 10px 0 0;
+            font-size: 1rem;
+            color: rgba(255,255,255,0.92);
+        }
+
+        .auth-body {
+            padding: 32px;
+        }
+
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--texto);
+        }
+
+        .section-subtitle {
+            font-size: 0.95rem;
+            color: var(--texto-suave);
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .input-group-premium {
+            position: relative;
+        }
+
+        .input-premium {
+            width: 100%;
+            height: 58px;
+            border-radius: 18px;
+            border: 1.5px solid var(--borda);
+            background: #fff;
+            color: var(--texto);
+            font-size: 15px;
+            padding: 0 52px 0 18px;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+            transition: all 0.25s ease;
+        }
+
+        .input-premium::placeholder {
+            color: #94a3b8;
+        }
+
+        .input-premium:focus {
+            outline: none;
+            border-color: var(--azul-primario);
+            box-shadow: 0 0 0 5px rgba(31, 111, 235, 0.14);
+            transform: translateY(-1px);
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 16px;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-size: 1.1rem;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .toggle-password:hover {
+            color: var(--azul-primario);
+        }
+
+        .btn-premium {
+            height: 58px;
+            border: none;
+            border-radius: 18px;
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 0.01em;
+            transition: all 0.25s ease;
+        }
+
+        .btn-primary-premium {
+            background: linear-gradient(135deg, var(--sucesso), #157347);
+            color: #fff;
+            box-shadow: 0 12px 30px rgba(25, 135, 84, 0.24);
+        }
+
+        .btn-primary-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 34px rgba(25, 135, 84, 0.28);
+        }
+
+        .btn-primary-premium:active {
+            transform: translateY(0);
+        }
+
+        .strength-box {
+            margin-top: 12px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: #f8fbff;
+            border: 1px solid #dbe7ff;
+        }
+
+        .strength-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 10px;
+        }
+
+        .strength-bar {
+            width: 100%;
+            height: 10px;
+            border-radius: 999px;
+            background: #e5e7eb;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            transition: all 0.25s ease;
+            background: linear-gradient(90deg, #dc3545, #fd7e14);
+        }
+
+        .strength-text {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .tips-box {
+            margin-top: 18px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+            border: 1px solid #dbe7ff;
+        }
+
+        .tips-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .tips-list {
+            margin: 0;
+            padding-left: 18px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .tips-list li + li {
+            margin-top: 6px;
+        }
+
+        .alert {
+            border: none;
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .footer-note a {
+            color: var(--azul-primario);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .footer-note a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .auth-header {
+                padding: 28px 22px 24px;
+            }
+
+            .auth-body {
+                padding: 24px 20px;
+            }
+
+            .auth-title {
+                font-size: 1.8rem;
+            }
+
+            .input-premium,
+            .btn-premium {
+                height: 54px;
+                border-radius: 16px;
+            }
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
-<div class="container mt-5" style="max-width: 500px;">
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-4">
-            <h3 class="mb-3">Redefinir senha</h3>
-            <p class="text-muted">Digite sua nova senha.</p>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-header-content">
+                <div class="auth-badge">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    Segurança da conta
+                </div>
+                <h1 class="auth-title">Redefinir senha</h1>
+                <p class="auth-subtitle">Crie uma nova senha forte para acessar seu sistema com segurança</p>
+            </div>
+        </div>
 
-            <form method="POST">
-                <div class="mb-3">
-                    <label class="form-label">Nova senha</label>
-                    <input type="password" name="nova_senha" class="form-control" required>
+        <div class="auth-body">
+            <div class="section-title">Nova senha</div>
+            <div class="section-subtitle">
+                Informe e confirme sua nova senha para concluir a redefinição de acesso.
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for categoria, mensagem in messages %}
+                        <div class="alert alert-{{ categoria }} alert-dismissible fade show mb-4" role="alert">
+                            {{ mensagem }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" id="formRedefinirSenha">
+                <div class="mb-4">
+                    <label for="senha" class="form-label">Nova senha</label>
+                    <div class="input-group-premium">
+                        <input
+                            type="password"
+                            name="senha"
+                            id="senha"
+                            class="form-control input-premium"
+                            placeholder="Digite sua nova senha"
+                            required
+                        >
+                        <button type="button" class="toggle-password" onclick="alternarSenha('senha', this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Confirmar senha</label>
-                    <input type="password" name="confirmar_senha" class="form-control" required>
+                    <label for="confirmar" class="form-label">Confirmar senha</label>
+                    <div class="input-group-premium">
+                        <input
+                            type="password"
+                            name="confirmar"
+                            id="confirmar"
+                            class="form-control input-premium"
+                            placeholder="Confirme sua nova senha"
+                            required
+                        >
+                        <button type="button" class="toggle-password" onclick="alternarSenha('confirmar', this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-success w-100">Salvar nova senha</button>
+                <div class="strength-box">
+                    <div class="strength-label">Força da senha</div>
+                    <div class="strength-bar">
+                        <div id="strengthFill" class="strength-fill"></div>
+                    </div>
+                    <div id="strengthText" class="strength-text">Digite uma senha para analisar.</div>
+                </div>
+
+                <div class="tips-box">
+                    <div class="tips-title">
+                        <i class="bi bi-stars me-2"></i>
+                        Recomendação
+                    </div>
+                    <ul class="tips-list">
+                        <li>Use pelo menos 8 caracteres.</li>
+                        <li>Misture letras maiúsculas, minúsculas, números e símbolos.</li>
+                        <li>Evite datas de nascimento, nomes e sequências óbvias.</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="btn btn-premium btn-primary-premium w-100 mt-4">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    Salvar nova senha
+                </button>
             </form>
+
+            <div class="footer-note">
+                Após redefinir, você poderá entrar normalmente no sistema.
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+function alternarSenha(idCampo, botao) {
+    const campo = document.getElementById(idCampo);
+    const icone = botao.querySelector("i");
+
+    if (!campo || !icone) return;
+
+    if (campo.type === "password") {
+        campo.type = "text";
+        icone.className = "bi bi-eye-slash";
+    } else {
+        campo.type = "password";
+        icone.className = "bi bi-eye";
+    }
+}
+
+function avaliarForcaSenha(senha) {
+    let pontos = 0;
+
+    if (senha.length >= 8) pontos++;
+    if (senha.length >= 12) pontos++;
+    if (/[A-Z]/.test(senha)) pontos++;
+    if (/[a-z]/.test(senha)) pontos++;
+    if (/[0-9]/.test(senha)) pontos++;
+    if (/[^A-Za-z0-9]/.test(senha)) pontos++;
+
+    return pontos;
+}
+
+function atualizarForcaSenha() {
+    const senha = document.getElementById("senha").value;
+    const fill = document.getElementById("strengthFill");
+    const text = document.getElementById("strengthText");
+
+    if (!senha) {
+        fill.style.width = "0%";
+        fill.style.background = "linear-gradient(90deg, #dc3545, #fd7e14)";
+        text.textContent = "Digite uma senha para analisar.";
+        return;
+    }
+
+    const pontos = avaliarForcaSenha(senha);
+
+    if (pontos <= 2) {
+        fill.style.width = "30%";
+        fill.style.background = "linear-gradient(90deg, #dc3545, #fd7e14)";
+        text.textContent = "Senha fraca";
+    } else if (pontos <= 4) {
+        fill.style.width = "65%";
+        fill.style.background = "linear-gradient(90deg, #fd7e14, #ffc107)";
+        text.textContent = "Senha média";
+    } else {
+        fill.style.width = "100%";
+        fill.style.background = "linear-gradient(90deg, #198754, #20c997)";
+        text.textContent = "Senha forte";
+    }
+}
+
+document.getElementById("senha").addEventListener("input", atualizarForcaSenha);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

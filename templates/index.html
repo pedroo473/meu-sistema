@@ -11,6 +11,177 @@
 
                         <style>
 
+
+                            .overlay-config {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(6px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.25s ease;
+}
+
+.config-modal {
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+    animation: scaleIn 0.25s ease;
+}
+
+.info-box {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.info-box small {
+    display: block;
+    color: #6b7280;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.info-box strong {
+    font-size: 15px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.overlay-config {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(6px);
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    animation: fadeIn 0.25s ease;
+}
+
+.config-modal {
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+    animation: scaleIn 0.25s ease;
+}
+
+.info-box {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.info-box small {
+    display: block;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.info-box strong {
+    font-size: 15px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0 }
+    to { opacity: 1 }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+                            .overlay-config {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(6px);
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    animation: fadeIn 0.25s ease;
+}
+
+.config-modal {
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+    animation: scaleIn 0.25s ease;
+}
+
+.info-box {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.info-box small {
+    display: block;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.info-box strong {
+    font-size: 15px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0 }
+    to { opacity: 1 }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
                             .page-shell {
                                 max-width: 1460px;
                                 position: relative;
@@ -976,62 +1147,58 @@
                     <div class="container-fluid page-shell py-4 py-lg-5">
 
                         {% if current_user.is_authenticated %}
-                        <div class="top-user-bar">
-                            <div class="admin-dropdown" id="adminDropdown">
-                                <button type="button" class="admin-trigger" onclick="toggleAdminMenu()">
-                                    <div class="admin-trigger-left">
-                                        <span class="admin-avatar">👤</span>
-                                        <div class="admin-info">
-                                            <span class="admin-label">Usuário logado</span>
-                                            <span class="admin-name">{{ current_user.nome }}</span>
-                                        </div>
-                                    </div>
-                                    <span class="admin-arrow" id="adminArrow">▾</span>
-                                </button>
+                        {% if current_user.is_authenticated %}
+<div class="top-user-bar">
+    <div class="admin-dropdown" id="adminDropdown">
+        <button type="button" class="admin-trigger" onclick="toggleAdminMenu()">
+            <div class="admin-trigger-left">
+                <span class="admin-avatar">👤</span>
+                <div class="admin-info">
+                    <span class="admin-label">Usuário logado</span>
+                    <span class="admin-name">{{ current_user.nome }}</span>
+                </div>
+            </div>
+            <span class="admin-arrow" id="adminArrow">▾</span>
+        </button>
 
-                                <div class="admin-menu" id="adminMenu">
-                                    <div class="admin-menu-header">
-                                        <div class="admin-menu-avatar">👤</div>
-                                        <div>
-                                            <div class="admin-menu-title">{{ current_user.nome }}</div>
-                                            <div class="admin-menu-subtitle">Administrador do sistema</div>
-                                        </div>
-                                    </div>
+        <div class="admin-menu" id="adminMenu">
+            <div class="admin-menu-header">
+                <div class="admin-menu-avatar">👤</div>
+                <div>
+                    <div class="admin-menu-title">{{ current_user.nome }}</div>
+                    <div class="admin-menu-subtitle">Administrador do sistema</div>
+                </div>
+            </div>
 
-                                    <div class="admin-menu-divider"></div>
+            <div class="admin-menu-divider"></div>
 
-                                    <a href="{{ url_for('listar_usuarios') }}" class="admin-menu-item">
-                                        <span class="admin-menu-icon">👥</span>
-                                        <span>Ver usuários</span>
-                                    </a>
+            <a href="{{ url_for('register') }}" class="admin-menu-item">
+                <span class="admin-menu-icon">➕</span>
+                <span>Criar usuário</span>
+            </a>
 
-                                    <a href="{{ url_for('register') }}" class="admin-menu-item">
-                                        <span class="admin-menu-icon">➕</span>
-                                        <span>Criar usuário</span>
-                                    </a>
+            <a href="{{ url_for('index') }}" class="admin-menu-item">
+                <span class="admin-menu-icon">🏠</span>
+                <span>Página inicial</span>
+            </a>
 
-                                    <a href="{{ url_for('index') }}" class="admin-menu-item">
-                                        <span class="admin-menu-icon">🏠</span>
-                                        <span>Página inicial</span>
-                                    </a>
+            <button type="button" class="admin-menu-item admin-menu-item-button" onclick="abrirPainelConfiguracoes()">
+                <span class="admin-menu-icon">⚙️</span>
+                <span>Configurações</span>
+            </button>
 
-                                    <button type="button" class="admin-menu-item admin-menu-item-button" onclick="alert('Depois podemos ligar essa opção a uma tela de perfil.')">
-                                        <span class="admin-menu-icon">⚙️</span>
-                                        <span>Configurações</span>
-                                    </button>
+            <div class="admin-menu-divider"></div>
 
-                                    <div class="admin-menu-divider"></div>
-
-                                    <form method="POST" action="{{ url_for('logout') }}" class="m-0">
-                                        <button type="submit" class="admin-menu-item danger-item w-100 text-start border-0 bg-transparent">
-                                            <span class="admin-menu-icon">🚪</span>
-                                            <span>Sair</span>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
+            <form method="POST" action="{{ url_for('logout') }}" class="m-0">
+                <button type="submit" class="admin-menu-item danger-item w-100 text-start border-0 bg-transparent">
+                    <span class="admin-menu-icon">🚪</span>
+                    <span>Sair</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
 
                         {% if not current_user.is_authenticated %}
                         <a href="{{ url_for('register') }}" class="btn btn-outline-primary w-100 mt-2 mb-3">
@@ -1040,36 +1207,37 @@
                         {% endif %}
 
                         <div class="toast-container-custom">
-                            {% with messages = get_flashed_messages(with_categories=true) %}
-                            {% if messages %}
-                            {% for categoria, mensagem in messages %}
-                            <div class="toast-custom toast-{{ categoria }}">
-                                <div class="toast-icon">
-                                    {% if categoria == "success" %}✅{% endif %}
-                                    {% if categoria == "danger" %}❌{% endif %}
-                                    {% if categoria == "warning" %}⚠️{% endif %}
-                                    {% if categoria == "primary" %}🔎{% endif %}
-                                    {% if categoria not in ["success", "danger", "warning", "primary"] %}ℹ️{% endif %}
-                                </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for categoria, mensagem in messages %}
+    <div class="toast-custom toast-{{ categoria }}">
+        <div class="toast-icon">
+            {% if categoria == "success" %}✅{% endif %}
+            {% if categoria == "danger" %}❌{% endif %}
+            {% if categoria == "warning" %}⚠️{% endif %}
+            {% if categoria == "primary" %}🔎{% endif %}
+            {% if categoria not in ["success", "danger", "warning", "primary"] %}ℹ️{% endif %}
+        </div>
 
-                                <div class="toast-content">
-                                    <div class="toast-title">
-                                        {% if categoria == "success" %}Operação realizada{% endif %}
-                                        {% if categoria == "danger" %}Algo deu errado{% endif %}
-                                        {% if categoria == "warning" %}Atenção{% endif %}
-                                        {% if categoria == "primary" %}Resultado do filtro{% endif %}
-                                        {% if categoria not in ["success", "danger", "warning", "primary"] %}Aviso{% endif %}
-                                    </div>
-                                    <div class="toast-message">{{ mensagem }}</div>
-                                </div>
+        <div class="toast-content">
+            <div class="toast-title">
+                {% if categoria == "success" %}Operação realizada{% endif %}
+                {% if categoria == "danger" %}Algo deu errado{% endif %}
+                {% if categoria == "warning" %}Atenção{% endif %}
+                {% if categoria == "primary" %}Resultado do filtro{% endif %}
+                {% if categoria not in ["success", "danger", "warning", "primary"] %}Aviso{% endif %}
+            </div>
+            <div class="toast-message">{{ mensagem }}</div>
+        </div>
 
-                                <button type="button" class="toast-close" onclick="fecharToast(this)">×</button>
-                                <div class="toast-progress"></div>
-                            </div>
-                            {% endfor %}
-                            {% endif %}
-                            {% endwith %}
-                        </div>
+        <button type="button" class="toast-close" onclick="fecharToast(this)">×</button>
+        <div class="toast-progress"></div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
+
 
                         <div class="hero p-4 p-lg-5 mb-4">
                             <div class="row g-4 align-items-center">
@@ -1210,10 +1378,6 @@
                                     <a href="/" class="btn btn-soft w-100">🧹 Limpar</a>
                                 </div>
                             </form>
-
-                            <a href="/usuarios" class="btn btn-dark mt-3">
-                                👤 Ver usuários
-                            </a>
 
                             {% if busca or tipo %}
                             <div class="mt-3 small text-secondary">
@@ -1622,6 +1786,20 @@ function toggleAdminMenu() {
     arrow.classList.toggle("rotated");
 }
 
+function abrirPainelConfiguracoes() {
+    document.getElementById("overlayConfig").classList.remove("d-none");
+}
+
+function fecharPainelConfiguracoes(event) {
+    if (!event || event.target.id === "overlayConfig") {
+        document.getElementById("overlayConfig").classList.add("d-none");
+    }
+}
+
+function toggleAlterarSenhaPanel() {
+    document.getElementById("alterarSenhaPanel").classList.toggle("d-none");
+}
+
 function abrirModalExcluir(url, nome = "") {
     document.getElementById("formExcluirIndividual").action = url;
     document.getElementById("nomeRegistroExcluir").textContent = nome;
@@ -1902,15 +2080,266 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+    <script>
+function abrirPainelConfiguracoes() {
+    const overlay = document.getElementById("overlayConfig");
+    const menu = document.getElementById("adminMenu");
+    const arrow = document.getElementById("adminArrow");
+
+    if (overlay) {
+        overlay.classList.remove("d-none");
+    }
+
+    if (menu) {
+        menu.classList.remove("show");
+    }
+
+    if (arrow) {
+        arrow.classList.remove("rotated");
+    }
+}
+
+function fecharPainelConfiguracoes(event) {
+    const overlay = document.getElementById("overlayConfig");
+    const senhaPanel = document.getElementById("alterarSenhaPanel");
+
+    if (!event || event.target.id === "overlayConfig") {
+        if (overlay) {
+            overlay.classList.add("d-none");
+        }
+        if (senhaPanel) {
+            senhaPanel.classList.add("d-none");
+        }
+    }
+}
+
+function toggleAlterarSenhaPanel() {
+    const panel = document.getElementById("alterarSenhaPanel");
+    if (panel) {
+        panel.classList.toggle("d-none");
+    }
+}
+
 </script>
 
-{% if mensagem_filtro %}
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    mostrarToastLocal({{ mensagem_filtro|tojson }}, {{ categoria_filtro|tojson }});
-});
-</script>
-{% endif %}
+
+                    <div id="overlayConfig" class="overlay-config d-none" onclick="fecharPainelConfiguracoes(event)">
+
+    <div class="config-modal" onclick="event.stopPropagation()">
+
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <h4 class="fw-bold mb-1">⚙️ Configurações da conta</h4>
+                <small class="text-muted">Gerencie seus dados</small>
+            </div>
+
+            <button class="btn btn-sm btn-light" onclick="fecharPainelConfiguracoes()">
+                ✕
+            </button>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="info-box">
+                    <small>ID</small>
+                    <strong>{{ current_user.id }}</strong>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('atualizar_conta_dashboard') }}">
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Nome</label>
+        <input type="text" name="nome" class="form-control" value="{{ current_user.nome }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Email</label>
+        <input type="email" name="email" class="form-control" value="{{ current_user.email }}" required>
+    </div>
+
+    <button class="btn btn-primary w-100">
+        Salvar alterações
+    </button>
+</form>
+
+            <div class="col-md-4">
+                <div class="info-box">
+                    <small>Status</small>
+                    <strong>
+                        {% if current_user.ativo %}
+                            <span class="badge bg-success">Ativo</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inativo</span>
+                        {% endif %}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="info-box">
+                    <small>Email</small>
+                    <strong>{{ current_user.email }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <button class="btn btn-primary w-100 mb-3" onclick="toggleAlterarSenhaPanel()">
+            Alterar senha
+        </button>
+
+<div id="overlayConfig" class="overlay-config d-none" onclick="fecharPainelConfiguracoes(event)">
+
+    <div class="config-modal" onclick="event.stopPropagation()">
+
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <h4 class="fw-bold mb-1">⚙️ Configurações da conta</h4>
+                <small class="text-muted">Gerencie seus dados</small>
+            </div>
+
+            <button class="btn btn-sm btn-light" onclick="fecharPainelConfiguracoes()">
+                ✕
+            </button>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="info-box">
+                    <small>ID</small>
+                    <strong>{{ current_user.id }}</strong>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="info-box">
+                    <small>Nome</small>
+                    <strong>{{ current_user.nome }}</strong>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="info-box">
+                    <small>Status</small>
+                    <strong>
+                        {% if current_user.ativo %}
+                            <span class="badge bg-success">Ativo</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inativo</span>
+                        {% endif %}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="info-box">
+                    <small>Email</small>
+                    <strong>{{ current_user.email }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <button class="btn btn-primary w-100 mb-3" onclick="toggleAlterarSenhaPanel()">
+            Alterar senha
+        </button>
+
+        <div id="alterarSenhaPanel" class="d-none">
+            <form method="POST" action="{{ url_for('atualizar_conta_dashboard') }}">
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Nome</label>
+        <input type="text" name="nome" class="form-control" value="{{ current_user.nome }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Email</label>
+        <input type="email" name="email" class="form-control" value="{{ current_user.email }}" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">
+        Salvar alterações
+    </button>
+</form>
+        </div>
+
+    </div>
+</div>
+
+
+        <div id="overlayConfig" class="overlay-config d-none" onclick="fecharPainelConfiguracoes(event)">
+    <div class="config-modal" onclick="event.stopPropagation()">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <h4 class="fw-bold mb-1">⚙️ Configurações da conta</h4>
+                <small class="text-muted">Gerencie seus dados</small>
+            </div>
+
+            <button type="button" class="btn btn-sm btn-light" onclick="fecharPainelConfiguracoes()">
+                ✕
+            </button>
+        </div>
+
+        <form method="POST" action="{{ url_for('atualizar_conta_dashboard') }}">
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="info-box">
+                        <small>ID</small>
+                        <strong>{{ current_user.id }}</strong>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Nome</label>
+                    <input type="text" name="nome" class="form-control" value="{{ current_user.nome }}" required>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Email</label>
+                    <input type="email" name="email" class="form-control" value="{{ current_user.email }}" required>
+                </div>
+
+                <div class="col-12">
+                    <div class="info-box">
+                        <small>Status</small>
+                        <strong>
+                            {% if current_user.ativo %}
+                                <span class="badge bg-success">Ativo</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inativo</span>
+                            {% endif %}
+                        </strong>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-3">
+                Salvar alterações
+            </button>
+        </form>
+
+        <hr class="my-4">
+
+        <button type="button" class="btn btn-outline-primary w-100 mb-3" onclick="toggleAlterarSenhaPanel()">
+            Alterar senha
+        </button>
+
+        <div id="alterarSenhaPanel" class="d-none">
+            <form method="POST" action="{{ url_for('redefinir_senha_dashboard') }}">
+                <input type="password" name="senha_atual" class="form-control mb-2" placeholder="Senha atual" required>
+                <input type="password" name="nova_senha" class="form-control mb-2" placeholder="Nova senha" required>
+                <input type="password" name="confirmar_senha" class="form-control mb-3" placeholder="Confirmar senha" required>
+
+                <button type="submit" class="btn btn-success w-100">
+                    Salvar nova senha
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 </body>
 </html>

@@ -766,7 +766,7 @@ def register():
         return redirect(url_for("index"))
 
     if request.method == "POST":
-        nome = limpar_texto(request.form.get("nome"))
+        nomef = limpar_texto(request.form.get("nome"))
         email = limpar_texto(request.form.get("email")).lower()
         senha = request.form.get("senha", "")
         confirmar_senha = request.form.get("confirmar_senha", "")
@@ -826,8 +826,8 @@ def logout():
 @app.route("/usuarios")
 @login_required
 def listar_usuarios():
-    usuarios = [current_user]
-    return render_template("usuarios.html", usuarios=usuarios)
+    flash("Página não disponível.", "warning")
+    return redirect(url_for("index"))
 
 
 def gerar_token_recuperacao(email):
@@ -1325,6 +1325,96 @@ def importar():
 @app.route("/health")
 def health():
     return {"status": "ok"}, 200
+
+@app.route("/redefinir-senha-dashboard", methods=["POST"])
+@login_required
+def redefinir_senha_dashboard():
+    senha_atual = request.form.get("senha_atual", "").strip()
+    nova_senha = request.form.get("nova_senha", "").strip()
+    confirmar_senha = request.form.get("confirmar_senha", "").strip()
+
+    if not senha_atual or not nova_senha or not confirmar_senha:
+        flash("Preencha todos os campos para alterar a senha.", "warning")
+        return redirect(url_for("index"))
+
+    if not current_user.check_senha(senha_atual):
+        flash("A senha atual está incorreta.", "danger")
+        return redirect(url_for("index"))
+
+    if len(nova_senha) < 6:
+        flash("A nova senha deve ter pelo menos 6 caracteres.", "warning")
+        return redirect(url_for("index"))
+
+    if nova_senha != confirmar_senha:
+        flash("As senhas não coincidem.", "warning")
+        return redirect(url_for("index"))
+
+    try:
+        current_user.set_senha(nova_senha)
+        db.session.commit()
+        flash("Senha alterada com sucesso.", "success")
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Erro ao alterar senha no dashboard")
+        flash("Erro interno ao alterar a senha.", "danger")
+
+    return redirect(url_for("index"))
+
+
+@app.route("/atualizar-nome-dashboard", methods=["POST"])
+@login_required
+def atualizar_nome_dashboard():
+    nome = request.form.get("nome", "").strip()
+
+    if not nome:
+        flash("Nome inválido.", "warning")
+        return redirect(url_for("index"))
+
+    try:
+        current_user.nome = nome
+        db.session.commit()
+        flash("Nome atualizado com sucesso.", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Erro ao atualizar nome.", "danger")
+
+    return redirect(url_for("index"))
+
+
+@app.route("/atualizar-conta-dashboard", methods=["POST"])
+@login_required
+def atualizar_conta_dashboard():
+    nome = request.form.get("nome", "").strip()
+    email = limpar_texto(request.form.get("email", "")).lower()
+
+    if not nome:
+        flash("Informe um nome válido.", "warning")
+        return redirect(url_for("index"))
+
+    if not email:
+        flash("Informe um e-mail válido.", "warning")
+        return redirect(url_for("index"))
+
+    usuario_existente = Usuario.query.filter(
+        Usuario.email == email,
+        Usuario.id != current_user.id
+    ).first()
+
+    if usuario_existente:
+        flash("Este e-mail já está em uso por outro usuário.", "danger")
+        return redirect(url_for("index"))
+
+    try:
+        current_user.nome = nome
+        current_user.email = email
+        db.session.commit()
+        flash("Conta atualizada com sucesso.", "success")
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Erro ao atualizar conta")
+        flash("Erro interno ao atualizar conta.", "danger")
+
+    return redirect(url_for("index"))
 
 
 # =========================================================

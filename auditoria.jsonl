@@ -57,3 +57,16 @@
 {"data_hora": "2026-03-31 10:42:50", "acao": "cadastro_editado", "detalhes": {"id": "1", "user_id": 1, "antes": {"ID": "1", "Nome": "aa", "CPF/CNPJ": "144.354.456-62", "Celular": "", "UF": "", "Cidade": "", "Bairro": "", "CEP": "", "Endereço": "", "Número": ""}, "depois": {"ID": "1", "Nome": "aa", "CPF/CNPJ": "144.354.456-62", "Celular": "(31) 99249-4648", "UF": "MG", "Cidade": "Contagem", "Bairro": "Riacho das Pedras", "CEP": "32280-430", "Endereço": "Rua Rio Congo", "Número": "999"}}}
 {"data_hora": "2026-03-31 10:43:01", "acao": "cadastros_excluidos_em_massa", "detalhes": {"quantidade": 1, "user_id": 1, "registros": [{"id": "1", "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}]}}
 {"data_hora": "2026-04-06 11:12:40", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-04-09 09:26:46", "acao": "base_exportada", "detalhes": {"user_id": 1, "quantidade_registros": 1}}
+{"data_hora": "2026-04-09 10:01:33", "acao": "cadastro_adicionado", "detalhes": {"id": 2, "user_id": 1, "nome": "Enxovais Malta", "documento": "24.296.895/0001-11"}}
+{"data_hora": "2026-04-09 10:01:41", "acao": "cadastro_excluido", "detalhes": {"id": "2", "user_id": 1, "nome": "Enxovais Malta", "documento": "24.296.895/0001-11"}}
+{"data_hora": "2026-04-09 10:01:44", "acao": "cadastro_excluido", "detalhes": {"id": "1", "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-04-09 16:27:26", "acao": "base_exportada", "detalhes": {"user_id": 1, "quantidade_registros": 0}}
+{"data_hora": "2026-04-13 08:33:28", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-04-13 08:33:51", "acao": "cadastros_excluidos_em_massa", "detalhes": {"quantidade": 1, "user_id": 1, "registros": [{"id": "1", "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}]}}
+{"data_hora": "2026-04-13 08:33:58", "acao": "cadastro_adicionado", "detalhes": {"id": 1, "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-04-13 08:34:06", "acao": "cadastro_editado", "detalhes": {"id": "1", "user_id": 1, "antes": {"ID": "1", "Nome": "aa", "CPF/CNPJ": "144.354.456-62", "Celular": "", "UF": "", "Cidade": "", "Bairro": "", "CEP": "", "Endereço": "", "Número": ""}, "depois": {"ID": "1", "Nome": "aa", "CPF/CNPJ": "144.354.456-62", "Celular": "", "UF": "", "Cidade": "", "Bairro": "", "CEP": "", "Endereço": "", "Número": ""}}}
+{"data_hora": "2026-04-13 08:34:12", "acao": "cadastro_excluido", "detalhes": {"id": "1", "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-04-13 08:44:50", "acao": "importacao_realizada", "detalhes": {"user_id": 1, "importados": 58, "ignorados": 0, "erros_arquivo": 0}}
+{"data_hora": "2026-04-13 08:45:00", "acao": "base_exportada", "detalhes": {"user_id": 1, "quantidade_registros": 58}}
+{"data_hora": "2026-04-13 14:45:30", "acao": "base_exportada", "detalhes": {"user_id": 1, "quantidade_registros": 58}}

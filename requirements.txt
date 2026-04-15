@@ -9,3 +9,4 @@ Flask-Login
 psycopg2-binary
 itsdangerous
 requests
+Pillow

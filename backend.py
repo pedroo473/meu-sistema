@@ -1,3 +1,7 @@
+from PIL import Image, ImageOps
+from flask import current_app
+from werkzeug.utils import secure_filename
+import uuid
 import traceback
 from flask import request, render_template, redirect, url_for, flash
 import threading
@@ -51,6 +55,15 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
+app.config["UPLOAD_FOLDER_PERFIS"] = os.path.join("static", "uploads", "perfis")
+app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024  # 2 MB
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+
+os.makedirs(app.config["UPLOAD_FOLDER_PERFIS"], exist_ok=True)
+
+def arquivo_permitido(nome_arquivo):
+    return "." in nome_arquivo and nome_arquivo.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
 db = SQLAlchemy(app)
@@ -74,6 +87,7 @@ class Usuario(UserMixin, db.Model):
     senha_hash = db.Column(db.String(255), nullable=False)
     ativo = db.Column(db.Boolean, default=True, nullable=False)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    foto_perfil = db.Column(db.String(255), nullable=True, default="default.png")
 
     registros = db.relationship(
         "Empresa",
@@ -738,6 +752,89 @@ def calcular_completude(registro):
 # =========================================================
 # ROTAS DE AUTENTICAÇÃO
 # =========================================================
+
+@app.route("/trocar-foto-perfil", methods=["POST"])
+@login_required
+def trocar_foto_perfil():
+    if "foto" not in request.files:
+        flash("Nenhuma imagem foi enviada.", "warning")
+        return redirect(url_for("index"))
+
+    arquivo = request.files["foto"]
+
+    if not arquivo or arquivo.filename == "":
+        flash("Selecione uma imagem.", "warning")
+        return redirect(url_for("index"))
+
+    if not arquivo_permitido(arquivo.filename):
+        flash("Formato inválido. Envie PNG, JPG, JPEG ou WEBP.", "danger")
+        return redirect(url_for("index"))
+
+    try:
+        usuario = db.session.get(Usuario, current_user.id)
+        if not usuario:
+            flash("Usuário não encontrado.", "danger")
+            return redirect(url_for("index"))
+
+        nome_original = secure_filename(arquivo.filename)
+        extensao = nome_original.rsplit(".", 1)[1].lower()
+
+        if extensao == "jpg":
+            extensao = "jpeg"
+
+        novo_nome = f"user_{current_user.id}_{uuid.uuid4().hex}.webp"
+        caminho_arquivo = os.path.join(app.config["UPLOAD_FOLDER_PERFIS"], novo_nome)
+
+        imagem = Image.open(arquivo.stream)
+
+        imagem = ImageOps.exif_transpose(imagem)
+
+        if imagem.mode not in ("RGB", "RGBA"):
+            imagem = imagem.convert("RGB")
+
+        tamanho_final = (400, 400)
+
+        imagem = ImageOps.fit(
+            imagem,
+            tamanho_final,
+            method=Image.LANCZOS,
+            centering=(0.5, 0.5)
+        )
+
+        if imagem.mode == "RGBA":
+            fundo = Image.new("RGB", imagem.size, (255, 255, 255))
+            fundo.paste(imagem, mask=imagem.split()[3])
+            imagem = fundo
+        else:
+            imagem = imagem.convert("RGB")
+
+        imagem.save(
+            caminho_arquivo,
+            format="WEBP",
+            quality=88,
+            method=6
+        )
+
+        if usuario.foto_perfil and usuario.foto_perfil != "default.png":
+            caminho_antigo = os.path.join(app.config["UPLOAD_FOLDER_PERFIS"], usuario.foto_perfil)
+            if os.path.exists(caminho_antigo):
+                try:
+                    os.remove(caminho_antigo)
+                except Exception:
+                    app.logger.warning("Não foi possível remover a foto antiga: %s", caminho_antigo)
+
+        usuario.foto_perfil = novo_nome
+        db.session.commit()
+
+        flash("Foto de perfil atualizada com sucesso.", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.exception("Erro ao atualizar foto de perfil")
+        flash("Erro ao atualizar a foto de perfil.", "danger")
+
+    return redirect(url_for("index"))
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
@@ -766,7 +863,7 @@ def register():
         return redirect(url_for("index"))
 
     if request.method == "POST":
-        nomef = limpar_texto(request.form.get("nome"))
+        nome = limpar_texto(request.form.get("nome"))
         email = limpar_texto(request.form.get("email")).lower()
         senha = request.form.get("senha", "")
         confirmar_senha = request.form.get("confirmar_senha", "")
@@ -1365,19 +1462,26 @@ def redefinir_senha_dashboard():
 @login_required
 def atualizar_nome_dashboard():
     nome = request.form.get("nome", "").strip()
+    email = request.form.get("email", "").strip().lower()
 
-    if not nome:
-        flash("Nome inválido.", "warning")
+    if not nome or not email:
+        flash("Preencha nome e email.", "warning")
         return redirect(url_for("index"))
 
-    try:
-        current_user.nome = nome
-        db.session.commit()
-        flash("Nome atualizado com sucesso.", "success")
-    except Exception:
-        db.session.rollback()
-        flash("Erro ao atualizar nome.", "danger")
+    usuario_existente = Usuario.query.filter(
+        Usuario.email == email,
+        Usuario.id != current_user.id
+    ).first()
 
+    if usuario_existente:
+        flash("Este e-mail já está em uso por outro usuário.", "danger")
+        return redirect(url_for("index"))
+
+    current_user.nome = nome
+    current_user.email = email
+    db.session.commit()
+
+    flash("Dados atualizados com sucesso.", "success")
     return redirect(url_for("index"))
 
 

@@ -144,6 +144,92 @@
     display: block;
 }
 
+.profile-avatar-clickable {
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.profile-avatar-clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
+}
+
+.profile-avatar-clickable:active {
+    transform: scale(0.98);
+}
+
+.profile-avatar-overlay span {
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 999px;
+    padding: 6px 10px;
+    backdrop-filter: blur(8px);
+}
+
+.custom-file-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    min-height: 56px;
+    padding: 10px 12px;
+    border: 1px solid #d5e1ee;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    box-shadow: inset 0 1px 2px rgba(15,23,42,0.03);
+}
+
+.custom-file-btn {
+    min-height: 42px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    font-weight: 900;
+    font-size: 0.92rem;
+    box-shadow: 0 10px 20px rgba(37,99,235,0.18);
+    transition: all 0.18s ease;
+}
+
+.custom-file-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 24px rgba(37,99,235,0.22);
+}
+
+.custom-file-name {
+    flex: 1;
+    min-width: 220px;
+    color: #475569;
+    font-size: 0.95rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-upload-help {
+    margin-top: 4px;
+    color: #475569;
+    font-size: 0.92rem;
+}
+
+@media (max-width: 768px) {
+    .custom-file-box {
+        align-items: stretch;
+    }
+
+    .custom-file-btn {
+        width: 100%;
+    }
+
+    .custom-file-name {
+        min-width: 100%;
+        white-space: normal;
+        word-break: break-word;
+    }
+}
+
 .profile-avatar-wrap {
     position: relative;
     width: 96px;
@@ -261,7 +347,7 @@ body {
     position: fixed;
     top: 18px;
     right: 24px;
-    z-index: 5000;
+    z-index: 11000;
 }
 
 .admin-dropdown {
@@ -1348,9 +1434,9 @@ body {
 
 .toast-container-custom {
     position: fixed;
-    top: 18px;
+    top: 96px;
     right: 18px;
-    z-index: 9999;
+    z-index: 9990;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -1509,6 +1595,14 @@ body {
 }
 
 @media (max-width: 768px) {
+
+    .toast-container-custom {
+    top: 88px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+}
+
     .page-shell {
         padding: 98px 14px 14px 14px;
         border-radius: 20px;
@@ -1841,6 +1935,210 @@ body {
     border: 1px solid #e5ebf2;
 }
 
+    .admin-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+    .admin-trigger-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+    .cep-status {
+    margin-top: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+    min-height: 20px;
+}
+
+.cep-status-box {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.4;
+    border: 1px solid transparent;
+    animation: fadeCepBox 0.25s ease;
+}
+
+.cep-status-box.loading {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+}
+
+.cep-status-box.success {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #15803d;
+}
+
+.cep-status-box.error {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+@keyframes fadeCepBox {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cep-status.loading {
+    color: #2563eb;
+}
+
+.cep-status.success {
+    color: #16a34a;
+}
+
+.cep-status.error {
+    color: #dc2626;
+}
+
+    .filter-panel {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    background:
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.05), transparent 22%),
+        linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border: 1px solid #dbe6f2;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+}
+
+.filter-panel::after {
+    content: "";
+    position: absolute;
+    right: -60px;
+    top: -60px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.08), transparent 70%);
+    pointer-events: none;
+}
+
+.filter-form .form-control,
+.filter-form .form-select {
+    min-height: 54px;
+    border-radius: 18px;
+    border: 1px solid #d8e2ee;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    font-weight: 700;
+    color: #1f2937;
+    transition: all 0.18s ease;
+}
+
+.filter-form .form-control::placeholder {
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.filter-form .form-control:hover,
+.filter-form .form-select:hover {
+    border-color: #bfd5f3;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.05);
+}
+
+.filter-form .form-control:focus,
+.filter-form .form-select:focus {
+    border-color: #60a5fa;
+    background: #fff;
+    box-shadow: 0 0 0 0.22rem rgba(37, 99, 235, 0.12) !important;
+}
+
+.filter-form .btn {
+    min-height: 54px;
+    border-radius: 18px;
+    font-weight: 900;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+    transition: all 0.18s ease;
+}
+
+.filter-form .btn:hover {
+    transform: translateY(-1px);
+}
+
+.filter-feedback-box {
+    display: none;
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: 1px solid #dbeafe;
+    background: linear-gradient(135deg, #eff6ff, #f8fbff);
+    color: #1d4ed8;
+    font-size: 0.94rem;
+    font-weight: 800;
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.08);
+    animation: fadeFilterBox 0.25s ease;
+}
+
+.filter-feedback-box.show {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-feedback-box.success {
+    border-color: #bfdbfe;
+    background: linear-gradient(135deg, #eff6ff, #f8fbff);
+    color: #1d4ed8;
+}
+
+.filter-feedback-box.clear {
+    border-color: #e5ebf2;
+    background: linear-gradient(135deg, #f8fafc, #ffffff);
+    color: #334155;
+}
+
+@keyframes fadeFilterBox {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+    .filter-form .form-select {
+    background-image:
+        linear-gradient(45deg, transparent 50%, #2563eb 50%),
+        linear-gradient(135deg, #2563eb 50%, transparent 50%);
+    background-position:
+        calc(100% - 20px) calc(50% - 3px),
+        calc(100% - 14px) calc(50% - 3px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 42px;
+}
+
 </style>
 </head>
 <body>
@@ -1849,24 +2147,26 @@ body {
 <div class="top-user-bar">
     <div class="admin-dropdown">
         <button type="button" class="admin-trigger" onclick="toggleAdminMenu(event)">
-            <div class="admin-trigger-left">
-                <div class="admin-avatar p-0 overflow-hidden">
-                    <div class="profile-avatar-wrap">
-                        <img
-                            src="{{ url_for('static', filename='uploads/perfis/' ~ (current_user.foto_perfil or 'default.png')) }}"
-                            alt="Foto de perfil"
-                            style="width:100%; height:100%; object-fit:cover; object-position:center;"
-                        >
-                        <div class="profile-avatar-overlay">Alterar foto</div>
-                    </div>
-                </div>
-                <div class="admin-info">
-                    <span class="admin-label">Minha conta</span>
-                    <span class="admin-name">{{ current_user.nome }}</span>
-                </div>
-            </div>
-            <span class="admin-arrow" id="adminArrow">⌄</span>
-        </button>
+
+    <div class="admin-trigger-left">
+
+        <div class="admin-avatar">
+            <img
+                src="{{ url_for('static', filename='uploads/perfis/' ~ (current_user.foto_perfil or 'default.png')) }}"
+                alt="Foto de perfil"
+            >
+        </div>
+
+        <div class="admin-info">
+            <span class="admin-label">Minha conta</span>
+            <span class="admin-name">{{ current_user.nome }}</span>
+        </div>
+
+    </div>
+
+    <span class="admin-arrow" id="adminArrow">&#9662;</span>
+
+</button>
 
         <div class="admin-menu" id="adminMenu">
             <div class="admin-menu-header">
@@ -2033,57 +2333,56 @@ body {
         </div>
     </div>
 
-    <div class="solid-card p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
-            <div>
-                <h2 class="section-title">🔎 Filtros e ordenação</h2>
-                <p class="section-subtitle">Localize registros por texto, tipo e ordem de exibição.</p>
-            </div>
-
-            {% if busca or tipo %}
-            <div class="section-chip">🎯 Filtro ativo</div>
-            {% endif %}
+    <div class="filter-panel p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+        <div>
+            <h2 class="section-title">🔎 Filtros e ordenação</h2>
+            <p class="section-subtitle">Localize registros por texto, tipo e ordem de exibição.</p>
         </div>
-
-        <form method="GET" class="row g-3">
-            <div class="col-lg-4">
-                <input type="text" name="busca" class="form-control" placeholder="Buscar por nome, documento, cidade..." value="{{ busca }}">
-            </div>
-
-            <div class="col-lg-2">
-                <select name="tipo" class="form-select">
-                    <option value="">Todos</option>
-                    <option value="pessoa" {% if tipo == "pessoa" %}selected{% endif %}>Pessoa</option>
-                    <option value="empresa" {% if tipo == "empresa" %}selected{% endif %}>Empresa</option>
-                </select>
-            </div>
-
-            <div class="col-lg-3">
-                <select name="ordem" class="form-select">
-                    <option value="id_desc" {% if ordem == "id_desc" %}selected{% endif %}>Mais recentes primeiro</option>
-                    <option value="id_asc" {% if ordem == "id_asc" %}selected{% endif %}>ID crescente</option>
-                    <option value="nome_asc" {% if ordem == "nome_asc" %}selected{% endif %}>Nome A-Z</option>
-                    <option value="nome_desc" {% if ordem == "nome_desc" %}selected{% endif %}>Nome Z-A</option>
-                    <option value="cidade_asc" {% if ordem == "cidade_asc" %}selected{% endif %}>Cidade A-Z</option>
-                    <option value="cidade_desc" {% if ordem == "cidade_desc" %}selected{% endif %}>Cidade Z-A</option>
-                </select>
-            </div>
-
-            <div class="col-lg-3 d-flex gap-2">
-                <button type="submit" class="btn btn-primary w-100">🔎 Buscar</button>
-                <a href="/" class="btn btn-soft w-100">🧹 Limpar</a>
-            </div>
-        </form>
 
         {% if busca or tipo %}
-        <div class="mt-3 small text-secondary">
-            <strong>Filtro atual:</strong>
-            {% if busca %} Busca = "{{ busca }}" {% endif %}
-            {% if busca and tipo %} | {% endif %}
-            {% if tipo %} Tipo = "{{ tipo|capitalize }}" {% endif %}
-        </div>
+        <div class="section-chip">🎯 Filtro ativo</div>
         {% endif %}
     </div>
+
+    <form method="GET" class="row g-3 filter-form" id="formFiltros">
+        <div class="col-lg-4">
+            <input type="text" name="busca" id="filtroBusca" class="form-control" placeholder="Buscar por nome, documento, cidade..." value="{{ busca }}">
+        </div>
+
+        <div class="col-lg-2">
+            <select name="tipo" id="filtroTipo" class="form-select">
+                <option value="">Todos</option>
+                <option value="pessoa" {% if tipo == "pessoa" %}selected{% endif %}>Pessoa</option>
+                <option value="empresa" {% if tipo == "empresa" %}selected{% endif %}>Empresa</option>
+            </select>
+        </div>
+
+        <div class="col-lg-3">
+            <select name="ordem" id="filtroOrdem" class="form-select">
+                <option value="id_desc" {% if ordem == "id_desc" %}selected{% endif %}>Mais recentes primeiro</option>
+                <option value="id_asc" {% if ordem == "id_asc" %}selected{% endif %}>ID crescente</option>
+                <option value="nome_asc" {% if ordem == "nome_asc" %}selected{% endif %}>Nome A-Z</option>
+                <option value="nome_desc" {% if ordem == "nome_desc" %}selected{% endif %}>Nome Z-A</option>
+                <option value="cidade_asc" {% if ordem == "cidade_asc" %}selected{% endif %}>Cidade A-Z</option>
+                <option value="cidade_desc" {% if ordem == "cidade_desc" %}selected{% endif %}>Cidade Z-A</option>
+            </select>
+        </div>
+
+        <div class="col-lg-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100" id="btnBuscarFiltro">🔎 Buscar</button>
+            <a href="/" class="btn btn-soft w-100" id="btnLimparFiltro">🧹 Limpar</a>
+        </div>
+    </form>
+
+    <div id="filterFeedbackBox" class="filter-feedback-box">
+        <span>🔎</span>
+        <span id="filterFeedbackText">Aplicando filtro...</span>
+    </div>
+
+    {% if busca or tipo %}
+    {% endif %}
+</div>
 
     <div class="register-card solid-card mb-4" id="blocoCadastro">
         <div class="register-header">
@@ -2112,8 +2411,9 @@ body {
                     </div>
 
                     <div class="col-12 col-md-4 col-lg-2">
-                        <input type="text" name="cep" id="cep" class="form-control" placeholder="CEP" maxlength="9" oninput="formatarCep(this)" onblur="buscarCep()">
-                    </div>
+    <input type="text" name="cep" id="cep" class="form-control" placeholder="CEP" maxlength="9" oninput="formatarCep(this)" onblur="buscarCep()">
+    <div id="cepStatusBox" class="cep-status-box" style="display: none;"></div>
+</div>
 
                     <div class="col-12 col-md-8 col-lg-5">
                         <input type="text" name="endereco" id="endereco" class="form-control" placeholder="Endereço">
@@ -2437,33 +2737,52 @@ body {
                 </div>
 
                 <div class="profile-upload-panel">
-                    <div class="d-flex align-items-center gap-3 flex-wrap">
-                        <div class="profile-avatar-wrap">
-                            <img
-                                src="{{ url_for('static', filename='uploads/perfis/' ~ (current_user.foto_perfil or 'default.png')) }}"
-                                alt="Foto de perfil"
-                                class="profile-avatar-img"
-                                id="previewAvatarAtual"
-                            >
-                            <div class="profile-avatar-overlay">Alterar foto</div>
-                        </div>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
 
-                        <div class="flex-grow-1">
-                            <label class="config-label">Selecionar nova foto</label>
-                            <input type="file" id="fotoPerfilInput" class="form-control config-input mb-3" accept=".png,.jpg,.jpeg,.webp">
+        <label for="fotoPerfilInput" class="profile-avatar-wrap profile-avatar-clickable" title="Clique para trocar a foto">
+            <img
+                src="{{ url_for('static', filename='uploads/perfis/' ~ (current_user.foto_perfil or 'default.png')) }}"
+                alt="Foto de perfil"
+                class="profile-avatar-img"
+                id="previewAvatarAtual"
+            >
+            <div class="profile-avatar-overlay">
+                <span>Alterar foto</span>
+            </div>
+        </label>
 
-                            <div class="profile-upload-actions">
-                                <button type="button" class="btn config-btn-primary" onclick="abrirCropper()">
-                                    Enquadrar e salvar foto
-                                </button>
-                            </div>
+        <div class="flex-grow-1">
+            <label class="config-label">Selecionar nova foto</label>
 
-                            <div class="profile-upload-help">
-                                Recomendado: imagem nítida, enquadramento central e fundo limpo.
-                            </div>
-                        </div>
-                    </div>
+            <input
+                type="file"
+                id="fotoPerfilInput"
+                class="d-none"
+                accept=".png,.jpg,.jpeg,.webp"
+            >
+
+            <div class="custom-file-box mb-3">
+                <button type="button" class="custom-file-btn" onclick="document.getElementById('fotoPerfilInput').click()">
+                    Escolher foto
+                </button>
+
+                <div class="custom-file-name" id="nomeArquivoFoto">
+                    Nenhum arquivo escolhido
                 </div>
+            </div>
+
+            <div class="profile-upload-actions">
+                <button type="button" class="btn config-btn-primary" onclick="abrirCropper()">
+                    Enquadrar e salvar foto
+                </button>
+            </div>
+
+            <div class="profile-upload-help">
+                Recomendado: imagem nítida, enquadramento central e fundo limpo.
+            </div>
+        </div>
+    </div>
+</div>
             </div>
 
             <div class="config-summary-grid">
@@ -2905,24 +3224,66 @@ async function buscarCep() {
     const bairro = document.getElementById("bairro");
     const cidade = document.getElementById("cidade");
     const uf = document.getElementById("uf");
+    const cepStatusBox = document.getElementById("cepStatusBox");
 
     if (!cepInput) return;
 
     const cep = cepInput.value.replace(/\D/g, "");
+
+    if (cepStatusBox) {
+        cepStatusBox.style.display = "none";
+        cepStatusBox.className = "cep-status-box";
+        cepStatusBox.textContent = "";
+    }
+
     if (cep.length !== 8) return;
+
+    if (cepStatusBox) {
+        cepStatusBox.style.display = "block";
+        cepStatusBox.className = "cep-status-box loading";
+        cepStatusBox.textContent = "Carregando CEP...";
+    }
 
     try {
         const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
         const data = await response.json();
 
-        if (data.erro) return;
+        if (data.erro) {
+            if (cepStatusBox) {
+                cepStatusBox.style.display = "block";
+                cepStatusBox.className = "cep-status-box error";
+                cepStatusBox.textContent = "CEP não encontrado.";
+            }
+            return;
+        }
 
         if (endereco) endereco.value = data.logradouro || "";
         if (bairro) bairro.value = data.bairro || "";
         if (cidade) cidade.value = data.localidade || "";
         if (uf) uf.value = data.uf || "";
+
+        if (cepStatusBox) {
+            cepStatusBox.style.display = "block";
+            cepStatusBox.className = "cep-status-box success";
+            cepStatusBox.textContent = "Endereço preenchido automaticamente pelo CEP.";
+        }
+
+        setTimeout(() => {
+            if (cepStatusBox) {
+                cepStatusBox.style.display = "none";
+                cepStatusBox.textContent = "";
+                cepStatusBox.className = "cep-status-box";
+            }
+        }, 2500);
+
     } catch (error) {
         console.error("Erro ao consultar CEP:", error);
+
+        if (cepStatusBox) {
+            cepStatusBox.style.display = "block";
+            cepStatusBox.className = "cep-status-box error";
+            cepStatusBox.textContent = "Erro ao buscar o CEP.";
+        }
     }
 }
 
@@ -2967,6 +3328,43 @@ document.addEventListener("DOMContentLoaded", function () {
     const topo = document.getElementById("selecionarTodosTopo");
     const base = document.getElementById("selecionarTodos");
 
+const btnLimparFiltro = document.getElementById("btnLimparFiltro");
+
+if (btnLimparFiltro) {
+    btnLimparFiltro.addEventListener("click", function () {
+        sessionStorage.setItem("toastFiltroSucesso", "Filtros limpos com sucesso.");
+    });
+}
+
+const fotoPerfilInput = document.getElementById("fotoPerfilInput");
+const previewAvatarAtual = document.getElementById("previewAvatarAtual");
+const nomeArquivoFoto = document.getElementById("nomeArquivoFoto");
+
+if (fotoPerfilInput) {
+    fotoPerfilInput.addEventListener("change", function () {
+        const arquivo = this.files && this.files[0] ? this.files[0] : null;
+
+        if (!arquivo) {
+            if (nomeArquivoFoto) {
+                nomeArquivoFoto.textContent = "Nenhum arquivo escolhido";
+            }
+            return;
+        }
+
+        if (nomeArquivoFoto) {
+            nomeArquivoFoto.textContent = arquivo.name;
+        }
+
+        if (previewAvatarAtual) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewAvatarAtual.src = e.target.result;
+            };
+            reader.readAsDataURL(arquivo);
+        }
+    });
+}
+
     if (topo) topo.addEventListener("change", function () { marcarTodos(this); });
     if (base) base.addEventListener("change", function () { marcarTodos(this); });
 
@@ -3010,6 +3408,15 @@ function resetCropper() {
     cropper.reset();
 }
 
+    function mostrarFeedbackFiltro(tipo, mensagem) {
+    const box = document.getElementById("filterFeedbackBox");
+    const text = document.getElementById("filterFeedbackText");
+
+    if (!box || !text) return;
+
+    box.className = "filter-feedback-box show " + tipo;
+    text.textContent = mensagem;
+}
 </script>
 
 <div class="modal fade" id="modalCropFoto" tabindex="-1">

@@ -82,12 +82,12 @@ class Usuario(UserMixin, db.Model):
     __tablename__ = "usuarios"
 
     id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(150), nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False, index=True)
+    nome = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     senha_hash = db.Column(db.String(255), nullable=False)
-    ativo = db.Column(db.Boolean, default=True, nullable=False)
-    criado_em = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    foto_perfil = db.Column(db.String(255), nullable=True, default="default.png")
+    ativo = db.Column(db.Boolean, default=True)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    foto_perfil = db.Column(db.String(255), nullable=True)
 
     registros = db.relationship(
         "Empresa",

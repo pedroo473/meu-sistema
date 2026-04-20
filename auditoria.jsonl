@@ -70,3 +70,6 @@
 {"data_hora": "2026-04-13 08:44:50", "acao": "importacao_realizada", "detalhes": {"user_id": 1, "importados": 58, "ignorados": 0, "erros_arquivo": 0}}
 {"data_hora": "2026-04-13 08:45:00", "acao": "base_exportada", "detalhes": {"user_id": 1, "quantidade_registros": 58}}
 {"data_hora": "2026-04-13 14:45:30", "acao": "base_exportada", "detalhes": {"user_id": 1, "quantidade_registros": 58}}
+{"data_hora": "2026-04-17 09:00:36", "acao": "cadastro_adicionado", "detalhes": {"id": 59, "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}
+{"data_hora": "2026-04-17 09:00:53", "acao": "cadastros_excluidos_em_massa", "detalhes": {"quantidade": 1, "user_id": 1, "registros": [{"id": "59", "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}]}}
+{"data_hora": "2026-04-17 09:16:45", "acao": "cadastro_adicionado", "detalhes": {"id": 59, "user_id": 1, "nome": "aa", "documento": "144.354.456-62"}}

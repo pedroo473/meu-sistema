@@ -29,6 +29,25 @@ import json
 from datetime import datetime
 from io import BytesIO
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+print("DATABASE_URL:", DATABASE_URL)
+
+import psycopg2
+
+try:
+    conn = psycopg2.connect(DATABASE_URL)
+    print("✅ Conectou com sucesso ao banco!")
+except Exception as e:
+    print("❌ Erro ao conectar:", e)
+conn = psycopg2.connect(DATABASE_URL)
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -1524,6 +1543,20 @@ def atualizar_conta_dashboard():
 # =========================================================
 # START
 # =========================================================
+
+print("Banco em uso:", app.config.get("SQLALCHEMY_DATABASE_URI"))
+
+print("Models carregados:", db.metadata.tables.keys())
+
+class Teste(db.Model):
+    __tablename__ = "teste"
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100))
+
+print("Criando tabelas...")
+with app.app_context():
+    db.create_all()
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
